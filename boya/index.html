@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en" class="dictionary-document">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>博雅</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <script src="../js/vocabulary-lists.js?v=3" defer></script>
+</head>
+<body class="dictionary-page vocabulary-list-page" data-page="boya"
+      data-source="../data/boya.json"
+      data-storage-key="zh-boya-known">
+  <header class="dict-header">
+    <div class="title-menu">
+      <h1 class="dict-title">
+        <button class="title-menu-trigger" type="button" aria-haspopup="true" aria-controls="title-menu-options">
+          <span class="title-main">博雅</span>
+        </button>
+      </h1>
+      <nav class="title-menu-options" id="title-menu-options" aria-label="Vocabulary lists">
+        <a href="../index.html">词典</a>
+        <a href="../hsk/index.html">HSK</a>
+        <a href="index.html" aria-current="page">Boya</a>
+      </nav>
+    </div>
+  </header>
+
+  <section class="vocabulary-filters boya-filters" aria-label="Vocabulary filters">
+    <div class="level-filters" id="level-filter" role="group" aria-label="按博雅级别筛选">
+      <button class="boya-level level-chip" type="button" data-level="1" aria-pressed="false">Boya 1</button>
+      <button class="boya-level level-chip" type="button" data-level="2" aria-pressed="false">Boya 2</button>
+    </div>
+    <div class="level-filters" id="chapter-filter" role="group" aria-label="按章节筛选">
+      <button class="boya-level level-chip" type="button" data-chapter="1" aria-pressed="false">Chapter 1</button>
+      <button class="boya-level level-chip" type="button" data-chapter="2" aria-pressed="false">Chapter 2</button>
+      <button class="boya-level level-chip" type="button" data-chapter="3" aria-pressed="false">Chapter 3</button>
+    </div>
+    <div class="filter-options">
+      <label class="check-control">
+        <input id="pinyin-toggle" type="checkbox" checked>
+        <span>显示拼音</span>
+      </label>
+      <label class="check-control">
+        <input id="only-pinyin-toggle" type="checkbox">
+        <span>仅显示拼音</span>
+      </label>
+    </div>
+  </section>
+  <div id="status" class="list-status" role="status" aria-live="polite">Loading vocabulary…</div>
+  <div id="vocabulary-entries" aria-live="polite"></div>
+  <nav class="pagination" aria-label="Vocabulary pages">
+    <button id="previous-page" type="button">Previous</button>
+    <span id="page-indicator"></span>
+    <button id="next-page" type="button">Next</button>
+  </nav>
+</body>
+</html>
