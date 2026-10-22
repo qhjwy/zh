@@ -5,24 +5,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>词典</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22central%22 text-anchor=%22middle%22 font-family=%22system-ui,sans-serif%22 font-weight=%22bold%22 font-size=%2260%22 fill=%22%23d35400%22>zh</text></svg>">
-  <link rel="stylesheet" href="css/style.css">
-  <script src="js/dictionary.js?v=1" defer></script>
+  <link rel="stylesheet" href="css/style.css?v=3">
+  <script src="js/dictionary.js?v=2" defer></script>
 </head>
 <body class="dictionary-page" data-worker-src="js/dictionary-worker.js?v=1">
   <header class="dict-header">
-    <div class="title-menu">
-      <h1 class="dict-title">
-        <button class="title-menu-trigger" type="button" aria-haspopup="true" aria-controls="title-menu-options">
-          <span class="title-main" id="title-main-label">词典</span>
-        </button><span class="title-sub"> · <span id="script-label">简体</span></span>
-      </h1>
-      <nav class="title-menu-options" id="title-menu-options" aria-label="Vocabulary lists">
-        <a href="index.html" aria-current="page"><span id="menu-title-label">词典 · 简体</span></a>
-        <a href="hsk/index.html">HSK</a>
-        <a href="boya/index.html">Boya</a>
-      </nav>
-    </div>
+    <h1 class="dict-title">
+      <a class="title-main" href="index.html">词典</a><span class="title-sub"> · <span id="script-label">简体</span></span>
+    </h1>
     <button id="script-toggle" class="toggle-icon" type="button" aria-label="Toggle script" title="Switch to Traditional">⇆</button>
+    <nav class="site-nav" aria-label="Vocabulary lists">
+      <a href="hsk/index.html">[ HSK ]</a>
+      <a href="boya/index.html">[ 博雅 ]</a>
+    </nav>
   </header>
 
   <div class="search-wrapper">
@@ -34,7 +29,7 @@
   <div id="results"></div>
 
   <footer>
-    Dictionary data from <a href="https://cc-cedict.org/" target="_blank" rel="noopener noreferrer">CC-CEDICT</a> (CC BY-SA 4.0).
+    <a href="about.html">About</a>
   </footer>
 </body>
 </html>

@@ -4,25 +4,18 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>博雅</title>
-  <link rel="stylesheet" href="../css/style.css">
-  <script src="../js/vocabulary-lists.js?v=3" defer></script>
+  <link rel="stylesheet" href="../css/style.css?v=8">
+  <script src="../js/vocabulary-lists.js?v=6" defer></script>
 </head>
 <body class="dictionary-page vocabulary-list-page" data-page="boya"
       data-source="../data/boya.json"
       data-storage-key="zh-boya-known">
   <header class="dict-header">
-    <div class="title-menu">
-      <h1 class="dict-title">
-        <button class="title-menu-trigger" type="button" aria-haspopup="true" aria-controls="title-menu-options">
-          <span class="title-main">博雅</span>
-        </button>
-      </h1>
-      <nav class="title-menu-options" id="title-menu-options" aria-label="Vocabulary lists">
-        <a href="../index.html">词典</a>
-        <a href="../hsk/index.html">HSK</a>
-        <a href="index.html" aria-current="page">Boya</a>
-      </nav>
-    </div>
+    <h1 class="dict-title"><a class="title-main" href="../index.html">词典</a></h1>
+    <nav class="site-nav" aria-label="Vocabulary lists">
+      <a href="../hsk/index.html">[ <span class="nav-label">HSK</span> ]</a>
+      <a href="index.html" aria-current="page">[ <span class="nav-label">博雅</span> ]</a>
+    </nav>
   </header>
 
   <section class="vocabulary-filters boya-filters" aria-label="Vocabulary filters">
@@ -37,7 +30,7 @@
     </div>
     <div class="filter-options">
       <label class="check-control">
-        <input id="pinyin-toggle" type="checkbox" checked>
+        <input id="pinyin-toggle" type="checkbox">
         <span>显示拼音</span>
       </label>
       <label class="check-control">
@@ -48,10 +41,5 @@
   </section>
   <div id="status" class="list-status" role="status" aria-live="polite">Loading vocabulary…</div>
   <div id="vocabulary-entries" aria-live="polite"></div>
-  <nav class="pagination" aria-label="Vocabulary pages">
-    <button id="previous-page" type="button">Previous</button>
-    <span id="page-indicator"></span>
-    <button id="next-page" type="button">Next</button>
-  </nav>
 </body>
 </html>

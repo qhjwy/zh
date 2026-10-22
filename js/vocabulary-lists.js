@@ -1,6 +1,6 @@
 "use strict";
 
-const PAGE_SIZE = 100;
+const PAGE_SIZE = 60;
 
 function readKnownState(storageKey) {
   const stored = localStorage.getItem(storageKey);
@@ -69,14 +69,34 @@ function startVocabularyPage() {
   const onlyPinyinToggle = document.querySelector("#only-pinyin-toggle");
   const levelFilter = document.querySelector("#level-filter");
   const chapterFilter = document.querySelector("#chapter-filter");
-  const previousButton = document.querySelector("#previous-page");
-  const nextButton = document.querySelector("#next-page");
-  const pageIndicator = document.querySelector("#page-indicator");
-  const titleMenu = document.querySelector(".title-menu");
-  const titleMenuTrigger = document.querySelector(".title-menu-trigger");
 
   let entries = [];
-  let currentPage = 1;
+  const requestedPage = Number(new URLSearchParams(window.location.search).get("page"));
+  let currentPage = Number.isSafeInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1;
+  document.body.classList.toggle("hide-pinyin", !pinyinToggle.checked);
+
+  function getPageUrl(pageNumber) {
+    const url = new URL(window.location.href);
+    if (pageNumber === 1) {
+      url.searchParams.delete("page");
+    } else {
+      url.searchParams.set("page", String(pageNumber));
+    }
+    return `${url.pathname}${url.search}${url.hash}`;
+  }
+
+  function writePageUrl(method = "replaceState") {
+    window.history[method](null, "", getPageUrl(currentPage));
+  }
+
+  function createPageLink(label, pageNumber, accessibleLabel) {
+    const link = document.createElement("a");
+    link.href = getPageUrl(pageNumber);
+    link.dataset.page = String(pageNumber);
+    link.textContent = label;
+    link.setAttribute("aria-label", accessibleLabel);
+    return link;
+  }
 
   function filteredEntries() {
     const selectedLevel = levelFilter?.querySelector('[aria-pressed="true"]')?.dataset.level ?? "";
@@ -103,6 +123,7 @@ function startVocabularyPage() {
     const matches = filteredEntries();
     const pageCount = Math.max(1, Math.ceil(matches.length / PAGE_SIZE));
     currentPage = Math.min(currentPage, pageCount);
+    writePageUrl();
     const start = (currentPage - 1) * PAGE_SIZE;
     const visible = matches.slice(start, start + PAGE_SIZE);
     entriesElement.replaceChildren();
@@ -112,10 +133,11 @@ function startVocabularyPage() {
       item.className = "entry";
 
       const heading = document.createElement("div");
+      heading.className = "vocabulary-entry-heading";
       const word = document.createElement("span");
       word.className = "word";
       word.textContent = entry.word;
-      heading.append(word, " ");
+      heading.append(word);
 
       if (entry.pinyin) {
         const pinyin = document.createElement("span");
@@ -133,7 +155,6 @@ function startVocabularyPage() {
         : entry.levelLabel
           ? `Boya ${entry.levelLabel.replace(/^Boya\s*/i, "")}${entry.chapter ? ` · ${entry.chapter}` : ""}`
           : "Unassigned";
-      heading.append(level);
       item.append(heading);
 
       if (entry.meaning) {
@@ -147,6 +168,7 @@ function startVocabularyPage() {
 
       const entryActions = document.createElement("div");
       entryActions.className = "entry-actions";
+      entryActions.append(level);
       if (page === "hsk") {
         const knownLabel = document.createElement("span");
         knownLabel.className = `known-entry${entry.known ? " is-known" : " is-unknown"}`;
@@ -165,7 +187,7 @@ function startVocabularyPage() {
       const sentenceHelper = document.createElement("section");
       sentenceHelper.className = "sentence-helper";
       sentenceHelper.hidden = true;
-      const prompt = `Write one natural, everyday Chinese sentence using the word “${entry.word}”. Show the sentence in Chinese, include pinyin, and provide a concise English translation.`;
+      const prompt = `Write three natural, everyday Chinese sentences using the word “${entry.word}”. For each sentence, show the Chinese, include pinyin, and provide a concise English translation.`;
       const promptText = document.createElement("textarea");
       promptText.className = "sentence-prompt";
       promptText.value = prompt;
@@ -245,10 +267,23 @@ function startVocabularyPage() {
 
     const first = matches.length ? start + 1 : 0;
     const last = Math.min(start + PAGE_SIZE, matches.length);
-    status.textContent = `${first}–${last} of ${matches.length} entries`;
-    pageIndicator.textContent = `Page ${currentPage} of ${pageCount}`;
-    previousButton.disabled = currentPage === 1;
-    nextButton.disabled = currentPage === pageCount;
+    const count = document.createElement("span");
+    count.textContent = `${first}–${last} of ${matches.length} entries`;
+    status.replaceChildren(count);
+    if (matches.length > PAGE_SIZE) {
+      const pageLinks = document.createElement("span");
+      pageLinks.className = "list-page-links";
+      if (currentPage > 1) {
+        pageLinks.append(createPageLink("←", currentPage - 1, "Previous page"));
+      }
+      if (currentPage < pageCount) {
+        if (currentPage > 1) {
+          pageLinks.append(document.createTextNode("·"));
+        }
+        pageLinks.append(createPageLink("→", currentPage + 1, "Next page"));
+      }
+      status.append(pageLinks);
+    }
   }
 
   function resetAndRender() {
@@ -256,12 +291,17 @@ function startVocabularyPage() {
     render();
   }
 
-  previousButton.addEventListener("click", () => {
-    currentPage -= 1;
+  status.addEventListener("click", (event) => {
+    const link = event.target.closest("a[data-page]");
+    if (!link) return;
+    event.preventDefault();
+    currentPage = Number(link.dataset.page);
+    writePageUrl("pushState");
     render();
   });
-  nextButton.addEventListener("click", () => {
-    currentPage += 1;
+  window.addEventListener("popstate", () => {
+    const pageFromUrl = Number(new URLSearchParams(window.location.search).get("page"));
+    currentPage = Number.isSafeInteger(pageFromUrl) && pageFromUrl > 0 ? pageFromUrl : 1;
     render();
   });
   if (unknownFilter) {
@@ -302,38 +342,6 @@ function startVocabularyPage() {
       document.body.classList.toggle("only-pinyin", onlyPinyinToggle.checked);
     });
   }
-  titleMenuTrigger.addEventListener("click", () => {
-    const isOpen = titleMenu.classList.toggle("menu-open");
-    titleMenuTrigger.setAttribute("aria-expanded", String(isOpen));
-    syncTitleMenuOverlay();
-  });
-
-  function syncTitleMenuOverlay() {
-    const isActive = titleMenu.matches(":hover")
-      || titleMenu.contains(document.activeElement)
-      || titleMenu.classList.contains("menu-open");
-    document.body.classList.toggle("menu-active", isActive);
-  }
-
-  titleMenu.addEventListener("pointerenter", syncTitleMenuOverlay);
-  titleMenu.addEventListener("pointerleave", syncTitleMenuOverlay);
-  titleMenu.addEventListener("focusin", syncTitleMenuOverlay);
-  titleMenu.addEventListener("focusout", (event) => {
-    if (!titleMenu.contains(event.relatedTarget)) {
-      titleMenu.classList.remove("menu-open");
-      titleMenuTrigger.setAttribute("aria-expanded", "false");
-    }
-    syncTitleMenuOverlay();
-  });
-  titleMenu.addEventListener("keydown", (event) => {
-    if (event.key === "Escape") {
-      titleMenu.classList.remove("menu-open");
-      titleMenuTrigger.setAttribute("aria-expanded", "false");
-      syncTitleMenuOverlay();
-      titleMenuTrigger.focus();
-    }
-  });
-
   fetch(source)
     .then((response) => {
       if (!response.ok) {

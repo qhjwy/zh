@@ -5,11 +5,7 @@ const statusElement = document.querySelector("#status");
 const resultsElement = document.querySelector("#results");
 const clearButton = document.querySelector("#clear-btn");
 const scriptLabel = document.querySelector("#script-label");
-const titleLabel = document.querySelector("#title-main-label");
-const menuTitleLabel = document.querySelector("#menu-title-label");
 const toggleButton = document.querySelector("#script-toggle");
-const titleMenu = document.querySelector(".title-menu");
-const titleMenuTrigger = document.querySelector(".title-menu-trigger");
 const worker = new Worker(document.body.dataset.workerSrc || "worker.js");
 
 let showTraditional = false;
@@ -152,44 +148,9 @@ clearButton.addEventListener("click", () => {
 
 toggleButton.addEventListener("click", () => {
   showTraditional = !showTraditional;
-  titleLabel.textContent = showTraditional ? "詞典" : "词典";
   scriptLabel.textContent = showTraditional ? "繁體" : "简体";
-  menuTitleLabel.textContent = titleLabel.textContent;
   toggleButton.title = showTraditional ? "Switch to Simplified" : "Switch to Traditional";
   if (lastQuery.trim()) runSearch(lastQuery);
-});
-
-titleMenuTrigger.addEventListener("click", () => {
-  const isOpen = titleMenu.classList.toggle("menu-open");
-  titleMenuTrigger.setAttribute("aria-expanded", String(isOpen));
-  syncTitleMenuOverlay();
-});
-
-function syncTitleMenuOverlay() {
-  const isActive = titleMenu.matches(":hover")
-    || titleMenu.contains(document.activeElement)
-    || titleMenu.classList.contains("menu-open");
-  document.body.classList.toggle("menu-active", isActive);
-}
-
-titleMenu.addEventListener("pointerenter", syncTitleMenuOverlay);
-titleMenu.addEventListener("pointerleave", syncTitleMenuOverlay);
-titleMenu.addEventListener("focusin", syncTitleMenuOverlay);
-titleMenu.addEventListener("focusout", (event) => {
-  if (!titleMenu.contains(event.relatedTarget)) {
-    titleMenu.classList.remove("menu-open");
-    titleMenuTrigger.setAttribute("aria-expanded", "false");
-  }
-  syncTitleMenuOverlay();
-});
-
-titleMenu.addEventListener("keydown", (event) => {
-  if (event.key === "Escape") {
-    titleMenu.classList.remove("menu-open");
-    titleMenuTrigger.setAttribute("aria-expanded", "false");
-    syncTitleMenuOverlay();
-    titleMenuTrigger.focus();
-  }
 });
 
 worker.addEventListener("message", (event) => {
