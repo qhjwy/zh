@@ -4,42 +4,58 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>HSK</title>
-  <link rel="stylesheet" href="../css/style.css?v=8">
-  <script src="../js/vocabulary-lists.js?v=4" defer></script>
+  <link rel="stylesheet" href="../css/style.css?v=13">
+  <script src="../js/vocabulary-lists.js?v=7" defer></script>
 </head>
 <body class="dictionary-page vocabulary-list-page" data-page="hsk"
       data-source="../data/hsk.json"
       data-storage-key="zh-hsk-known">
   <header class="dict-header">
     <h1 class="dict-title"><a class="title-main" href="../index.html">词典</a></h1>
-    <nav class="site-nav" aria-label="Vocabulary lists">
-      <a href="index.html" aria-current="page">[ <span class="nav-label">HSK</span> ]</a>
-      <a href="../boya/index.html">[ <span class="nav-label">博雅</span> ]</a>
-    </nav>
+    <div class="site-nav-stack">
+      <nav class="site-nav" aria-label="Vocabulary lists">
+        <a href="index.html" aria-current="page">[ <span class="nav-label">HSK</span> ]</a>
+        <a href="../boya/index.html">[ <span class="nav-label">博雅</span> ]</a>
+      </nav>
+      <nav class="hsk-view-nav" aria-label="HSK views">
+        <a href="#list" aria-current="page">[ <span class="nav-label">清单</span> ]</a>
+        <a href="#progress">[ <span class="nav-label">进度</span> ]</a>
+      </nav>
+    </div>
   </header>
 
-  <section class="vocabulary-filters hsk-filters" aria-label="Vocabulary filters">
-    <div class="level-filters" id="level-filter" role="group" aria-label="按 HSK 级别筛选">
-      <button class="hsk-level hsk1" type="button" data-level="1" aria-pressed="false">HSK1</button>
-      <button class="hsk-level hsk2" type="button" data-level="2" aria-pressed="false">HSK2</button>
-      <button class="hsk-level hsk3" type="button" data-level="3" aria-pressed="false">HSK3</button>
-      <button class="hsk-level hsk4" type="button" data-level="4" aria-pressed="false">HSK4</button>
-      <button class="hsk-level hsk5" type="button" data-level="5" aria-pressed="false">HSK5</button>
-      <button class="hsk-level hsk6" type="button" data-level="6" aria-pressed="false">HSK6</button>
-      <button class="hsk-level hsk7-9" type="button" data-level="7-9" aria-pressed="false">HSK7-9</button>
-    </div>
-    <div class="filter-options">
-      <label class="check-control">
-        <input id="pinyin-toggle" type="checkbox">
-        <span>显示拼音</span>
-      </label>
-      <label class="check-control">
-        <input id="unknown-filter" type="checkbox" checked>
-        <span>只显示不认识</span>
-      </label>
-    </div>
+  <main id="hsk-list-view">
+    <section class="vocabulary-filters hsk-filters" aria-label="Vocabulary filters">
+      <div class="level-filters" id="level-filter" role="group" aria-label="按 HSK 级别筛选">
+        <button class="hsk-level hsk1" type="button" data-level="1" aria-pressed="false">HSK1</button>
+        <button class="hsk-level hsk2" type="button" data-level="2" aria-pressed="false">HSK2</button>
+        <button class="hsk-level hsk3" type="button" data-level="3" aria-pressed="false">HSK3</button>
+        <button class="hsk-level hsk4" type="button" data-level="4" aria-pressed="false">HSK4</button>
+        <button class="hsk-level hsk5" type="button" data-level="5" aria-pressed="false">HSK5</button>
+        <button class="hsk-level hsk6" type="button" data-level="6" aria-pressed="false">HSK6</button>
+        <button class="hsk-level hsk7-9" type="button" data-level="7-9" aria-pressed="false">HSK7-9</button>
+      </div>
+      <div class="filter-options">
+        <label class="check-control">
+          <input id="pinyin-toggle" type="checkbox">
+          <span>显示拼音</span>
+        </label>
+        <label class="check-control">
+          <input id="unknown-filter" type="checkbox" checked>
+          <span>只显示不认识</span>
+        </label>
+      </div>
+    </section>
+    <div id="status" class="list-status" role="status" aria-live="polite">Loading vocabulary…</div>
+    <div id="vocabulary-entries" aria-live="polite"></div>
+  </main>
+  <section id="hsk-progress-view" class="hsk-progress-view" aria-label="HSK 学习进度" hidden>
+    <table class="hsk-progress-table">
+      <thead>
+        <tr><th scope="col">级别</th><th scope="col">进度</th></tr>
+      </thead>
+      <tbody id="hsk-progress-rows"></tbody>
+    </table>
   </section>
-  <div id="status" class="list-status" role="status" aria-live="polite">Loading vocabulary…</div>
-  <div id="vocabulary-entries" aria-live="polite"></div>
 </body>
 </html>

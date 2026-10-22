@@ -64,6 +64,10 @@ function startVocabularyPage() {
   const storageKey = document.body.dataset.storageKey;
   const entriesElement = document.querySelector("#vocabulary-entries");
   const status = document.querySelector("#status");
+  const listView = document.querySelector("#hsk-list-view");
+  const progressView = document.querySelector("#hsk-progress-view");
+  const progressRows = document.querySelector("#hsk-progress-rows");
+  const viewLinks = document.querySelectorAll(".hsk-view-nav a");
   const unknownFilter = document.querySelector("#unknown-filter");
   const pinyinToggle = document.querySelector("#pinyin-toggle");
   const onlyPinyinToggle = document.querySelector("#only-pinyin-toggle");
@@ -74,6 +78,70 @@ function startVocabularyPage() {
   const requestedPage = Number(new URLSearchParams(window.location.search).get("page"));
   let currentPage = Number.isSafeInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1;
   document.body.classList.toggle("hide-pinyin", !pinyinToggle.checked);
+
+  function setHskView(view) {
+    if (!listView || !progressView) return;
+    const showProgress = view === "progress";
+    listView.hidden = showProgress;
+    progressView.hidden = !showProgress;
+    for (const link of viewLinks) {
+      if (link.hash === `#${view}`) {
+        link.setAttribute("aria-current", "page");
+      } else {
+        link.removeAttribute("aria-current");
+      }
+    }
+  }
+
+  function renderHskProgress() {
+    if (!progressRows) return;
+    const groups = [
+      ...Array.from({ length: 6 }, (_, index) => ({
+        label: `HSK${index + 1}`,
+        levelClass: `hsk${index + 1}`,
+        includes: (level) => level === index + 1
+      })),
+      { label: "HSK7-9", levelClass: "hsk7-9", includes: (level) => level >= 7 && level <= 9 }
+    ];
+
+    progressRows.replaceChildren();
+    for (const group of groups) {
+      const groupEntries = entries.filter((entry) => entry.levels.some(group.includes));
+      const knownCount = groupEntries.filter((entry) => entry.known).length;
+      const percentage = groupEntries.length
+        ? Math.round((knownCount / groupEntries.length) * 100)
+        : 0;
+      const row = document.createElement("tr");
+      const levelCell = document.createElement("th");
+      levelCell.scope = "row";
+      levelCell.className = `hsk-progress-level ${group.levelClass}`;
+      levelCell.textContent = group.label;
+      row.append(levelCell);
+
+      const progressCell = document.createElement("td");
+      const progress = document.createElement("div");
+      progress.className = `hsk-progress-bar ${group.levelClass}`;
+      progress.setAttribute("role", "progressbar");
+      progress.setAttribute("aria-label", `${group.label} 已认识词语`);
+      progress.setAttribute("aria-valuemin", "0");
+      progress.setAttribute("aria-valuemax", String(groupEntries.length));
+      progress.setAttribute("aria-valuenow", String(knownCount));
+      const fill = document.createElement("span");
+      fill.className = "hsk-progress-fill";
+      fill.style.width = `${percentage}%`;
+      const percentageLabel = document.createElement("span");
+      percentageLabel.className = "hsk-progress-percentage";
+      percentageLabel.textContent = `${percentage}%`;
+      progress.append(fill, percentageLabel);
+
+      const count = document.createElement("div");
+      count.className = "hsk-progress-count";
+      count.textContent = `已认识 ${knownCount} / ${groupEntries.length}`;
+      progressCell.append(progress, count);
+      row.append(progressCell);
+      progressRows.append(row);
+    }
+  }
 
   function getPageUrl(pageNumber) {
     const url = new URL(window.location.href);
@@ -299,6 +367,21 @@ function startVocabularyPage() {
     writePageUrl("pushState");
     render();
   });
+  if (viewLinks.length) {
+    for (const link of viewLinks) {
+      link.addEventListener("click", (event) => {
+        event.preventDefault();
+        if (window.location.hash !== link.hash) {
+          window.history.pushState(null, "", link.hash);
+        }
+        setHskView(link.hash.slice(1));
+      });
+    }
+    window.addEventListener("popstate", () => {
+      setHskView(window.location.hash === "#progress" ? "progress" : "list");
+    });
+    setHskView(window.location.hash === "#progress" ? "progress" : "list");
+  }
   window.addEventListener("popstate", () => {
     const pageFromUrl = Number(new URLSearchParams(window.location.search).get("page"));
     currentPage = Number.isSafeInteger(pageFromUrl) && pageFromUrl > 0 ? pageFromUrl : 1;
@@ -355,12 +438,19 @@ function startVocabularyPage() {
       }
       const knownState = page === "hsk" ? readKnownState(storageKey) : {};
       entries = data.map((record) => normalizeRecord(record, page, knownState));
+      if (page === "hsk") {
+        renderHskProgress();
+      }
       status.classList.remove("error");
       render();
     })
     .catch((error) => {
       status.textContent = `Unable to load vocabulary: ${error.message}`;
       status.classList.add("error");
+      if (page === "hsk") {
+        window.history.replaceState(null, "", "#list");
+        setHskView("list");
+      }
     });
 }
 
