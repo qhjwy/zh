@@ -4,6 +4,7 @@ const searchInput = document.querySelector("#search");
 const statusElement = document.querySelector("#status");
 const resultsElement = document.querySelector("#results");
 const clearButton = document.querySelector("#clear-btn");
+const tagFilterOptions = document.querySelector("#tag-filter-options");
 const scriptLabel = document.querySelector("#script-label");
 const toggleButton = document.querySelector("#script-toggle");
 const worker = new Worker(document.body.dataset.workerSrc || "worker.js");
@@ -13,42 +14,15 @@ let lastQuery = "";
 let debounceTimer;
 let ready = false;
 let readyStatus = "Loading dictionary…";
-
-function convertPinyin(pinyin) {
-  const toneMap = {
-    a: ["ā", "á", "ǎ", "à"],
-    e: ["ē", "é", "ě", "è"],
-    i: ["ī", "í", "ǐ", "ì"],
-    o: ["ō", "ó", "ǒ", "ò"],
-    u: ["ū", "ú", "ǔ", "ù"],
-    ü: ["ǖ", "ǘ", "ǚ", "ǜ"]
-  };
-
-  return pinyin.split(" ").map((syllable) => {
-    const match = syllable.match(/([1-5])$/);
-    let word = syllable.replace(/u:/g, "ü").replace(/v/g, "ü");
-    if (!match || match[1] === "5") return word.replace(/[1-5]$/, "");
-    word = word.slice(0, -1);
-
-    const lower = word.toLowerCase();
-    let vowel = "";
-    if (lower.includes("a")) vowel = "a";
-    else if (lower.includes("e")) vowel = "e";
-    else if (lower.includes("ou")) vowel = "o";
-    else {
-      for (let index = lower.length - 1; index >= 0; index -= 1) {
-        if (Object.hasOwn(toneMap, lower[index])) {
-          vowel = lower[index];
-          break;
-        }
-      }
-    }
-
-    return vowel
-      ? word.replace(new RegExp(vowel, "i"), toneMap[vowel][Number(match[1]) - 1])
-      : word;
-  }).join(" ");
-}
+const hiddenByDefaultTags = new Set([
+  "archaic",
+  "dated",
+  "latin_digit",
+  "proper_noun",
+  "regional",
+  "variant"
+]);
+const hiddenTags = new Set(hiddenByDefaultTags);
 
 function appendHskBadges(parent, levels) {
   for (const level of levels) {
@@ -82,7 +56,7 @@ function render(entries) {
 
     const pinyin = document.createElement("span");
     pinyin.className = "pinyin";
-    pinyin.textContent = `[${convertPinyin(entry.pinyin)}]`;
+    pinyin.textContent = `[${window.convertPinyin(entry.pinyin)}]`;
     heading.append(pinyin);
 
     if (entry.classifiers.length) {
@@ -94,11 +68,12 @@ function render(entries) {
       heading.append(classifier);
     }
 
-    if (entry.frequencyRank !== null) {
-      const frequencyRank = document.createElement("span");
-      frequencyRank.className = "classifier";
-      frequencyRank.textContent = `${entry.classifiers.length ? " · " : " "}${entry.frequencyRank}`;
-      heading.append(frequencyRank);
+    if (entry.frequencyProbability !== null) {
+      const frequencyProbability = document.createElement("span");
+      frequencyProbability.className = "classifier";
+      frequencyProbability.title = "Estimated chance of use at least once in a day; see About for assumptions.";
+      frequencyProbability.textContent = `${entry.classifiers.length ? " · " : " "}${Math.round(entry.frequencyProbability * 100)}%`;
+      heading.append(frequencyProbability);
     }
 
     appendHskBadges(heading, entry.hskLevels);
@@ -124,7 +99,42 @@ function runSearch(query) {
     statusElement.textContent = readyStatus;
     return;
   }
-  worker.postMessage({ type: "search", query });
+  worker.postMessage({ type: "search", query, hiddenTags: [...hiddenTags] });
+}
+
+function renderTagFilters(tags) {
+  tagFilterOptions.replaceChildren();
+  const fragment = document.createDocumentFragment();
+
+  for (const hiddenByDefault of [false, true]) {
+    const group = tags
+      .filter((tag) => hiddenByDefaultTags.has(tag.name) === hiddenByDefault)
+      .sort((first, second) => second.count - first.count || first.name.localeCompare(second.name));
+    if (!group.length) continue;
+
+    const heading = document.createElement("strong");
+    heading.className = "tag-filter-group-heading";
+    heading.textContent = hiddenByDefault ? "Hidden by default" : "Shown by default";
+    fragment.append(heading);
+
+    for (const tag of group) {
+      const label = document.createElement("label");
+      const checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      checkbox.checked = !hiddenTags.has(tag.name);
+      checkbox.addEventListener("change", () => {
+        if (checkbox.checked) hiddenTags.delete(tag.name);
+        else hiddenTags.add(tag.name);
+        runSearch(lastQuery);
+      });
+
+      const text = document.createElement("span");
+      text.textContent = `Show ${tag.name} (${tag.count})`;
+      label.append(checkbox, text);
+      fragment.append(label);
+    }
+  }
+  tagFilterOptions.append(fragment);
 }
 
 searchInput.addEventListener("input", () => {
@@ -157,7 +167,8 @@ worker.addEventListener("message", (event) => {
   const message = event.data;
   if (message.type === "ready") {
     ready = true;
-    readyStatus = `${message.entryCount.toLocaleString()} entries loaded. ${message.hskCount.toLocaleString()} entries have HSK levels (${message.hskPercentage}%).`;
+    renderTagFilters(message.tags);
+    readyStatus = `${message.entryCount.toLocaleString()} entries loaded. ${message.hskCount.toLocaleString()} dictionary entries match an HSK word and reading (${message.hskPercentage}%).`;
     statusElement.textContent = readyStatus;
     runSearch(lastQuery);
   } else if (message.type === "results") {

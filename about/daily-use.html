@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en" class="dictionary-document">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Estimated daily use · 中文词典</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body class="dictionary-page about-page">
+  <header class="dict-header">
+    <h1 class="dict-title"><span class="title-main">Estimated daily use</span></h1>
+  </header>
+
+  <main class="about-content">
+    <p><a href="about.html">Back to About</a></p>
+
+    <p>
+      The percentage beside a dictionary entry estimates the chance of seeing or hearing that word
+      at least once in a day. It is derived from the word's frequency rank using a simple Zipf model,
+      not from tracking anyone's personal language use.
+    </p>
+
+    <h2>Calculation</h2>
+    <p>
+      Let <code>r</code> be the word's frequency rank, where rank 1 is most frequent. The model
+      approximates its probability per token as
+      <code>p = 1 / (r × H₅₀₀₀₀)</code>, where
+      <code>H₅₀₀₀₀ ≈ ln(50,000) + 0.5772156649</code> is the harmonic normalizer.
+    </p>
+    <p>
+      Assuming <code>T = 17,000</code> spoken and written tokens per day, the expected daily
+      occurrence rate is <code>λ = p × T</code>. The chance of one or more occurrences is
+      estimated as <code>100 × (1 − exp(−λ))</code>, then rounded to a whole percent.
+    </p>
+    <p>
+      The same numbers can be read three ways: <code>p × 1,000,000</code> gives occurrences per
+      million words, <code>λ</code> gives the expected number of uses per day, and
+      <code>1 − exp(−λ)</code> gives the probability of at least one use.
+    </p>
+
+    <h2>Example</h2>
+    <p>
+      For rank 802, the model estimates a daily-use probability of about 84%. This means the model
+      predicts at least one occurrence on roughly 84 out of 100 comparable days; it is not a guarantee
+      that an individual will encounter the word on any particular day.
+    </p>
+    <p>
+      The table below uses a 50,000-word cutoff, 17,000 tokens per day, and a Zipf exponent of 1.
+    </p>
+
+    <table>
+      <thead>
+        <tr>
+          <th scope="col">Rank</th>
+          <th scope="col">Per million</th>
+          <th scope="col">λ per day</th>
+          <th scope="col">Chance of ≥1 today</th>
+          <th scope="col">Rough feel</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>10</td><td>~8,800</td><td>~150</td><td>~100%</td><td>every few minutes</td></tr>
+        <tr><td>100</td><td>~880</td><td>~15</td><td>~100%</td><td>many times a day</td></tr>
+        <tr><td>500</td><td>~175</td><td>~3.0</td><td>~95%</td><td>several times a day</td></tr>
+        <tr><td>1,000</td><td>~88</td><td>~1.5</td><td>~78%</td><td>most days</td></tr>
+        <tr><td>2,000</td><td>~44</td><td>~0.75</td><td>~53%</td><td>every other day</td></tr>
+        <tr><td>5,000</td><td>~17.5</td><td>~0.30</td><td>~26%</td><td>weekly-ish</td></tr>
+        <tr><td>10,000</td><td>~8.8</td><td>~0.15</td><td>~14%</td><td>every week or two</td></tr>
+        <tr><td>20,000</td><td>~4.4</td><td>~0.075</td><td>~7%</td><td>monthly</td></tr>
+        <tr><td>50,000</td><td>~1.75</td><td>~0.03</td><td>~3%</td><td>rare</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Limitations</h2>
+    <p>
+      This is a rough estimate. It assumes a Zipf exponent of 1, a 50,000-word cutoff, and the same
+      frequency distribution across spoken and written language. A person's vocabulary, interests,
+      location, and daily context can make their actual exposure quite different. Real usage is also
+      bursty rather than evenly spread, so the percentages should be read as an order-of-magnitude
+      guide, not a precise forecast.
+    </p>
+
+    <p><a href="about.html">Back to About</a> · <a href="../index.html">Back to dictionary</a></p>
+  </main>
+</body>
+</html>

@@ -474,6 +474,16 @@ th:last-child {
   --hsk7-9: #808080;
 }
 
+.vocabulary-sticky {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  margin: 0 -1rem;
+  padding: 0 1rem 0.5rem;
+  border-bottom: 1px solid #eaeaea;
+  background: #fcfcfc;
+}
+
 .vocabulary-filters {
   display: flex;
   flex-wrap: wrap;
@@ -488,6 +498,10 @@ th:last-child {
   flex-direction: column;
   align-items: flex-start;
   gap: 0.5rem;
+}
+
+.hsk-filters[hidden] {
+  display: none;
 }
 
 .filter-options {
@@ -590,6 +604,10 @@ th:last-child {
   font-size: 0.9rem;
 }
 
+.list-status[hidden] {
+  display: none;
+}
+
 .list-page-links {
   display: inline-flex;
   align-items: center;
@@ -616,10 +634,67 @@ th:last-child {
 }
 
 .vocabulary-entry-heading {
+  position: relative;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 0.15rem 0.4rem;
+  transition: padding-left 140ms ease;
+}
+
+.entry.is-selected .vocabulary-entry-heading {
+  padding-left: 1.65rem;
+}
+
+.vocabulary-list-page .word-select {
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  appearance: none;
+  background: transparent;
+  color: inherit;
+  font-family: "Kaiti SC", "STKaiti", "KaiTi", "楷体", serif;
+  font-size: 2rem;
+  font-weight: 600;
+  line-height: normal;
+  text-align: inherit;
+  vertical-align: baseline;
+  cursor: pointer;
+}
+
+.vocabulary-list-page .word-select:hover {
+  color: var(--red);
+}
+
+.vocabulary-list-page .word-select:focus-visible {
+  outline: 2px solid var(--red);
+  outline-offset: 2px;
+}
+
+.selection-indicator {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 1.25rem;
+  color: var(--red);
+  font: 700 0.9rem/1 system-ui, sans-serif;
+  opacity: 0;
+  text-align: center;
+  transform: translateY(-50%);
+  transition: opacity 120ms ease;
+}
+
+.entry.is-selected .selection-indicator {
+  cursor: pointer;
+}
+
+.entry.is-selected .selection-indicator {
+  opacity: 1;
+}
+
+.entry.is-selected .word-select {
+  color: var(--red);
 }
 
 .boya-level {
@@ -660,27 +735,38 @@ th:last-child {
   display: none;
 }
 
+.vocabulary-list-page .entry:not(.is-expanded) .defs {
+  display: none;
+}
+
+.vocabulary-list-page .entry.is-expanded .vocabulary-pinyin {
+  display: inline;
+}
+
 .only-pinyin .word {
+  display: none;
+}
+
+.only-pinyin .selection-indicator {
   display: none;
 }
 
 .vocabulary-list-page .entry {
   position: relative;
-  padding-right: 12rem;
+  padding-right: 18rem;
 }
 
 .vocabulary-list-page[data-page="boya"] .entry {
-  padding-right: 9.5rem;
+  padding-right: 12rem;
 }
 
 .entry-actions {
   position: absolute;
-  top: 50%;
+  top: 1.25rem;
   right: 0;
   display: flex;
   align-items: center;
   gap: 0.4rem;
-  transform: translateY(-50%);
 }
 
 .entry-actions .list-level {
@@ -746,6 +832,125 @@ th:last-child {
 .sentence-status {
   color: #666;
 }
+
+.selection-toolbar {
+  position: fixed;
+  z-index: 20;
+  right: 50%;
+  bottom: max(1rem, env(safe-area-inset-bottom));
+  display: flex;
+  width: max-content;
+  max-width: calc(100vw - 1.5rem);
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 4px 20px rgb(0 0 0 / 18%);
+  transform: translateX(50%);
+}
+
+.selection-toolbar[hidden] {
+  display: none;
+}
+
+.selection-count,
+.selection-status {
+  color: #555;
+  font-size: 0.82rem;
+}
+
+.selection-action {
+  min-height: 36px;
+  padding: 0.35rem 0.7rem;
+  border: 1px solid #ddd;
+  border-radius: 1rem;
+  background: #f0f0f0;
+  color: #444;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.selection-action:hover {
+  border-color: #d35400;
+  color: #d35400;
+}
+
+.vocabulary-list-page.has-selection {
+  padding-bottom: 6rem;
+}
+
+.search-tools {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 0.35rem;
+}
+
+.tag-filter {
+  position: relative;
+  color: #666;
+  font-size: 0.8rem;
+}
+
+.tag-filter summary {
+  padding: 0.15rem 0.35rem;
+  border-radius: 4px;
+  cursor: pointer;
+  list-style-position: inside;
+}
+
+.tag-filter summary:hover {
+  background: #f0f0f0;
+  color: #222;
+}
+
+.tag-filter-options {
+  position: absolute;
+  top: calc(100% + 0.25rem);
+  right: 0;
+  z-index: 2;
+  display: grid;
+  width: max-content;
+  max-width: calc(100vw - 2rem);
+  max-height: min(18rem, 60vh);
+  gap: 0.35rem;
+  overflow-y: auto;
+  padding: 0.6rem;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  background: #fff;
+  box-shadow: 0 4px 14px rgb(0 0 0 / 12%);
+}
+
+.tag-filter-options label {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.tag-filter-group-heading {
+  padding-top: 0.25rem;
+  border-top: 1px solid #eee;
+  color: #444;
+  font-size: 0.75rem;
+}
+
+.tag-filter-group-heading:first-child {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.tag-filter-options input {
+  width: auto;
+  min-height: 0;
+  height: auto;
+  margin: 0;
+  padding: 0;
 }
 
 .search-wrapper {
@@ -874,6 +1079,18 @@ th:last-child {
   .content {
     width: min(100% - 1.25rem, 1100px);
     padding-top: 1.25rem;
+  }
+
+  .vocabulary-list-page .entry,
+  .vocabulary-list-page[data-page="boya"] .entry {
+    padding-right: 0;
+  }
+
+  .vocabulary-list-page .entry-actions {
+    position: static;
+    flex-wrap: wrap;
+    margin-top: 0.5rem;
+    transform: none;
   }
 
   th,

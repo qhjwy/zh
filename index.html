@@ -5,10 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>词典</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22central%22 text-anchor=%22middle%22 font-family=%22system-ui,sans-serif%22 font-weight=%22bold%22 font-size=%2260%22 fill=%22%23d35400%22>zh</text></svg>">
-  <link rel="stylesheet" href="css/style.css?v=3">
-  <script src="js/dictionary.js?v=2" defer></script>
+  <link rel="stylesheet" href="css/style.css?v=6">
+  <script src="js/pinyin.js?v=1" defer></script>
+  <script src="js/dictionary.js?v=7" defer></script>
 </head>
-<body class="dictionary-page" data-worker-src="js/dictionary-worker.js?v=1">
+<body class="dictionary-page" data-worker-src="js/dictionary-worker.js?v=5">
   <header class="dict-header">
     <h1 class="dict-title">
       <a class="title-main" href="index.html">词典</a><span class="title-sub"> · <span id="script-label">简体</span></span>
@@ -20,6 +21,12 @@
     </nav>
   </header>
 
+  <div class="search-tools">
+    <details class="tag-filter">
+      <summary>Entry tags</summary>
+      <div id="tag-filter-options" class="tag-filter-options" role="group" aria-label="Show entries with CEDICT tags"></div>
+    </details>
+  </div>
   <div class="search-wrapper">
     <button id="clear-btn" class="clear-btn" type="button" aria-label="Clear search">→</button>
     <input id="search" type="text" placeholder="在此输入……" autocomplete="off" autofocus>
@@ -29,7 +36,7 @@
   <div id="results"></div>
 
   <footer>
-    <a href="about.html">About</a>
+    <a href="about/about.html">About</a>
   </footer>
 </body>
 </html>

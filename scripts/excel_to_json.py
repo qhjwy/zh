@@ -1,6 +1,7 @@
 import pandas as pd
 import json
 import os
+import re
 
 # --- Configuration ---
 EXCEL_FILE_PATH = '../dictionaries.xlsx'
@@ -14,6 +15,25 @@ SHEETS_TO_EXPORT = {
     'Boya': 'boya.json',
 }
 
+HIDDEN_CEDICT_TAGS = {
+    'archaic',
+    'dated',
+    'latin_digit',
+    'proper_noun',
+    'regional',
+    'variant',
+}
+
+
+def normalize_pinyin(value):
+    """Normalize numbered pinyin separators for matching spreadsheet records."""
+    return re.sub(
+        r"[\s'’‘·-]+",
+        "",
+        str(value).lower().replace('u:', 'v').replace('ü', 'v'),
+    )
+
+
 def convert_sheet_to_json(sheet_name, output_filename):
     """Reads a specific sheet from Excel and saves it as a JSON file."""
     try:
@@ -23,6 +43,38 @@ def convert_sheet_to_json(sheet_name, output_filename):
 
         # Replace any empty cells (NaN) with an empty string
         df = df.fillna('')
+        if sheet_name == 'HSK':
+            df = df.drop(columns=['Pinyin original'], errors='ignore')
+            cedict = pd.read_excel(EXCEL_FILE_PATH, sheet_name='cedict', dtype=str).fillna('')
+            definitions_by_key = {}
+            for record in cedict.to_dict(orient='records'):
+                word = record.get('Word', '')
+                pinyin = normalize_pinyin(record.get('Pinyin', ''))
+                if not word or not pinyin:
+                    continue
+
+                tags = json.loads(record.get('Tags') or '[]')
+                if HIDDEN_CEDICT_TAGS.intersection(tags):
+                    continue
+
+                definition = str(record.get('Definitions', '')).strip('/')
+                if not definition:
+                    continue
+
+                key = (word, pinyin)
+                definitions = definitions_by_key.setdefault(key, [])
+                for item in definition.split('/'):
+                    item = item.strip()
+                    if item and not item.startswith('CL:') and item not in definitions:
+                        definitions.append(item)
+
+            df['Dictionary definitions'] = df.apply(
+                lambda record: definitions_by_key.get(
+                    (str(record.get('Word', '')), normalize_pinyin(record.get('Pinyin', ''))),
+                    [],
+                ),
+                axis=1,
+            )
 
         # Convert the DataFrame to a list of dictionaries
         # Each dictionary represents a row, with column headers as keys
