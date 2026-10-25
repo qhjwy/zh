@@ -747,6 +747,14 @@ th:last-child {
   display: none;
 }
 
+.vocabulary-list-page[data-page="boya"] .word-select {
+  line-height: 1.4;
+}
+
+.only-pinyin[data-page="boya"] .vocabulary-entry-heading {
+  min-height: 2.8rem;
+}
+
 .only-pinyin .selection-indicator {
   display: none;
 }
@@ -758,6 +766,23 @@ th:last-child {
 
 .vocabulary-list-page[data-page="boya"] .entry {
   padding-right: 12rem;
+}
+
+.vocabulary-list-page[data-page="boya"] .entry.is-selected {
+  background: #fff0e6;
+}
+
+.vocabulary-list-page[data-page="boya"] .vocabulary-entry-heading {
+  padding-left: 0;
+  transition: none;
+}
+
+.vocabulary-list-page[data-page="boya"] .selection-indicator {
+  display: none;
+}
+
+.vocabulary-list-page[data-page="boya"] .entry.is-selected .word-select {
+  color: inherit;
 }
 
 .entry-actions {

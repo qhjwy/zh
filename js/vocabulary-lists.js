@@ -57,7 +57,7 @@ function normalizeRecord(record, page, knownState) {
     definitions,
     levels: levelInfo.levels,
     levelLabel: levelInfo.label,
-    chapter: String(record.chapter ?? record.Chapter ?? ""),
+    week: String(record["周"] ?? ""),
     known
   };
 }
@@ -99,7 +99,9 @@ function startVocabularyPage() {
   selectionStatus.className = "selection-status";
   selectionStatus.setAttribute("role", "status");
   selectionToolbar.append(selectionCount, copyWordsButton, copyPromptsButton, selectionStatus);
-  document.body.append(selectionToolbar);
+  if (page !== "boya") {
+    document.body.append(selectionToolbar);
+  }
 
   let entries = [];
   const requestedPage = Number(new URLSearchParams(window.location.search).get("page"));
@@ -107,6 +109,8 @@ function startVocabularyPage() {
   document.body.classList.toggle("hide-pinyin", !pinyinToggle.checked);
 
   function updateSelectionToolbar() {
+    if (page === "boya") return;
+
     const selectedCount = selectedIds.size;
     selectionToolbar.hidden = selectedCount === 0;
     document.body.classList.toggle("has-selection", selectedCount > 0);
@@ -250,23 +254,63 @@ function startVocabularyPage() {
   }
 
   function filteredEntries() {
-    const selectedLevel = levelFilter?.querySelector('[aria-pressed="true"]')?.dataset.level ?? "";
-    const selectedChapter = chapterFilter?.querySelector('[aria-pressed="true"]')?.dataset.chapter ?? "";
+    const selectedLevels = new Set(
+      [...(levelFilter?.querySelectorAll('button[data-level][aria-pressed="true"]') ?? [])]
+        .map((button) => button.dataset.level)
+    );
+    const selectedWeeks = new Set(
+      [...(chapterFilter?.querySelectorAll('button[data-week][aria-pressed="true"]') ?? [])]
+        .map((button) => button.dataset.week)
+    );
 
-    return entries.filter((entry) => {
+    const matches = entries.filter((entry) => {
       if (unknownFilter?.checked && entry.known) {
         return false;
       }
-      if (selectedLevel && !entry.levels.some((level) =>
-        selectedLevel === "7-9" ? level >= 7 && level <= 9 : level === Number(selectedLevel)
+      if (selectedLevels.size && ![...selectedLevels].some((selectedLevel) =>
+        entry.levels.some((level) =>
+          selectedLevel === "7-9" ? level >= 7 && level <= 9 : level === Number(selectedLevel)
+        )
       )) {
         return false;
       }
-      if (selectedChapter && entry.chapter !== selectedChapter) {
+      if (selectedWeeks.size && !selectedWeeks.has(entry.week || "-")) {
         return false;
       }
       return true;
     });
+    if (page === "boya") {
+      const selectedRank = new Map(
+        [...selectedIds].map((id, index) => [id, index])
+      );
+      matches.sort((left, right) =>
+        (selectedRank.get(left.id) ?? Infinity) - (selectedRank.get(right.id) ?? Infinity)
+      );
+    }
+    return matches;
+  }
+
+  function renderBoyaWeekFilters() {
+    if (page !== "boya" || !chapterFilter) return;
+
+    const weeks = new Set(entries.map((entry) => entry.week || "-"));
+    chapterFilter.replaceChildren();
+    const sortedWeeks = [...weeks].sort((left, right) =>
+      left === "-" ? 1 : right === "-" ? -1 : Number(left) - Number(right)
+    );
+    for (const week of sortedWeeks) {
+      const weekButton = document.createElement("button");
+      weekButton.className = "boya-level level-chip week-chip";
+      weekButton.type = "button";
+      weekButton.dataset.week = week;
+      weekButton.setAttribute("aria-pressed", "false");
+      weekButton.textContent = week === "-" ? "-" : `周${week}`;
+      weekButton.setAttribute(
+        "aria-label",
+        week === "-" ? "筛选无周" : `筛选第${week}周`
+      );
+      chapterFilter.append(weekButton);
+    }
   }
 
   function render() {
@@ -302,6 +346,10 @@ function startVocabularyPage() {
         } else {
           selectedIds.add(entry.id);
         }
+        if (page === "boya") {
+          resetAndRender();
+          return;
+        }
         item.classList.toggle("is-selected", !selected);
         selectionIndicator.textContent = selected ? "" : "✓";
         word.setAttribute("aria-pressed", String(!selected));
@@ -309,7 +357,8 @@ function startVocabularyPage() {
       });
       heading.addEventListener("click", (event) => {
         if (
-          !selectedIds.has(entry.id)
+          page === "boya"
+          || !selectedIds.has(entry.id)
           || event.target === word
           || event.clientX >= word.getBoundingClientRect().left
         ) {
@@ -322,7 +371,11 @@ function startVocabularyPage() {
         word.setAttribute("aria-pressed", "false");
         updateSelectionToolbar();
       });
-      heading.append(selectionIndicator, word);
+      if (page === "boya") {
+        heading.append(word);
+      } else {
+        heading.append(selectionIndicator, word);
+      }
 
       if (entry.pinyin) {
         const pinyin = document.createElement("span");
@@ -515,20 +568,22 @@ function startVocabularyPage() {
       const button = event.target.closest("button[data-level]");
       if (!button) return;
       const wasSelected = button.getAttribute("aria-pressed") === "true";
-      for (const filterButton of levelFilter.querySelectorAll("button[data-level]")) {
-        filterButton.setAttribute("aria-pressed", String(filterButton === button && !wasSelected));
+      if (page === "boya") {
+        button.setAttribute("aria-pressed", String(!wasSelected));
+      } else {
+        for (const filterButton of levelFilter.querySelectorAll("button[data-level]")) {
+          filterButton.setAttribute("aria-pressed", String(filterButton === button && !wasSelected));
+        }
       }
       resetAndRender();
     });
   }
   if (chapterFilter) {
     chapterFilter.addEventListener("click", (event) => {
-      const button = event.target.closest("button[data-chapter]");
+      const button = event.target.closest("button[data-week]");
       if (!button) return;
       const wasSelected = button.getAttribute("aria-pressed") === "true";
-      for (const filterButton of chapterFilter.querySelectorAll("button[data-chapter]")) {
-        filterButton.setAttribute("aria-pressed", String(filterButton === button && !wasSelected));
-      }
+      button.setAttribute("aria-pressed", String(!wasSelected));
       resetAndRender();
     });
   }
@@ -558,6 +613,7 @@ function startVocabularyPage() {
       }
       const knownState = page === "hsk" ? readKnownState(storageKey) : {};
       entries = data.map((record) => normalizeRecord(record, page, knownState));
+      renderBoyaWeekFilters();
       if (page === "hsk") {
         renderHskProgress();
       }

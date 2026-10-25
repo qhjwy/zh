@@ -5,7 +5,8 @@
     "Pinyin": "bào dào",
     "Book": "Boya 1",
     "Chapter": "1",
-    "Number": "1"
+    "Number": "1",
+    "周": "1"
   },
   {
     "ID": "Boya10102",
@@ -13,7 +14,8 @@
     "Pinyin": "zāo",
     "Book": "Boya 1",
     "Chapter": "1",
-    "Number": "2"
+    "Number": "2",
+    "周": "1"
   },
   {
     "ID": "Boya10103",
@@ -21,7 +23,8 @@
     "Pinyin": "bù yóu de",
     "Book": "Boya 1",
     "Chapter": "1",
-    "Number": "3"
+    "Number": "3",
+    "周": "1"
   },
   {
     "ID": "Boya10104",
@@ -29,7 +32,8 @@
     "Pinyin": "fā máo",
     "Book": "Boya 1",
     "Chapter": "1",
-    "Number": "4"
+    "Number": "4",
+    "周": "1"
   },
   {
     "ID": "Boya10105",
@@ -37,7 +41,8 @@
     "Pinyin": "jiē jiē bā bā",
     "Book": "Boya 1",
     "Chapter": "1",
-    "Number": "5"
+    "Number": "5",
+    "周": "1"
   },
   {
     "ID": "Boya10106",
@@ -45,7 +50,8 @@
     "Pinyin": "kùn huò",
     "Book": "Boya 1",
     "Chapter": "1",
-    "Number": "6"
+    "Number": "6",
+    "周": "2"
   },
   {
     "ID": "Boya10107",
@@ -53,7 +59,8 @@
     "Pinyin": "mò míng qí miào",
     "Book": "Boya 1",
     "Chapter": "1",
-    "Number": "7"
+    "Number": "7",
+    "周": "2"
   },
   {
     "ID": "Boya10108",
@@ -61,7 +68,8 @@
     "Pinyin": "jū rán",
     "Book": "Boya 1",
     "Chapter": "1",
-    "Number": "8"
+    "Number": "8",
+    "周": "2"
   },
   {
     "ID": "Boya10109",
@@ -69,7 +77,8 @@
     "Pinyin": "lián máng",
     "Book": "Boya 1",
     "Chapter": "1",
-    "Number": "9"
+    "Number": "9",
+    "周": "2"
   },
   {
     "ID": "Boya10110",
@@ -77,7 +86,8 @@
     "Pinyin": "fàng qì",
     "Book": "Boya 1",
     "Chapter": "1",
-    "Number": "10"
+    "Number": "10",
+    "周": "2"
   },
   {
     "ID": "Boya10111",
@@ -85,7 +95,8 @@
     "Pinyin": "mù dèng kǒu dāi",
     "Book": "Boya 1",
     "Chapter": "1",
-    "Number": "11"
+    "Number": "11",
+    "周": "2"
   },
   {
     "ID": "Boya10112",
@@ -93,7 +104,8 @@
     "Pinyin": "hào qí",
     "Book": "Boya 1",
     "Chapter": "1",
-    "Number": "12"
+    "Number": "12",
+    "周": "2"
   },
   {
     "ID": "Boya10113",
@@ -101,7 +113,8 @@
     "Pinyin": "gān cuì",
     "Book": "Boya 1",
     "Chapter": "1",
-    "Number": "13"
+    "Number": "13",
+    "周": "2"
   },
   {
     "ID": "Boya10114",
@@ -109,7 +122,8 @@
     "Pinyin": "pīn xiě",
     "Book": "Boya 1",
     "Chapter": "1",
-    "Number": "14"
+    "Number": "14",
+    "周": "2"
   },
   {
     "ID": "Boya10115",
@@ -117,7 +131,8 @@
     "Pinyin": "liáo yǎng yuàn",
     "Book": "Boya 1",
     "Chapter": "1",
-    "Number": "15"
+    "Number": "15",
+    "周": "3"
   },
   {
     "ID": "Boya10116",
@@ -125,7 +140,8 @@
     "Pinyin": "nà mènr",
     "Book": "Boya 1",
     "Chapter": "1",
-    "Number": "16"
+    "Number": "16",
+    "周": "3"
   },
   {
     "ID": "Boya10117",
@@ -133,7 +149,8 @@
     "Pinyin": "kāng nǎi xīn",
     "Book": "Boya 1",
     "Chapter": "1",
-    "Number": "17"
+    "Number": "17",
+    "周": "3"
   },
   {
     "ID": "Boya10118",
@@ -141,7 +158,8 @@
     "Pinyin": "bié",
     "Book": "Boya 1",
     "Chapter": "1",
-    "Number": "18"
+    "Number": "18",
+    "周": "2"
   },
   {
     "ID": "Boya10119",
@@ -149,7 +167,8 @@
     "Pinyin": "yǒu fènr",
     "Book": "Boya 1",
     "Chapter": "1",
-    "Number": "19"
+    "Number": "19",
+    "周": "3"
   },
   {
     "ID": "Boya10120",
@@ -157,7 +176,8 @@
     "Pinyin": "lèng",
     "Book": "Boya 1",
     "Chapter": "1",
-    "Number": "20"
+    "Number": "20",
+    "周": "3"
   },
   {
     "ID": "Boya10121",
@@ -165,7 +185,8 @@
     "Pinyin": "gài niàn",
     "Book": "Boya 1",
     "Chapter": "1",
-    "Number": "21"
+    "Number": "21",
+    "周": "3"
   },
   {
     "ID": "Boya10122",
@@ -173,7 +194,8 @@
     "Pinyin": "huái yùn",
     "Book": "Boya 1",
     "Chapter": "1",
-    "Number": "22"
+    "Number": "22",
+    "周": "3"
   },
   {
     "ID": "Boya10123",
@@ -181,7 +203,8 @@
     "Pinyin": "jǐng gào",
     "Book": "Boya 1",
     "Chapter": "1",
-    "Number": "23"
+    "Number": "23",
+    "周": "3"
   },
   {
     "ID": "Boya10124",
@@ -189,7 +212,8 @@
     "Pinyin": "chāo shēng bō",
     "Book": "Boya 1",
     "Chapter": "1",
-    "Number": "24"
+    "Number": "24",
+    "周": "3"
   },
   {
     "ID": "Boya10125",
@@ -197,7 +221,8 @@
     "Pinyin": "píng mù",
     "Book": "Boya 1",
     "Chapter": "1",
-    "Number": "25"
+    "Number": "25",
+    "周": "3"
   },
   {
     "ID": "Boya10126",
@@ -205,7 +230,8 @@
     "Pinyin": "yīng'ér",
     "Book": "Boya 1",
     "Chapter": "1",
-    "Number": "26"
+    "Number": "26",
+    "周": "3"
   },
   {
     "ID": "Boya10127",
@@ -213,7 +239,8 @@
     "Pinyin": "bù yuē ér tóng",
     "Book": "Boya 1",
     "Chapter": "1",
-    "Number": "27"
+    "Number": "27",
+    "周": "3"
   },
   {
     "ID": "Boya10128",
@@ -221,7 +248,8 @@
     "Pinyin": "jīng yà",
     "Book": "Boya 1",
     "Chapter": "1",
-    "Number": "28"
+    "Number": "28",
+    "周": "3"
   },
   {
     "ID": "Boya10129",
@@ -229,7 +257,8 @@
     "Pinyin": "fèi jìn xīn jī",
     "Book": "Boya 1",
     "Chapter": "1",
-    "Number": "29"
+    "Number": "29",
+    "周": "3"
   },
   {
     "ID": "Boya10130",
@@ -237,7 +266,8 @@
     "Pinyin": "tí xiào jiē fēi",
     "Book": "Boya 1",
     "Chapter": "1",
-    "Number": "30"
+    "Number": "30",
+    "周": "3"
   },
   {
     "ID": "Boya10201",
@@ -245,7 +275,8 @@
     "Pinyin": "mìng",
     "Book": "Boya 1",
     "Chapter": "2",
-    "Number": "1"
+    "Number": "1",
+    "周": "5"
   },
   {
     "ID": "Boya10202",
@@ -253,7 +284,8 @@
     "Pinyin": "jué duì",
     "Book": "Boya 1",
     "Chapter": "2",
-    "Number": "2"
+    "Number": "2",
+    "周": "5"
   },
   {
     "ID": "Boya10203",
@@ -261,7 +293,8 @@
     "Pinyin": "huāng dǎo",
     "Book": "Boya 1",
     "Chapter": "2",
-    "Number": "3"
+    "Number": "3",
+    "周": "5"
   },
   {
     "ID": "Boya10204",
@@ -269,7 +302,8 @@
     "Pinyin": "fú hé",
     "Book": "Boya 1",
     "Chapter": "2",
-    "Number": "4"
+    "Number": "4",
+    "周": "5"
   },
   {
     "ID": "Boya10205",
@@ -277,7 +311,8 @@
     "Pinyin": "bú jìn rán",
     "Book": "Boya 1",
     "Chapter": "2",
-    "Number": "5"
+    "Number": "5",
+    "周": "5"
   },
   {
     "ID": "Boya10206",
@@ -285,7 +320,8 @@
     "Pinyin": "róng yù",
     "Book": "Boya 1",
     "Chapter": "2",
-    "Number": "6"
+    "Number": "6",
+    "周": "6"
   },
   {
     "ID": "Boya10207",
@@ -293,7 +329,8 @@
     "Pinyin": "xǐ chū wàng wài",
     "Book": "Boya 1",
     "Chapter": "2",
-    "Number": "7"
+    "Number": "7",
+    "周": "6"
   },
   {
     "ID": "Boya10208",
@@ -301,7 +338,8 @@
     "Pinyin": "kě yù bù kě qiú",
     "Book": "Boya 1",
     "Chapter": "2",
-    "Number": "8"
+    "Number": "8",
+    "周": "6"
   },
   {
     "ID": "Boya10209",
@@ -309,7 +347,8 @@
     "Pinyin": "shǎo zhī yòu shǎo",
     "Book": "Boya 1",
     "Chapter": "2",
-    "Number": "9"
+    "Number": "9",
+    "周": "6"
   },
   {
     "ID": "Boya10210",
@@ -317,7 +356,8 @@
     "Pinyin": "gān měi",
     "Book": "Boya 1",
     "Chapter": "2",
-    "Number": "10"
+    "Number": "10",
+    "周": "6"
   },
   {
     "ID": "Boya10211",
@@ -325,7 +365,8 @@
     "Pinyin": "yì jǔ liǎng dé",
     "Book": "Boya 1",
     "Chapter": "2",
-    "Number": "11"
+    "Number": "11",
+    "周": "6"
   },
   {
     "ID": "Boya10212",
@@ -333,7 +374,8 @@
     "Pinyin": "jìng jiè",
     "Book": "Boya 1",
     "Chapter": "2",
-    "Number": "12"
+    "Number": "12",
+    "周": "6"
   },
   {
     "ID": "Boya10213",
@@ -341,7 +383,8 @@
     "Pinyin": "gāo shàng",
     "Book": "Boya 1",
     "Chapter": "2",
-    "Number": "13"
+    "Number": "13",
+    "周": "6"
   },
   {
     "ID": "Boya10214",
@@ -349,7 +392,8 @@
     "Pinyin": "pǐn xué jiān yōu",
     "Book": "Boya 1",
     "Chapter": "2",
-    "Number": "14"
+    "Number": "14",
+    "周": "6"
   },
   {
     "ID": "Boya10215",
@@ -357,7 +401,8 @@
     "Pinyin": "mó fàn",
     "Book": "Boya 1",
     "Chapter": "2",
-    "Number": "15"
+    "Number": "15",
+    "周": "6"
   },
   {
     "ID": "Boya10216",
@@ -365,7 +410,8 @@
     "Pinyin": "měi zhōng bù zú",
     "Book": "Boya 1",
     "Chapter": "2",
-    "Number": "16"
+    "Number": "16",
+    "周": "6"
   },
   {
     "ID": "Boya10217",
@@ -373,7 +419,8 @@
     "Pinyin": "quē fá",
     "Book": "Boya 1",
     "Chapter": "2",
-    "Number": "17"
+    "Number": "17",
+    "周": "6"
   },
   {
     "ID": "Boya10218",
@@ -381,7 +428,8 @@
     "Pinyin": "yōu mò",
     "Book": "Boya 1",
     "Chapter": "2",
-    "Number": "18"
+    "Number": "18",
+    "周": "6"
   },
   {
     "ID": "Boya10219",
@@ -389,7 +437,8 @@
     "Pinyin": "huó po",
     "Book": "Boya 1",
     "Chapter": "2",
-    "Number": "19"
+    "Number": "19",
+    "周": "6"
   },
   {
     "ID": "Boya10220",
@@ -397,7 +446,8 @@
     "Pinyin": "gǔn xuě qiú",
     "Book": "Boya 1",
     "Chapter": "2",
-    "Number": "20"
+    "Number": "20",
+    "周": "6"
   },
   {
     "ID": "Boya10221",
@@ -405,7 +455,8 @@
     "Pinyin": "huà tí",
     "Book": "Boya 1",
     "Chapter": "2",
-    "Number": "21"
+    "Number": "21",
+    "周": "6"
   },
   {
     "ID": "Boya10222",
@@ -413,7 +464,8 @@
     "Pinyin": "guǎn",
     "Book": "Boya 1",
     "Chapter": "2",
-    "Number": "22"
+    "Number": "22",
+    "周": "6"
   },
   {
     "ID": "Boya10223",
@@ -421,7 +473,8 @@
     "Pinyin": "nán dé",
     "Book": "Boya 1",
     "Chapter": "2",
-    "Number": "23"
+    "Number": "23",
+    "周": "6"
   },
   {
     "ID": "Boya10224",
@@ -429,7 +482,8 @@
     "Pinyin": "jī jí",
     "Book": "Boya 1",
     "Chapter": "2",
-    "Number": "24"
+    "Number": "24",
+    "周": "6"
   },
   {
     "ID": "Boya10225",
@@ -437,7 +491,8 @@
     "Pinyin": "qù wèi",
     "Book": "Boya 1",
     "Chapter": "2",
-    "Number": "25"
+    "Number": "25",
+    "周": "6"
   },
   {
     "ID": "Boya10226",
@@ -445,7 +500,8 @@
     "Pinyin": "zhǎi",
     "Book": "Boya 1",
     "Chapter": "2",
-    "Number": "26"
+    "Number": "26",
+    "周": "6"
   },
   {
     "ID": "Boya10227",
@@ -453,7 +509,8 @@
     "Pinyin": "huáng",
     "Book": "Boya 1",
     "Chapter": "2",
-    "Number": "27"
+    "Number": "27",
+    "周": ""
   },
   {
     "ID": "Boya10228",
@@ -461,7 +518,8 @@
     "Pinyin": "líng tōng",
     "Book": "Boya 1",
     "Chapter": "2",
-    "Number": "28"
+    "Number": "28",
+    "周": ""
   },
   {
     "ID": "Boya10229",
@@ -469,7 +527,8 @@
     "Pinyin": "cāo xīn",
     "Book": "Boya 1",
     "Chapter": "2",
-    "Number": "29"
+    "Number": "29",
+    "周": ""
   },
   {
     "ID": "Boya10230",
@@ -477,7 +536,8 @@
     "Pinyin": "wài háng",
     "Book": "Boya 1",
     "Chapter": "2",
-    "Number": "30"
+    "Number": "30",
+    "周": ""
   },
   {
     "ID": "Boya10231",
@@ -485,7 +545,8 @@
     "Pinyin": "lòu mǎ jiǎo",
     "Book": "Boya 1",
     "Chapter": "2",
-    "Number": "31"
+    "Number": "31",
+    "周": ""
   },
   {
     "ID": "Boya10232",
@@ -493,7 +554,8 @@
     "Pinyin": "qì fēn",
     "Book": "Boya 1",
     "Chapter": "2",
-    "Number": "32"
+    "Number": "32",
+    "周": ""
   },
   {
     "ID": "Boya10233",
@@ -501,7 +563,8 @@
     "Pinyin": "kōng dòng",
     "Book": "Boya 1",
     "Chapter": "2",
-    "Number": "33"
+    "Number": "33",
+    "周": ""
   },
   {
     "ID": "Boya10234",
@@ -509,7 +572,8 @@
     "Pinyin": "chōng shí",
     "Book": "Boya 1",
     "Chapter": "2",
-    "Number": "34"
+    "Number": "34",
+    "周": ""
   },
   {
     "ID": "Boya10235",
@@ -517,7 +581,8 @@
     "Pinyin": "qià qià",
     "Book": "Boya 1",
     "Chapter": "2",
-    "Number": "35"
+    "Number": "35",
+    "周": ""
   },
   {
     "ID": "Boya10236",
@@ -525,7 +590,8 @@
     "Pinyin": "chéng rèn",
     "Book": "Boya 1",
     "Chapter": "2",
-    "Number": "36"
+    "Number": "36",
+    "周": ""
   },
   {
     "ID": "Boya10301",
@@ -533,7 +599,8 @@
     "Pinyin": "yī dài",
     "Book": "Boya 1",
     "Chapter": "3",
-    "Number": "1"
+    "Number": "1",
+    "周": ""
   },
   {
     "ID": "Boya10302",
@@ -541,7 +608,8 @@
     "Pinyin": "gāo lóu lín lì",
     "Book": "Boya 1",
     "Chapter": "3",
-    "Number": "2"
+    "Number": "2",
+    "周": ""
   },
   {
     "ID": "Boya10303",
@@ -549,7 +617,8 @@
     "Pinyin": "chē rú liú shuǐ",
     "Book": "Boya 1",
     "Chapter": "3",
-    "Number": "3"
+    "Number": "3",
+    "周": ""
   },
   {
     "ID": "Boya10304",
@@ -557,7 +626,8 @@
     "Pinyin": "xiǎn",
     "Book": "Boya 1",
     "Chapter": "3",
-    "Number": "4"
+    "Number": "4",
+    "周": ""
   },
   {
     "ID": "Boya10305",
@@ -565,7 +635,8 @@
     "Pinyin": "tòu liàng",
     "Book": "Boya 1",
     "Chapter": "3",
-    "Number": "5"
+    "Number": "5",
+    "周": ""
   },
   {
     "ID": "Boya10306",
@@ -573,7 +644,8 @@
     "Pinyin": "dà lǐ shí",
     "Book": "Boya 1",
     "Chapter": "3",
-    "Number": "6"
+    "Number": "6",
+    "周": ""
   },
   {
     "ID": "Boya10307",
@@ -581,7 +653,8 @@
     "Pinyin": "lín yīn shù",
     "Book": "Boya 1",
     "Chapter": "3",
-    "Number": "7"
+    "Number": "7",
+    "周": ""
   },
   {
     "ID": "Boya10308",
@@ -589,7 +662,8 @@
     "Pinyin": "wǔ guāng shí sè",
     "Book": "Boya 1",
     "Chapter": "3",
-    "Number": "8"
+    "Number": "8",
+    "周": ""
   },
   {
     "ID": "Boya10309",
@@ -597,7 +671,8 @@
     "Pinyin": "cùn tǔ cùn jīn",
     "Book": "Boya 1",
     "Chapter": "3",
-    "Number": "9"
+    "Number": "9",
+    "周": ""
   },
   {
     "ID": "Boya10310",
@@ -605,7 +680,8 @@
     "Pinyin": "sì hū",
     "Book": "Boya 1",
     "Chapter": "3",
-    "Number": "10"
+    "Number": "10",
+    "周": ""
   },
   {
     "ID": "Boya10311",
@@ -613,7 +689,8 @@
     "Pinyin": "xīn shǎng",
     "Book": "Boya 1",
     "Chapter": "3",
-    "Number": "11"
+    "Number": "11",
+    "周": ""
   },
   {
     "ID": "Boya10312",
@@ -621,7 +698,8 @@
     "Pinyin": "hū lüè",
     "Book": "Boya 1",
     "Chapter": "3",
-    "Number": "12"
+    "Number": "12",
+    "周": ""
   },
   {
     "ID": "Boya10313",
@@ -629,7 +707,8 @@
     "Pinyin": "yī shān kào hǎi",
     "Book": "Boya 1",
     "Chapter": "3",
-    "Number": "13"
+    "Number": "13",
+    "周": ""
   },
   {
     "ID": "Boya10314",
@@ -637,7 +716,8 @@
     "Pinyin": "yí zhí",
     "Book": "Boya 1",
     "Chapter": "3",
-    "Number": "14"
+    "Number": "14",
+    "周": ""
   },
   {
     "ID": "Boya10315",
@@ -645,7 +725,8 @@
     "Pinyin": "xiū jiǎn",
     "Book": "Boya 1",
     "Chapter": "3",
-    "Number": "15"
+    "Number": "15",
+    "周": ""
   },
   {
     "ID": "Boya10316",
@@ -653,7 +734,8 @@
     "Pinyin": "nèi dì",
     "Book": "Boya 1",
     "Chapter": "3",
-    "Number": "16"
+    "Number": "16",
+    "周": ""
   },
   {
     "ID": "Boya10317",
@@ -661,7 +743,8 @@
     "Pinyin": "guān shǎng",
     "Book": "Boya 1",
     "Chapter": "3",
-    "Number": "17"
+    "Number": "17",
+    "周": ""
   },
   {
     "ID": "Boya10318",
@@ -669,7 +752,8 @@
     "Pinyin": "fēng kuáng",
     "Book": "Boya 1",
     "Chapter": "3",
-    "Number": "18"
+    "Number": "18",
+    "周": ""
   },
   {
     "ID": "Boya10319",
@@ -677,7 +761,8 @@
     "Pinyin": "guò shān chē",
     "Book": "Boya 1",
     "Chapter": "3",
-    "Number": "19"
+    "Number": "19",
+    "周": ""
   },
   {
     "ID": "Boya10320",
@@ -685,7 +770,8 @@
     "Pinyin": "cì jī",
     "Book": "Boya 1",
     "Chapter": "3",
-    "Number": "20"
+    "Number": "20",
+    "周": ""
   },
   {
     "ID": "Boya10321",
@@ -693,7 +779,8 @@
     "Pinyin": "yūn xuàn",
     "Book": "Boya 1",
     "Chapter": "3",
-    "Number": "21"
+    "Number": "21",
+    "周": ""
   },
   {
     "ID": "Boya10322",
@@ -701,7 +788,8 @@
     "Pinyin": "yóu lè",
     "Book": "Boya 1",
     "Chapter": "3",
-    "Number": "22"
+    "Number": "22",
+    "周": ""
   },
   {
     "ID": "Boya10323",
@@ -709,7 +797,8 @@
     "Pinyin": "shè shī",
     "Book": "Boya 1",
     "Chapter": "3",
-    "Number": "23"
+    "Number": "23",
+    "周": ""
   },
   {
     "ID": "Boya10324",
@@ -717,7 +806,8 @@
     "Pinyin": "wán yìr",
     "Book": "Boya 1",
     "Chapter": "3",
-    "Number": "24"
+    "Number": "24",
+    "周": ""
   },
   {
     "ID": "Boya10325",
@@ -725,7 +815,8 @@
     "Pinyin": "lǐng jiào",
     "Book": "Boya 1",
     "Chapter": "3",
-    "Number": "25"
+    "Number": "25",
+    "周": ""
   },
   {
     "ID": "Boya10326",
@@ -733,7 +824,8 @@
     "Pinyin": "shàng nián jì",
     "Book": "Boya 1",
     "Chapter": "3",
-    "Number": "26"
+    "Number": "26",
+    "周": ""
   },
   {
     "ID": "Boya10327",
@@ -741,7 +833,8 @@
     "Pinyin": "mào xiǎn",
     "Book": "Boya 1",
     "Chapter": "3",
-    "Number": "27"
+    "Number": "27",
+    "周": ""
   },
   {
     "ID": "Boya10328",
@@ -749,7 +842,8 @@
     "Pinyin": "xīng fèn",
     "Book": "Boya 1",
     "Chapter": "3",
-    "Number": "28"
+    "Number": "28",
+    "周": ""
   },
   {
     "ID": "Boya10329",
@@ -757,7 +851,8 @@
     "Pinyin": "shén qíng",
     "Book": "Boya 1",
     "Chapter": "3",
-    "Number": "29"
+    "Number": "29",
+    "周": ""
   },
   {
     "ID": "Boya10330",
@@ -765,7 +860,8 @@
     "Pinyin": "shùn jiān",
     "Book": "Boya 1",
     "Chapter": "3",
-    "Number": "30"
+    "Number": "30",
+    "周": ""
   },
   {
     "ID": "Boya10331",
@@ -773,7 +869,8 @@
     "Pinyin": "jīng hū",
     "Book": "Boya 1",
     "Chapter": "3",
-    "Number": "31"
+    "Number": "31",
+    "周": ""
   },
   {
     "ID": "Boya10332",
@@ -781,7 +878,8 @@
     "Pinyin": "guàng jiē",
     "Book": "Boya 1",
     "Chapter": "3",
-    "Number": "32"
+    "Number": "32",
+    "周": ""
   },
   {
     "ID": "Boya10333",
@@ -789,7 +887,8 @@
     "Pinyin": "sōng bǎi",
     "Book": "Boya 1",
     "Chapter": "3",
-    "Number": "33"
+    "Number": "33",
+    "周": ""
   },
   {
     "ID": "Boya10334",
@@ -797,7 +896,8 @@
     "Pinyin": "dù jià",
     "Book": "Boya 1",
     "Chapter": "3",
-    "Number": "34"
+    "Number": "34",
+    "周": ""
   },
   {
     "ID": "Boya10335",
@@ -805,7 +905,8 @@
     "Pinyin": "shā tān",
     "Book": "Boya 1",
     "Chapter": "3",
-    "Number": "35"
+    "Number": "35",
+    "周": ""
   },
   {
     "ID": "Boya10336",
@@ -813,7 +914,8 @@
     "Pinyin": "jiāo shí",
     "Book": "Boya 1",
     "Chapter": "3",
-    "Number": "36"
+    "Number": "36",
+    "周": ""
   },
   {
     "ID": "Boya10337",
@@ -821,7 +923,8 @@
     "Pinyin": "diǎn zhuì",
     "Book": "Boya 1",
     "Chapter": "3",
-    "Number": "37"
+    "Number": "37",
+    "周": ""
   },
   {
     "ID": "Boya10338",
@@ -829,7 +932,8 @@
     "Pinyin": "xuān xiāo",
     "Book": "Boya 1",
     "Chapter": "3",
-    "Number": "38"
+    "Number": "38",
+    "周": ""
   },
   {
     "ID": "Boya10339",
@@ -837,7 +941,8 @@
     "Pinyin": "jié zòu",
     "Book": "Boya 1",
     "Chapter": "3",
-    "Number": "39"
+    "Number": "39",
+    "周": ""
   },
   {
     "ID": "Boya10340",
@@ -845,7 +950,8 @@
     "Pinyin": "qīn jìn",
     "Book": "Boya 1",
     "Chapter": "3",
-    "Number": "40"
+    "Number": "40",
+    "周": ""
   },
   {
     "ID": "Boya10341",
@@ -853,7 +959,8 @@
     "Pinyin": "piàn kè",
     "Book": "Boya 1",
     "Chapter": "3",
-    "Number": "41"
+    "Number": "41",
+    "周": ""
   },
   {
     "ID": "Boya10342",
@@ -861,7 +968,8 @@
     "Pinyin": "níng jìng",
     "Book": "Boya 1",
     "Chapter": "3",
-    "Number": "42"
+    "Number": "42",
+    "周": ""
   },
   {
     "ID": "Boya10343",
@@ -869,7 +977,8 @@
     "Pinyin": "qīng xián",
     "Book": "Boya 1",
     "Chapter": "3",
-    "Number": "43"
+    "Number": "43",
+    "周": ""
   },
   {
     "ID": "Boya10344",
@@ -877,7 +986,8 @@
     "Pinyin": "sú huà",
     "Book": "Boya 1",
     "Chapter": "3",
-    "Number": "44"
+    "Number": "44",
+    "周": ""
   },
   {
     "ID": "Boya10345",
@@ -885,7 +995,8 @@
     "Pinyin": "gǔ diǎn",
     "Book": "Boya 1",
     "Chapter": "3",
-    "Number": "45"
+    "Number": "45",
+    "周": ""
   },
   {
     "ID": "Boya10346",
@@ -893,7 +1004,8 @@
     "Pinyin": "qiáo mù",
     "Book": "Boya 1",
     "Chapter": "3",
-    "Number": "46"
+    "Number": "46",
+    "周": ""
   },
   {
     "ID": "Boya10347",
@@ -901,7 +1013,8 @@
     "Pinyin": "dā huà",
     "Book": "Boya 1",
     "Chapter": "3",
-    "Number": "47"
+    "Number": "47",
+    "周": ""
   },
   {
     "ID": "Boya20101",
@@ -909,7 +1022,8 @@
     "Pinyin": "zèng yán",
     "Book": "Boya 2",
     "Chapter": "1",
-    "Number": "1"
+    "Number": "1",
+    "周": "1"
   },
   {
     "ID": "Boya20102",
@@ -917,7 +1031,8 @@
     "Pinyin": "zhū wèi",
     "Book": "Boya 2",
     "Chapter": "1",
-    "Number": "2"
+    "Number": "2",
+    "周": "1"
   },
   {
     "ID": "Boya20103",
@@ -925,7 +1040,8 @@
     "Pinyin": "mǔ xiào",
     "Book": "Boya 2",
     "Chapter": "1",
-    "Number": "3"
+    "Number": "3",
+    "周": "1"
   },
   {
     "ID": "Boya20104",
@@ -933,7 +1049,8 @@
     "Pinyin": "ba",
     "Book": "Boya 2",
     "Chapter": "1",
-    "Number": "4"
+    "Number": "4",
+    "周": "1"
   },
   {
     "ID": "Boya20105",
@@ -941,7 +1058,8 @@
     "Pinyin": "pāo qì",
     "Book": "Boya 2",
     "Chapter": "1",
-    "Number": "5"
+    "Number": "5",
+    "周": "1"
   },
   {
     "ID": "Boya20106",
@@ -949,7 +1067,8 @@
     "Pinyin": "xué wèn",
     "Book": "Boya 2",
     "Chapter": "1",
-    "Number": "6"
+    "Number": "6",
+    "周": "1"
   },
   {
     "ID": "Boya20107",
@@ -957,7 +1076,8 @@
     "Pinyin": "gōng kè",
     "Book": "Boya 2",
     "Chapter": "1",
-    "Number": "7"
+    "Number": "7",
+    "周": "1"
   },
   {
     "ID": "Boya20108",
@@ -965,7 +1085,8 @@
     "Pinyin": "wén píng",
     "Book": "Boya 2",
     "Chapter": "1",
-    "Number": "8"
+    "Number": "8",
+    "周": "1"
   },
   {
     "ID": "Boya20109",
@@ -973,7 +1094,8 @@
     "Pinyin": "bù dé yǐ",
     "Book": "Boya 2",
     "Chapter": "1",
-    "Number": "9"
+    "Number": "9",
+    "周": "1"
   },
   {
     "ID": "Boya20110",
@@ -981,7 +1103,8 @@
     "Pinyin": "yī",
     "Book": "Boya 2",
     "Chapter": "1",
-    "Number": "10"
+    "Number": "10",
+    "周": "1"
   },
   {
     "ID": "Boya20111",
@@ -989,7 +1112,8 @@
     "Pinyin": "xīn yuàn",
     "Book": "Boya 2",
     "Chapter": "1",
-    "Number": "11"
+    "Number": "11",
+    "周": "1"
   },
   {
     "ID": "Boya20112",
@@ -997,7 +1121,8 @@
     "Pinyin": "nián fù lì qiáng",
     "Book": "Boya 2",
     "Chapter": "1",
-    "Number": "12"
+    "Number": "12",
+    "周": "1"
   },
   {
     "ID": "Boya20113",
@@ -1005,7 +1130,8 @@
     "Pinyin": "yī qù bù fù fǎn",
     "Book": "Boya 2",
     "Chapter": "1",
-    "Number": "13"
+    "Number": "13",
+    "周": "1"
   },
   {
     "ID": "Boya20114",
@@ -1013,7 +1139,8 @@
     "Pinyin": "shuāi tuì",
     "Book": "Boya 2",
     "Chapter": "1",
-    "Number": "14"
+    "Number": "14",
+    "周": "1"
   },
   {
     "ID": "Boya20115",
@@ -1021,7 +1148,8 @@
     "Pinyin": "gū fù",
     "Book": "Boya 2",
     "Chapter": "1",
-    "Number": "15"
+    "Number": "15",
+    "周": "1"
   },
   {
     "ID": "Boya20116",
@@ -1029,7 +1157,8 @@
     "Pinyin": "táo tài",
     "Book": "Boya 2",
     "Chapter": "1",
-    "Number": "16"
+    "Number": "16",
+    "周": "1"
   },
   {
     "ID": "Boya20117",
@@ -1037,7 +1166,8 @@
     "Pinyin": "bǔ jiù",
     "Book": "Boya 2",
     "Chapter": "1",
-    "Number": "17"
+    "Number": "17",
+    "周": "1"
   },
   {
     "ID": "Boya20118",
@@ -1045,7 +1175,8 @@
     "Pinyin": "kǒng pà",
     "Book": "Boya 2",
     "Chapter": "1",
-    "Number": "18"
+    "Number": "18",
+    "周": "1"
   },
   {
     "ID": "Boya20119",
@@ -1053,7 +1184,8 @@
     "Pinyin": "hòu jìn",
     "Book": "Boya 2",
     "Chapter": "1",
-    "Number": "19"
+    "Number": "19",
+    "周": "1"
   },
   {
     "ID": "Boya20120",
@@ -1061,7 +1193,8 @@
     "Pinyin": "jí xū",
     "Book": "Boya 2",
     "Chapter": "1",
-    "Number": "20"
+    "Number": "20",
+    "周": "2"
   },
   {
     "ID": "Boya20121",
@@ -1069,7 +1202,8 @@
     "Pinyin": "jié yī suō shí",
     "Book": "Boya 2",
     "Chapter": "1",
-    "Number": "21"
+    "Number": "21",
+    "周": "2"
   },
   {
     "ID": "Boya20122",
@@ -1077,7 +1211,8 @@
     "Pinyin": "fǎ zi",
     "Book": "Boya 2",
     "Chapter": "1",
-    "Number": "22"
+    "Number": "22",
+    "周": "2"
   },
   {
     "ID": "Boya20123",
@@ -1085,7 +1220,8 @@
     "Pinyin": "zhì bèi",
     "Book": "Boya 2",
     "Chapter": "1",
-    "Number": "23"
+    "Number": "23",
+    "周": "2"
   },
   {
     "ID": "Boya20124",
@@ -1093,7 +1229,8 @@
     "Pinyin": "yí qì",
     "Book": "Boya 2",
     "Chapter": "1",
-    "Number": "24"
+    "Number": "24",
+    "周": "2"
   },
   {
     "ID": "Boya20125",
@@ -1101,7 +1238,8 @@
     "Pinyin": "zhì yú",
     "Book": "Boya 2",
     "Chapter": "1",
-    "Number": "25"
+    "Number": "25",
+    "周": "2"
   },
   {
     "ID": "Boya20126",
@@ -1109,7 +1247,8 @@
     "Pinyin": "yī shēng",
     "Book": "Boya 2",
     "Chapter": "1",
-    "Number": "26"
+    "Number": "26",
+    "周": "2"
   },
   {
     "ID": "Boya20127",
@@ -1117,7 +1256,8 @@
     "Pinyin": "xué zhě",
     "Book": "Boya 2",
     "Chapter": "1",
-    "Number": "27"
+    "Number": "27",
+    "周": "2"
   },
   {
     "ID": "Boya20128",
@@ -1125,7 +1265,8 @@
     "Pinyin": "xiǎo bào",
     "Book": "Boya 2",
     "Chapter": "1",
-    "Number": "28"
+    "Number": "28",
+    "周": "2"
   },
   {
     "ID": "Boya20129",
@@ -1133,7 +1274,8 @@
     "Pinyin": "guāng yīn",
     "Book": "Boya 2",
     "Chapter": "1",
-    "Number": "29"
+    "Number": "29",
+    "周": "2"
   },
   {
     "ID": "Boya20130",
@@ -1141,7 +1283,8 @@
     "Pinyin": "zé rèn",
     "Book": "Boya 2",
     "Chapter": "1",
-    "Number": "30"
+    "Number": "30",
+    "周": "2"
   },
   {
     "ID": "Boya20131",
@@ -1149,7 +1292,8 @@
     "Pinyin": "zhù zào",
     "Book": "Boya 2",
     "Chapter": "1",
-    "Number": "31"
+    "Number": "31",
+    "周": "2"
   },
   {
     "ID": "Boya20132",
@@ -1157,7 +1301,8 @@
     "Pinyin": "chéng qì",
     "Book": "Boya 2",
     "Chapter": "1",
-    "Number": "32"
+    "Number": "32",
+    "周": "2"
   },
   {
     "ID": "Boya20133",
@@ -1165,7 +1310,8 @@
     "Pinyin": "zhù",
     "Book": "Boya 2",
     "Chapter": "1",
-    "Number": "33"
+    "Number": "33",
+    "周": "2"
   },
   {
     "ID": "Boya20134",
@@ -1173,7 +1319,8 @@
     "Pinyin": "huǐ",
     "Book": "Boya 2",
     "Chapter": "1",
-    "Number": "34"
+    "Number": "34",
+    "周": "2"
   },
   {
     "ID": "Boya20135",
@@ -1181,7 +1328,8 @@
     "Pinyin": "zài huì",
     "Book": "Boya 2",
     "Chapter": "1",
-    "Number": "35"
+    "Number": "35",
+    "周": "2"
   },
   {
     "ID": "Boya20136",
@@ -1189,7 +1337,8 @@
     "Pinyin": "yǎn zhēng zhēng",
     "Book": "Boya 2",
     "Chapter": "1",
-    "Number": "36"
+    "Number": "36",
+    "周": "2"
   },
   {
     "ID": "Boya20201",
@@ -1197,7 +1346,8 @@
     "Pinyin": "bìng fēi",
     "Book": "Boya 2",
     "Chapter": "2",
-    "Number": "1"
+    "Number": "1",
+    "周": "3"
   },
   {
     "ID": "Boya20202",
@@ -1205,7 +1355,8 @@
     "Pinyin": "tài rán chǔ zhī",
     "Book": "Boya 2",
     "Chapter": "2",
-    "Number": "2"
+    "Number": "2",
+    "周": "3"
   },
   {
     "ID": "Boya20203",
@@ -1213,7 +1364,8 @@
     "Pinyin": "nèi xīn",
     "Book": "Boya 2",
     "Chapter": "2",
-    "Number": "3"
+    "Number": "3",
+    "周": "3"
   },
   {
     "ID": "Boya20204",
@@ -1221,7 +1373,8 @@
     "Pinyin": "kǒng jù",
     "Book": "Boya 2",
     "Chapter": "2",
-    "Number": "4"
+    "Number": "4",
+    "周": "3"
   },
   {
     "ID": "Boya20205",
@@ -1229,7 +1382,8 @@
     "Pinyin": "bēn téng",
     "Book": "Boya 2",
     "Chapter": "2",
-    "Number": "5"
+    "Number": "5",
+    "周": "3"
   },
   {
     "ID": "Boya20206",
@@ -1237,7 +1391,8 @@
     "Pinyin": "fù gài",
     "Book": "Boya 2",
     "Chapter": "2",
-    "Number": "6"
+    "Number": "6",
+    "周": "3"
   },
   {
     "ID": "Boya20207",
@@ -1245,7 +1400,8 @@
     "Pinyin": "dān bó",
     "Book": "Boya 2",
     "Chapter": "2",
-    "Number": "7"
+    "Number": "7",
+    "周": "3"
   },
   {
     "ID": "Boya20208",
@@ -1253,7 +1409,8 @@
     "Pinyin": "shēn yǐng",
     "Book": "Boya 2",
     "Chapter": "2",
-    "Number": "8"
+    "Number": "8",
+    "周": "3"
   },
   {
     "ID": "Boya20209",
@@ -1261,7 +1418,8 @@
     "Pinyin": "xīn si",
     "Book": "Boya 2",
     "Chapter": "2",
-    "Number": "9"
+    "Number": "9",
+    "周": "3"
   },
   {
     "ID": "Boya20210",
@@ -1269,7 +1427,8 @@
     "Pinyin": "tūn shì",
     "Book": "Boya 2",
     "Chapter": "2",
-    "Number": "10"
+    "Number": "10",
+    "周": "3"
   },
   {
     "ID": "Boya20211",
@@ -1277,7 +1436,8 @@
     "Pinyin": "shù shǒu wú cè",
     "Book": "Boya 2",
     "Chapter": "2",
-    "Number": "11"
+    "Number": "11",
+    "周": "3"
   },
   {
     "ID": "Boya20212",
@@ -1285,7 +1445,8 @@
     "Pinyin": "zhì xī",
     "Book": "Boya 2",
     "Chapter": "2",
-    "Number": "12"
+    "Number": "12",
+    "周": "3"
   },
   {
     "ID": "Boya20213",
@@ -1293,7 +1454,8 @@
     "Pinyin": "shēn zhòng",
     "Book": "Boya 2",
     "Chapter": "2",
-    "Number": "13"
+    "Number": "13",
+    "周": "3"
   },
   {
     "ID": "Boya20214",
@@ -1301,7 +1463,8 @@
     "Pinyin": "gū dú",
     "Book": "Boya 2",
     "Chapter": "2",
-    "Number": "14"
+    "Number": "14",
+    "周": "3"
   },
   {
     "ID": "Boya20215",
@@ -1309,7 +1472,8 @@
     "Pinyin": "shǎn shuò",
     "Book": "Boya 2",
     "Chapter": "2",
-    "Number": "15"
+    "Number": "15",
+    "周": "3"
   },
   {
     "ID": "Boya20216",
@@ -1317,7 +1481,8 @@
     "Pinyin": "qǐ pàn",
     "Book": "Boya 2",
     "Chapter": "2",
-    "Number": "16"
+    "Number": "16",
+    "周": "3"
   },
   {
     "ID": "Boya20217",
@@ -1325,7 +1490,8 @@
     "Pinyin": "xìn niàn",
     "Book": "Boya 2",
     "Chapter": "2",
-    "Number": "17"
+    "Number": "17",
+    "周": "3"
   },
   {
     "ID": "Boya20218",
@@ -1333,7 +1499,8 @@
     "Pinyin": "ǒu rán",
     "Book": "Boya 2",
     "Chapter": "2",
-    "Number": "18"
+    "Number": "18",
+    "周": "5"
   },
   {
     "ID": "Boya20219",
@@ -1341,7 +1508,8 @@
     "Pinyin": "biàn gù",
     "Book": "Boya 2",
     "Chapter": "2",
-    "Number": "19"
+    "Number": "19",
+    "周": "5"
   },
   {
     "ID": "Boya20220",
@@ -1349,7 +1517,8 @@
     "Pinyin": "cù rán",
     "Book": "Boya 2",
     "Chapter": "2",
-    "Number": "20"
+    "Number": "20",
+    "周": "5"
   },
   {
     "ID": "Boya20221",
@@ -1357,7 +1526,8 @@
     "Pinyin": "qiān guà",
     "Book": "Boya 2",
     "Chapter": "2",
-    "Number": "21"
+    "Number": "21",
+    "周": "5"
   },
   {
     "ID": "Boya20222",
@@ -1365,7 +1535,8 @@
     "Pinyin": "xià zàng",
     "Book": "Boya 2",
     "Chapter": "2",
-    "Number": "22"
+    "Number": "22",
+    "周": "5"
   },
   {
     "ID": "Boya20223",
@@ -1373,7 +1544,8 @@
     "Pinyin": "kū qì",
     "Book": "Boya 2",
     "Chapter": "2",
-    "Number": "23"
+    "Number": "23",
+    "周": "5"
   },
   {
     "ID": "Boya20224",
@@ -1381,7 +1553,8 @@
     "Pinyin": "zhěng zhěng",
     "Book": "Boya 2",
     "Chapter": "2",
-    "Number": "24"
+    "Number": "24",
+    "周": "5"
   },
   {
     "ID": "Boya20225",
@@ -1389,7 +1562,8 @@
     "Pinyin": "lǎn de",
     "Book": "Boya 2",
     "Chapter": "2",
-    "Number": "25"
+    "Number": "25",
+    "周": "5"
   },
   {
     "ID": "Boya20226",
@@ -1397,7 +1571,8 @@
     "Pinyin": "pò jiù",
     "Book": "Boya 2",
     "Chapter": "2",
-    "Number": "26"
+    "Number": "26",
+    "周": "5"
   },
   {
     "ID": "Boya20227",
@@ -1405,7 +1580,8 @@
     "Pinyin": "cāng lǎo",
     "Book": "Boya 2",
     "Chapter": "2",
-    "Number": "27"
+    "Number": "27",
+    "周": "5"
   },
   {
     "ID": "Boya20228",
@@ -1413,7 +1589,8 @@
     "Pinyin": "àn dàn",
     "Book": "Boya 2",
     "Chapter": "2",
-    "Number": "28"
+    "Number": "28",
+    "周": "5"
   },
   {
     "ID": "Boya20229",
@@ -1421,7 +1598,8 @@
     "Pinyin": "ái",
     "Book": "Boya 2",
     "Chapter": "2",
-    "Number": "29"
+    "Number": "29",
+    "周": "5"
   },
   {
     "ID": "Boya20230",
@@ -1429,7 +1607,8 @@
     "Pinyin": "duàn duàn xù xù",
     "Book": "Boya 2",
     "Chapter": "2",
-    "Number": "30"
+    "Number": "30",
+    "周": "5"
   },
   {
     "ID": "Boya20231",
@@ -1437,7 +1616,8 @@
     "Pinyin": "qù shì",
     "Book": "Boya 2",
     "Chapter": "2",
-    "Number": "31"
+    "Number": "31",
+    "周": "5"
   },
   {
     "ID": "Boya20232",
@@ -1445,7 +1625,8 @@
     "Pinyin": "jì rì",
     "Book": "Boya 2",
     "Chapter": "2",
-    "Number": "32"
+    "Number": "32",
+    "周": "5"
   },
   {
     "ID": "Boya20233",
@@ -1453,7 +1634,8 @@
     "Pinyin": "zhào jí",
     "Book": "Boya 2",
     "Chapter": "2",
-    "Number": "33"
+    "Number": "33",
+    "周": "5"
   },
   {
     "ID": "Boya20234",
@@ -1461,7 +1643,8 @@
     "Pinyin": "cóng wèi",
     "Book": "Boya 2",
     "Chapter": "2",
-    "Number": "34"
+    "Number": "34",
+    "周": "5"
   },
   {
     "ID": "Boya20235",
@@ -1469,7 +1652,8 @@
     "Pinyin": "cóng róng",
     "Book": "Boya 2",
     "Chapter": "2",
-    "Number": "35"
+    "Number": "35",
+    "周": "5"
   },
   {
     "ID": "Boya20236",
@@ -1477,7 +1661,8 @@
     "Pinyin": "yīn jiān",
     "Book": "Boya 2",
     "Chapter": "2",
-    "Number": "36"
+    "Number": "36",
+    "周": "5"
   },
   {
     "ID": "Boya20237",
@@ -1485,7 +1670,8 @@
     "Pinyin": "zhào yào",
     "Book": "Boya 2",
     "Chapter": "2",
-    "Number": "37"
+    "Number": "37",
+    "周": "5"
   },
   {
     "ID": "Boya20238",
@@ -1493,7 +1679,8 @@
     "Pinyin": "kè",
     "Book": "Boya 2",
     "Chapter": "2",
-    "Number": "38"
+    "Number": "38",
+    "周": "5"
   },
   {
     "ID": "Boya20239",
@@ -1501,7 +1688,8 @@
     "Pinyin": "lián ài",
     "Book": "Boya 2",
     "Chapter": "2",
-    "Number": "39"
+    "Number": "39",
+    "周": "5"
   },
   {
     "ID": "Boya20240",
@@ -1509,7 +1697,8 @@
     "Pinyin": "tiān táng",
     "Book": "Boya 2",
     "Chapter": "2",
-    "Number": "40"
+    "Number": "40",
+    "周": "5"
   },
   {
     "ID": "Boya20241",
@@ -1517,7 +1706,8 @@
     "Pinyin": "ér hòu",
     "Book": "Boya 2",
     "Chapter": "2",
-    "Number": "41"
+    "Number": "41",
+    "周": "5"
   },
   {
     "ID": "Boya20242",
@@ -1525,7 +1715,8 @@
     "Pinyin": "yǎn",
     "Book": "Boya 2",
     "Chapter": "2",
-    "Number": "42"
+    "Number": "42",
+    "周": "5"
   },
   {
     "ID": "Boya20243",
@@ -1533,7 +1724,8 @@
     "Pinyin": "qīn qíng",
     "Book": "Boya 2",
     "Chapter": "2",
-    "Number": "43"
+    "Number": "43",
+    "周": "5"
   },
   {
     "ID": "Boya20244",
@@ -1541,7 +1733,8 @@
     "Pinyin": "rén jiān",
     "Book": "Boya 2",
     "Chapter": "2",
-    "Number": "44"
+    "Number": "44",
+    "周": "5"
   },
   {
     "ID": "Boya20245",
@@ -1549,7 +1742,8 @@
     "Pinyin": "yí hàn",
     "Book": "Boya 2",
     "Chapter": "2",
-    "Number": "45"
+    "Number": "45",
+    "周": "5"
   },
   {
     "ID": "Boya20246",
@@ -1557,7 +1751,8 @@
     "Pinyin": "wǎng hòu",
     "Book": "Boya 2",
     "Chapter": "2",
-    "Number": "46"
+    "Number": "46",
+    "周": "6"
   },
   {
     "ID": "Boya20247",
@@ -1565,7 +1760,8 @@
     "Pinyin": "yī jiù",
     "Book": "Boya 2",
     "Chapter": "2",
-    "Number": "47"
+    "Number": "47",
+    "周": "6"
   },
   {
     "ID": "Boya20248",
@@ -1573,7 +1769,8 @@
     "Pinyin": "zé wèn",
     "Book": "Boya 2",
     "Chapter": "2",
-    "Number": "48"
+    "Number": "48",
+    "周": "6"
   },
   {
     "ID": "Boya20249",
@@ -1581,7 +1778,8 @@
     "Pinyin": "diǎn rán",
     "Book": "Boya 2",
     "Chapter": "2",
-    "Number": "49"
+    "Number": "49",
+    "周": "6"
   },
   {
     "ID": "Boya20250",
@@ -1589,7 +1787,8 @@
     "Pinyin": "kāi xīn",
     "Book": "Boya 2",
     "Chapter": "2",
-    "Number": "50"
+    "Number": "50",
+    "周": "6"
   },
   {
     "ID": "Boya20251",
@@ -1597,7 +1796,8 @@
     "Pinyin": "xíng zǒu",
     "Book": "Boya 2",
     "Chapter": "2",
-    "Number": "51"
+    "Number": "51",
+    "周": "6"
   },
   {
     "ID": "Boya20252",
@@ -1605,7 +1805,8 @@
     "Pinyin": "gǎn shòu",
     "Book": "Boya 2",
     "Chapter": "2",
-    "Number": "52"
+    "Number": "52",
+    "周": "6"
   },
   {
     "ID": "Boya20253",
@@ -1613,7 +1814,8 @@
     "Pinyin": "guāng máng",
     "Book": "Boya 2",
     "Chapter": "2",
-    "Number": "53"
+    "Number": "53",
+    "周": "6"
   },
   {
     "ID": "Boya20254",
@@ -1621,7 +1823,8 @@
     "Pinyin": "gè zì",
     "Book": "Boya 2",
     "Chapter": "2",
-    "Number": "54"
+    "Number": "54",
+    "周": "6"
   },
   {
     "ID": "Boya20255",
@@ -1629,7 +1832,8 @@
     "Pinyin": "jiān fù",
     "Book": "Boya 2",
     "Chapter": "2",
-    "Number": "55"
+    "Number": "55",
+    "周": "6"
   },
   {
     "ID": "Boya20256",
@@ -1637,7 +1841,8 @@
     "Pinyin": "měng rán",
     "Book": "Boya 2",
     "Chapter": "2",
-    "Number": "56"
+    "Number": "56",
+    "周": "6"
   },
   {
     "ID": "Boya20257",
@@ -1645,7 +1850,8 @@
     "Pinyin": "xǐng wù",
     "Book": "Boya 2",
     "Chapter": "2",
-    "Number": "57"
+    "Number": "57",
+    "周": "6"
   },
   {
     "ID": "Boya20258",
@@ -1653,7 +1859,8 @@
     "Pinyin": "kě wàng",
     "Book": "Boya 2",
     "Chapter": "2",
-    "Number": "58"
+    "Number": "58",
+    "周": "6"
   },
   {
     "ID": "Boya20259",
@@ -1661,7 +1868,8 @@
     "Pinyin": "suì yuè",
     "Book": "Boya 2",
     "Chapter": "2",
-    "Number": "59"
+    "Number": "59",
+    "周": "6"
   },
   {
     "ID": "Boya20260",
@@ -1669,7 +1877,8 @@
     "Pinyin": "páng huáng",
     "Book": "Boya 2",
     "Chapter": "2",
-    "Number": "60"
+    "Number": "60",
+    "周": "6"
   },
   {
     "ID": "Boya20261",
@@ -1677,7 +1886,8 @@
     "Pinyin": "chí chú",
     "Book": "Boya 2",
     "Chapter": "2",
-    "Number": "61"
+    "Number": "61",
+    "周": "6"
   },
   {
     "ID": "Boya20262",
@@ -1685,7 +1895,8 @@
     "Pinyin": "xīn líng",
     "Book": "Boya 2",
     "Chapter": "2",
-    "Number": "62"
+    "Number": "62",
+    "周": "6"
   },
   {
     "ID": "Boya20263",
@@ -1693,7 +1904,8 @@
     "Pinyin": "jué wàng",
     "Book": "Boya 2",
     "Chapter": "2",
-    "Number": "63"
+    "Number": "63",
+    "周": "6"
   },
   {
     "ID": "Boya20301",
@@ -1701,7 +1913,8 @@
     "Pinyin": "cù",
     "Book": "Boya 2",
     "Chapter": "3",
-    "Number": "1"
+    "Number": "1",
+    "周": ""
   },
   {
     "ID": "Boya20302",
@@ -1709,7 +1922,8 @@
     "Pinyin": "xǐ",
     "Book": "Boya 2",
     "Chapter": "3",
-    "Number": "2"
+    "Number": "2",
+    "周": ""
   },
   {
     "ID": "Boya20303",
@@ -1717,7 +1931,8 @@
     "Pinyin": "jiā yù hù xiǎo",
     "Book": "Boya 2",
     "Chapter": "3",
-    "Number": "3"
+    "Number": "3",
+    "周": ""
   },
   {
     "ID": "Boya20304",
@@ -1725,7 +1940,8 @@
     "Pinyin": "guì zú",
     "Book": "Boya 2",
     "Chapter": "3",
-    "Number": "4"
+    "Number": "4",
+    "周": ""
   },
   {
     "ID": "Boya20305",
@@ -1733,7 +1949,8 @@
     "Pinyin": "cài yáo",
     "Book": "Boya 2",
     "Chapter": "3",
-    "Number": "5"
+    "Number": "5",
+    "周": ""
   },
   {
     "ID": "Boya20306",
@@ -1741,7 +1958,8 @@
     "Pinyin": "měi shí",
     "Book": "Boya 2",
     "Chapter": "3",
-    "Number": "6"
+    "Number": "6",
+    "周": ""
   },
   {
     "ID": "Boya20307",
@@ -1749,7 +1967,8 @@
     "Pinyin": "gāo diǎn",
     "Book": "Boya 2",
     "Chapter": "3",
-    "Number": "7"
+    "Number": "7",
+    "周": ""
   },
   {
     "ID": "Boya20308",
@@ -1757,7 +1976,8 @@
     "Pinyin": "bǎi xìng",
     "Book": "Boya 2",
     "Chapter": "3",
-    "Number": "8"
+    "Number": "8",
+    "周": ""
   },
   {
     "ID": "Boya20309",
@@ -1765,7 +1985,8 @@
     "Pinyin": "piān ài",
     "Book": "Boya 2",
     "Chapter": "3",
-    "Number": "9"
+    "Number": "9",
+    "周": ""
   },
   {
     "ID": "Boya20310",
@@ -1773,7 +1994,8 @@
     "Pinyin": "měi wèi",
     "Book": "Boya 2",
     "Chapter": "3",
-    "Number": "10"
+    "Number": "10",
+    "周": ""
   },
   {
     "ID": "Boya20311",
@@ -1781,7 +2003,8 @@
     "Pinyin": "jiǔ zú fàn bǎo",
     "Book": "Boya 2",
     "Chapter": "3",
-    "Number": "11"
+    "Number": "11",
+    "周": ""
   },
   {
     "ID": "Boya20312",
@@ -1789,7 +2012,8 @@
     "Pinyin": "jiā yáo",
     "Book": "Boya 2",
     "Chapter": "3",
-    "Number": "12"
+    "Number": "12",
+    "周": ""
   },
   {
     "ID": "Boya20313",
@@ -1797,7 +2021,8 @@
     "Pinyin": "jì huì",
     "Book": "Boya 2",
     "Chapter": "3",
-    "Number": "13"
+    "Number": "13",
+    "周": ""
   },
   {
     "ID": "Boya20314",
@@ -1805,7 +2030,8 @@
     "Pinyin": "chōng dàn",
     "Book": "Boya 2",
     "Chapter": "3",
-    "Number": "14"
+    "Number": "14",
+    "周": ""
   },
   {
     "ID": "Boya20315",
@@ -1813,7 +2039,8 @@
     "Pinyin": "zuì kuí huò shǒu",
     "Book": "Boya 2",
     "Chapter": "3",
-    "Number": "15"
+    "Number": "15",
+    "周": ""
   },
   {
     "ID": "Boya20316",
@@ -1821,7 +2048,8 @@
     "Pinyin": "miàn zi",
     "Book": "Boya 2",
     "Chapter": "3",
-    "Number": "16"
+    "Number": "16",
+    "周": ""
   },
   {
     "ID": "Boya20317",
@@ -1829,7 +2057,8 @@
     "Pinyin": "pái chǎng",
     "Book": "Boya 2",
     "Chapter": "3",
-    "Number": "17"
+    "Number": "17",
+    "周": ""
   },
   {
     "ID": "Boya20318",
@@ -1837,7 +2066,8 @@
     "Pinyin": "shì hào",
     "Book": "Boya 2",
     "Chapter": "3",
-    "Number": "18"
+    "Number": "18",
+    "周": ""
   },
   {
     "ID": "Boya20319",
@@ -1845,7 +2075,8 @@
     "Pinyin": "dùn",
     "Book": "Boya 2",
     "Chapter": "3",
-    "Number": "19"
+    "Number": "19",
+    "周": ""
   },
   {
     "ID": "Boya20320",
@@ -1853,7 +2084,8 @@
     "Pinyin": "dǐ céng",
     "Book": "Boya 2",
     "Chapter": "3",
-    "Number": "20"
+    "Number": "20",
+    "周": ""
   },
   {
     "ID": "Boya20321",
@@ -1861,7 +2093,8 @@
     "Pinyin": "kǔ lì",
     "Book": "Boya 2",
     "Chapter": "3",
-    "Number": "21"
+    "Number": "21",
+    "周": ""
   },
   {
     "ID": "Boya20322",
@@ -1869,7 +2102,8 @@
     "Pinyin": "yáng chē",
     "Book": "Boya 2",
     "Chapter": "3",
-    "Number": "22"
+    "Number": "22",
+    "周": ""
   },
   {
     "ID": "Boya20323",
@@ -1877,7 +2111,8 @@
     "Pinyin": "jiǎo fū",
     "Book": "Boya 2",
     "Chapter": "3",
-    "Number": "23"
+    "Number": "23",
+    "周": ""
   },
   {
     "ID": "Boya20324",
@@ -1885,7 +2120,8 @@
     "Pinyin": "yóu",
     "Book": "Boya 2",
     "Chapter": "3",
-    "Number": "24"
+    "Number": "24",
+    "周": ""
   },
   {
     "ID": "Boya20325",
@@ -1893,7 +2129,8 @@
     "Pinyin": "wō tóu",
     "Book": "Boya 2",
     "Chapter": "3",
-    "Number": "25"
+    "Number": "25",
+    "周": ""
   },
   {
     "ID": "Boya20326",
@@ -1901,7 +2138,8 @@
     "Pinyin": "dié",
     "Book": "Boya 2",
     "Chapter": "3",
-    "Number": "26"
+    "Number": "26",
+    "周": ""
   },
   {
     "ID": "Boya20327",
@@ -1909,7 +2147,8 @@
     "Pinyin": "xián cài",
     "Book": "Boya 2",
     "Chapter": "3",
-    "Number": "27"
+    "Number": "27",
+    "周": ""
   },
   {
     "ID": "Boya20328",
@@ -1917,7 +2156,8 @@
     "Pinyin": "jīn jīn yǒu wèi",
     "Book": "Boya 2",
     "Chapter": "3",
-    "Number": "28"
+    "Number": "28",
+    "周": ""
   },
   {
     "ID": "Boya20329",
@@ -1925,7 +2165,8 @@
     "Pinyin": "wài dài",
     "Book": "Boya 2",
     "Chapter": "3",
-    "Number": "29"
+    "Number": "29",
+    "周": ""
   },
   {
     "ID": "Boya20330",
@@ -1933,7 +2174,8 @@
     "Pinyin": "huǒ shao",
     "Book": "Boya 2",
     "Chapter": "3",
-    "Number": "30"
+    "Number": "30",
+    "周": ""
   },
   {
     "ID": "Boya20331",
@@ -1941,7 +2183,8 @@
     "Pinyin": "pǐn cháng",
     "Book": "Boya 2",
     "Chapter": "3",
-    "Number": "31"
+    "Number": "31",
+    "周": ""
   },
   {
     "ID": "Boya20332",
@@ -1949,7 +2192,8 @@
     "Pinyin": "gān shuǐ",
     "Book": "Boya 2",
     "Chapter": "3",
-    "Number": "32"
+    "Number": "32",
+    "周": ""
   },
   {
     "ID": "Boya20333",
@@ -1957,7 +2201,8 @@
     "Pinyin": "lè cǐ bù pí",
     "Book": "Boya 2",
     "Chapter": "3",
-    "Number": "33"
+    "Number": "33",
+    "周": ""
   },
   {
     "ID": "Boya20334",
@@ -1965,7 +2210,8 @@
     "Pinyin": "shàng yǐn",
     "Book": "Boya 2",
     "Chapter": "3",
-    "Number": "34"
+    "Number": "34",
+    "周": ""
   },
   {
     "ID": "Boya20335",
@@ -1973,7 +2219,8 @@
     "Pinyin": "gè sè",
     "Book": "Boya 2",
     "Chapter": "3",
-    "Number": "35"
+    "Number": "35",
+    "周": ""
   },
   {
     "ID": "Boya20336",
@@ -1981,7 +2228,8 @@
     "Pinyin": "yě xìng",
     "Book": "Boya 2",
     "Chapter": "3",
-    "Number": "36"
+    "Number": "36",
+    "周": ""
   },
   {
     "ID": "Boya20337",
@@ -1989,7 +2237,8 @@
     "Pinyin": "huǒ bào",
     "Book": "Boya 2",
     "Chapter": "3",
-    "Number": "37"
+    "Number": "37",
+    "周": ""
   },
   {
     "ID": "Boya20338",
@@ -1997,7 +2246,8 @@
     "Pinyin": "pō la",
     "Book": "Boya 2",
     "Chapter": "3",
-    "Number": "38"
+    "Number": "38",
+    "周": ""
   },
   {
     "ID": "Boya20339",
@@ -2005,7 +2255,8 @@
     "Pinyin": "qīng dàn",
     "Book": "Boya 2",
     "Chapter": "3",
-    "Number": "39"
+    "Number": "39",
+    "周": ""
   },
   {
     "ID": "Boya20340",
@@ -2013,7 +2264,8 @@
     "Pinyin": "wēn wén ěr yǎ",
     "Book": "Boya 2",
     "Chapter": "3",
-    "Number": "40"
+    "Number": "40",
+    "周": ""
   },
   {
     "ID": "Boya20341",
@@ -2021,7 +2273,8 @@
     "Pinyin": "dú jù tè sè",
     "Book": "Boya 2",
     "Chapter": "3",
-    "Number": "41"
+    "Number": "41",
+    "周": ""
   },
   {
     "ID": "Boya20342",
@@ -2029,7 +2282,8 @@
     "Pinyin": "cài xì",
     "Book": "Boya 2",
     "Chapter": "3",
-    "Number": "42"
+    "Number": "42",
+    "周": ""
   },
   {
     "ID": "Boya20343",
@@ -2037,7 +2291,8 @@
     "Pinyin": "gài kuò",
     "Book": "Boya 2",
     "Chapter": "3",
-    "Number": "43"
+    "Number": "43",
+    "周": ""
   },
   {
     "ID": "Boya20344",
@@ -2045,7 +2300,8 @@
     "Pinyin": "yí mín",
     "Book": "Boya 2",
     "Chapter": "3",
-    "Number": "44"
+    "Number": "44",
+    "周": ""
   },
   {
     "ID": "Boya20345",
@@ -2053,7 +2309,8 @@
     "Pinyin": "wǔ hú sì hǎi",
     "Book": "Boya 2",
     "Chapter": "3",
-    "Number": "45"
+    "Number": "45",
+    "周": ""
   },
   {
     "ID": "Boya20346",
@@ -2061,7 +2318,8 @@
     "Pinyin": "yuǎn gǔ",
     "Book": "Boya 2",
     "Chapter": "3",
-    "Number": "46"
+    "Number": "46",
+    "周": ""
   },
   {
     "ID": "Boya20347",
@@ -2069,7 +2327,8 @@
     "Pinyin": "fán yǎn",
     "Book": "Boya 2",
     "Chapter": "3",
-    "Number": "47"
+    "Number": "47",
+    "周": ""
   },
   {
     "ID": "Boya20348",
@@ -2077,7 +2336,8 @@
     "Pinyin": "shēng xī",
     "Book": "Boya 2",
     "Chapter": "3",
-    "Number": "48"
+    "Number": "48",
+    "周": ""
   },
   {
     "ID": "Boya20349",
@@ -2085,7 +2345,8 @@
     "Pinyin": "jiāo huì",
     "Book": "Boya 2",
     "Chapter": "3",
-    "Number": "49"
+    "Number": "49",
+    "周": ""
   },
   {
     "ID": "Boya20350",
@@ -2093,7 +2354,8 @@
     "Pinyin": "róng hé",
     "Book": "Boya 2",
     "Chapter": "3",
-    "Number": "50"
+    "Number": "50",
+    "周": ""
   },
   {
     "ID": "Boya20351",
@@ -2101,7 +2363,8 @@
     "Pinyin": "yī rán",
     "Book": "Boya 2",
     "Chapter": "3",
-    "Number": "51"
+    "Number": "51",
+    "周": ""
   },
   {
     "ID": "Boya20352",
@@ -2109,7 +2372,8 @@
     "Pinyin": "huó lì",
     "Book": "Boya 2",
     "Chapter": "3",
-    "Number": "52"
+    "Number": "52",
+    "周": ""
   },
   {
     "ID": "Boya20353",
@@ -2117,7 +2381,8 @@
     "Pinyin": "róng huì",
     "Book": "Boya 2",
     "Chapter": "3",
-    "Number": "53"
+    "Number": "53",
+    "周": ""
   },
   {
     "ID": "Boya20354",
@@ -2125,7 +2390,8 @@
     "Pinyin": "quē hàn",
     "Book": "Boya 2",
     "Chapter": "3",
-    "Number": "54"
+    "Number": "54",
+    "周": ""
   },
   {
     "ID": "Boya20355",
@@ -2133,7 +2399,8 @@
     "Pinyin": "róng lú",
     "Book": "Boya 2",
     "Chapter": "3",
-    "Number": "55"
+    "Number": "55",
+    "周": ""
   },
   {
     "ID": "Boya20356",
@@ -2141,7 +2408,8 @@
     "Pinyin": "róng huà",
     "Book": "Boya 2",
     "Chapter": "3",
-    "Number": "56"
+    "Number": "56",
+    "周": ""
   },
   {
     "ID": "Boya20357",
@@ -2149,7 +2417,8 @@
     "Pinyin": "dǐ yùn",
     "Book": "Boya 2",
     "Chapter": "3",
-    "Number": "57"
+    "Number": "57",
+    "周": ""
   },
   {
     "ID": "Boya20358",
@@ -2157,7 +2426,8 @@
     "Pinyin": "lè bù sī shǔ",
     "Book": "Boya 2",
     "Chapter": "3",
-    "Number": "58"
+    "Number": "58",
+    "周": ""
   },
   {
     "ID": "Boya20359",
@@ -2165,7 +2435,8 @@
     "Pinyin": "liú lián wàng fǎn",
     "Book": "Boya 2",
     "Chapter": "3",
-    "Number": "59"
+    "Number": "59",
+    "周": ""
   },
   {
     "ID": "Boya20360",
@@ -2173,7 +2444,8 @@
     "Pinyin": "kǒu yīn",
     "Book": "Boya 2",
     "Chapter": "3",
-    "Number": "60"
+    "Number": "60",
+    "周": ""
   },
   {
     "ID": "Boya20361",
@@ -2181,7 +2453,8 @@
     "Pinyin": "bù zhī bù jué",
     "Book": "Boya 2",
     "Chapter": "3",
-    "Number": "61"
+    "Number": "61",
+    "周": ""
   },
   {
     "ID": "Boya20362",
@@ -2189,7 +2462,8 @@
     "Pinyin": "gòu zhù",
     "Book": "Boya 2",
     "Chapter": "3",
-    "Number": "62"
+    "Number": "62",
+    "周": ""
   },
   {
     "ID": "Boya20363",
@@ -2197,7 +2471,8 @@
     "Pinyin": "nóng zhòng",
     "Book": "Boya 2",
     "Chapter": "3",
-    "Number": "63"
+    "Number": "63",
+    "周": ""
   },
   {
     "ID": "Boya20364",
@@ -2205,7 +2480,8 @@
     "Pinyin": "shēng měng",
     "Book": "Boya 2",
     "Chapter": "3",
-    "Number": "64"
+    "Number": "64",
+    "周": ""
   },
   {
     "ID": "Boya20365",
@@ -2213,7 +2489,8 @@
     "Pinyin": "fēng xíng yī shí",
     "Book": "Boya 2",
     "Chapter": "3",
-    "Number": "65"
+    "Number": "65",
+    "周": ""
   },
   {
     "ID": "Boya20366",
@@ -2221,7 +2498,8 @@
     "Pinyin": "yǐn shí",
     "Book": "Boya 2",
     "Chapter": "3",
-    "Number": "66"
+    "Number": "66",
+    "周": ""
   },
   {
     "ID": "Boya20367",
@@ -2229,7 +2507,8 @@
     "Pinyin": "fēng wèi",
     "Book": "Boya 2",
     "Chapter": "3",
-    "Number": "67"
+    "Number": "67",
+    "周": ""
   },
   {
     "ID": "Boya20368",
@@ -2237,7 +2516,8 @@
     "Pinyin": "jiān róng",
     "Book": "Boya 2",
     "Chapter": "3",
-    "Number": "68"
+    "Number": "68",
+    "周": ""
   },
   {
     "ID": "Boya20369",
@@ -2245,7 +2525,8 @@
     "Pinyin": "zhǎn shì",
     "Book": "Boya 2",
     "Chapter": "3",
-    "Number": "69"
+    "Number": "69",
+    "周": ""
   },
   {
     "ID": "Boya20370",
@@ -2253,7 +2534,8 @@
     "Pinyin": "rén wén",
     "Book": "Boya 2",
     "Chapter": "3",
-    "Number": "70"
+    "Number": "70",
+    "周": ""
   },
   {
     "ID": "Boya20371",
@@ -2261,7 +2543,8 @@
     "Pinyin": "bāo róng",
     "Book": "Boya 2",
     "Chapter": "3",
-    "Number": "71"
+    "Number": "71",
+    "周": ""
   },
   {
     "ID": "Boya20372",
@@ -2269,6 +2552,7 @@
     "Pinyin": "cháng shì",
     "Book": "Boya 2",
     "Chapter": "3",
-    "Number": "72"
+    "Number": "72",
+    "周": ""
   }
 ]
