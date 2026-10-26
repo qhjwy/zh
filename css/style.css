@@ -306,6 +306,47 @@ th:last-child {
   margin-left: auto;
 }
 
+.account-link {
+  position: fixed;
+  z-index: 10;
+  top: 1rem;
+  right: max(1rem, calc((100vw - 732px) / 2 + 1rem));
+  display: grid;
+  width: 2.25rem;
+  height: 2.25rem;
+  place-items: center;
+  border: 1px solid transparent;
+  border-radius: 50%;
+  color: #858585;
+  opacity: 0.75;
+  text-decoration: none;
+}
+
+.account-link svg {
+  width: 1.3rem;
+  height: 1.3rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-width: 1.7;
+}
+
+.account-link:hover,
+.account-link:focus-visible {
+  border-color: #dedede;
+  background: #f7f7f7;
+  color: #707070;
+  opacity: 1;
+}
+
+.account-link.is-authenticated {
+  color: #858585;
+}
+
+.account-link.has-auth-error {
+  color: #858585;
+}
+
 .site-nav-stack .site-nav {
   margin-left: 0;
 }
@@ -860,6 +901,87 @@ th:last-child {
 .known-entry.is-unknown {
   background: #f0f0f0;
   color: #777;
+}
+
+.flag-toggle {
+  min-height: 28px;
+  border: 0;
+  cursor: pointer;
+}
+
+.flag-toggle:disabled {
+  cursor: default;
+  opacity: 0.7;
+}
+
+.saved-entry {
+  padding: 0.2rem 0.45rem;
+  border-radius: 1rem;
+  background: #f0f0f0;
+  color: #666;
+  font-size: 0.72rem;
+  line-height: 1.2;
+}
+
+.saved-entry.is-saved {
+  background: #e3e3e3;
+  color: #555;
+}
+
+.login-content {
+  width: min(100%, 25rem);
+}
+
+.login-form {
+  display: grid;
+  gap: 0.75rem;
+  margin: 1.5rem 0 0;
+}
+
+.login-form label {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.login-form input {
+  width: 100%;
+}
+
+.login-form button {
+  justify-self: start;
+  padding: 0.4rem 0.85rem;
+  cursor: pointer;
+}
+
+.login-form button:disabled,
+.signed-in-panel button:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+.signed-in-panel[hidden],
+.login-form[hidden] {
+  display: none;
+}
+
+.signed-in-panel p {
+  overflow-wrap: anywhere;
+}
+
+.login-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.login-status {
+  min-height: 1.5rem;
+  margin: 0.75rem 0 0;
+  color: #596773;
+}
+
+.login-status.error {
+  color: #a12622;
 }
 
 .hide-pinyin .vocabulary-pinyin {

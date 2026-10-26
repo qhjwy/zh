@@ -2,19 +2,6 @@
 
 const PAGE_SIZE = 60;
 
-function readKnownState(storageKey) {
-  const stored = localStorage.getItem(storageKey);
-  if (stored === null) {
-    return {};
-  }
-
-  const parsed = JSON.parse(stored);
-  if (parsed === null || typeof parsed !== "object" || Array.isArray(parsed)) {
-    throw new Error(`Saved progress for ${storageKey} is not valid.`);
-  }
-  return parsed;
-}
-
 function getLevelInfo(record, page) {
   if (page === "dictionary") {
     return { levels: [], label: "" };
@@ -36,7 +23,7 @@ function getLevelInfo(record, page) {
   return { levels: levels.slice(0, 1), label: source };
 }
 
-function normalizeRecord(record, page, knownState) {
+function normalizeRecord(record, page, knownState, savedState = {}) {
   const word = String(record.word ?? record.Word ?? "");
   const pinyin = String(record.pinyin ?? record.Pinyin ?? "");
   const meaning = String(record.meaning ?? record.Meaning ?? record.Definitions ?? "");
@@ -44,9 +31,10 @@ function normalizeRecord(record, page, knownState) {
     ? record["Dictionary definitions"].map(String).filter(Boolean)
     : meaning ? [meaning] : [];
   const id = String(record.ID ?? `${word}\u0000${pinyin}`);
-  const known = Object.prototype.hasOwnProperty.call(knownState, id)
+  const known = page === "hsk"
     ? Boolean(knownState[id])
     : Boolean(record.known ?? record["学会"] === "x");
+  const saved = Boolean(savedState[id]);
   const levelInfo = getLevelInfo(record, page);
 
   return {
@@ -59,16 +47,17 @@ function normalizeRecord(record, page, knownState) {
     levels: levelInfo.levels,
     levelLabel: levelInfo.label,
     week: String(record["周"] ?? ""),
-    known
+    known,
+    saved
   };
 }
 
 function startVocabularyPage() {
   const page = document.body.dataset.page;
   const source = document.body.dataset.source;
-  const storageKey = document.body.dataset.storageKey;
   const entriesElement = document.querySelector("#vocabulary-entries");
   const status = document.querySelector("#status");
+  const accountLink = document.querySelector("#hsk-account-link");
   const listView = document.querySelector("#hsk-list-view");
   const hskFilters = document.querySelector(".hsk-filters");
   const progressView = document.querySelector("#hsk-progress-view");
@@ -83,12 +72,16 @@ function startVocabularyPage() {
   const musicResults = document.querySelector("#music-results");
   const viewLinks = document.querySelectorAll(".hsk-view-nav a");
   const unknownFilter = document.querySelector("#unknown-filter");
+  const savedFilter = document.querySelector("#saved-filter");
   const pinyinToggle = document.querySelector("#pinyin-toggle");
   const onlyPinyinToggle = document.querySelector("#only-pinyin-toggle");
   const levelFilter = document.querySelector("#level-filter");
   const chapterFilter = document.querySelector("#chapter-filter");
 
   const selectedIds = new Set();
+  const supabaseClient = page === "hsk" && window.supabase
+    ? window.supabase.createClient(document.body.dataset.supabaseUrl, document.body.dataset.supabaseKey)
+    : null;
   const selectionToolbar = document.createElement("div");
   selectionToolbar.className = "selection-toolbar";
   selectionToolbar.setAttribute("role", "toolbar");
@@ -113,6 +106,9 @@ function startVocabularyPage() {
   }
 
   let entries = [];
+  let activeSession = null;
+  let remoteFlagsReady = false;
+  let authGeneration = 0;
   let hskWordTrie = null;
   let cedictWordTrie = null;
   let cedictLoadPromise = null;
@@ -126,6 +122,14 @@ function startVocabularyPage() {
   const requestedPage = Number(new URLSearchParams(window.location.search).get("page"));
   let currentPage = Number.isSafeInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1;
   document.body.classList.toggle("hide-pinyin", !pinyinToggle.checked);
+
+  accountLink?.addEventListener("click", (event) => {
+    event.preventDefault();
+    const returnTo = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+    const loginUrl = new URL(accountLink.href);
+    loginUrl.searchParams.set("return", returnTo);
+    window.location.assign(loginUrl);
+  });
 
   function updateSelectionToolbar() {
     if (page === "boya") return;
@@ -198,6 +202,150 @@ function startVocabularyPage() {
       } else {
         link.removeAttribute("aria-current");
       }
+    }
+  }
+
+  function setAuthStatus(message, isError = false) {
+    if (!accountLink) return;
+    accountLink.title = message;
+    accountLink.classList.toggle("has-auth-error", isError);
+  }
+
+  async function loadHskFlags() {
+    const table = document.body.dataset.supabaseTable;
+    const idColumn = document.body.dataset.supabaseIdColumn;
+    const knownColumn = document.body.dataset.supabaseKnownColumn;
+    const savedColumn = document.body.dataset.supabaseSavedColumn;
+    const knownState = {};
+    const savedState = {};
+    const pageSize = 1000;
+
+    for (let offset = 0; ; offset += pageSize) {
+      const { data, error } = await supabaseClient
+        .from(table)
+        .select(`${idColumn},${knownColumn},${savedColumn}`)
+        .order(idColumn, { ascending: true })
+        .range(offset, offset + pageSize - 1);
+      if (error) throw error;
+
+      for (const row of data) {
+        const id = String(row[idColumn]);
+        knownState[id] = row[knownColumn] === true;
+        savedState[id] = row[savedColumn] === true;
+      }
+      if (data.length < pageSize) break;
+    }
+    return { knownState, savedState };
+  }
+
+  async function updateAuthSession(session) {
+    activeSession = session;
+    const generation = ++authGeneration;
+    const isSignedIn = Boolean(session);
+    if (accountLink) {
+      accountLink.classList.toggle("is-authenticated", isSignedIn);
+      accountLink.title = isSignedIn ? `Signed in as ${session.user.email}` : "Account sign in";
+      accountLink.setAttribute("aria-label", isSignedIn ? `Account: ${session.user.email}` : "Account sign in");
+    }
+    remoteFlagsReady = false;
+
+    if (page !== "hsk") return;
+    if (!supabaseClient) {
+      setAuthStatus("Supabase client failed to load. Reload the page and try again.", true);
+      return;
+    }
+    if (!entries.length) return;
+    if (!isSignedIn) {
+      for (const entry of entries) {
+        entry.known = false;
+        entry.saved = false;
+      }
+      render();
+      renderHskProgress();
+      setAuthStatus("Sign in to load and sync Known and Saved flags.");
+      return;
+    }
+    for (const entry of entries) {
+      entry.known = false;
+      entry.saved = false;
+    }
+    render();
+    setAuthStatus("Loading your HSK flags…");
+    try {
+      const { knownState, savedState } = await loadHskFlags();
+      if (generation !== authGeneration) return;
+      for (const entry of entries) {
+        entry.known = Boolean(knownState[entry.id]);
+        entry.saved = Boolean(savedState[entry.id]);
+      }
+      remoteFlagsReady = true;
+      render();
+      renderHskProgress();
+      setAuthStatus(`Synced HSK flags for ${session.user.email}.`);
+    } catch (error) {
+      if (generation !== authGeneration) return;
+      const message = error instanceof Error ? error.message : String(error);
+      setAuthStatus(`Could not load HSK flags: ${message}`, true);
+      render();
+    }
+  }
+
+  async function updateHskFlag(entry, field, column, button) {
+    if (!supabaseClient || !activeSession || !remoteFlagsReady || button.disabled) return;
+    const idColumn = document.body.dataset.supabaseIdColumn;
+    const table = document.body.dataset.supabaseTable;
+    const nextValue = !entry[field];
+    button.disabled = true;
+    setAuthStatus(`Saving ${entry.word}…`);
+    try {
+      const { data, error } = await supabaseClient
+        .from(table)
+        .update({ [column]: nextValue })
+        .eq(idColumn, Number(entry.id))
+        .select(idColumn)
+        .maybeSingle();
+      if (error) throw error;
+      if (!data) {
+        throw new Error(`No ${table} row was updated for ID ${entry.id}. Check the row and your Supabase update policy.`);
+      }
+      entry[field] = nextValue;
+      button.disabled = false;
+      button.setAttribute("aria-pressed", String(nextValue));
+      if (field === "known") {
+        button.textContent = nextValue ? "Known" : "Unknown";
+        button.classList.toggle("is-known", nextValue);
+        button.classList.toggle("is-unknown", !nextValue);
+        button.setAttribute("aria-label", `Mark ${entry.word} ${nextValue ? "unknown" : "known"}`);
+      } else {
+        button.textContent = nextValue ? "Saved" : "Save";
+        button.classList.toggle("is-saved", nextValue);
+        button.setAttribute("aria-label", `${nextValue ? "Unsave" : "Save"} ${entry.word}`);
+      }
+      renderHskProgress();
+      setAuthStatus(`Saved ${entry.word}.`);
+    } catch (error) {
+      button.disabled = false;
+      const message = error instanceof Error ? error.message : String(error);
+      setAuthStatus(`Could not save ${entry.word}: ${message}`, true);
+    }
+  }
+
+  if (page === "hsk") {
+    if (!supabaseClient) {
+      accountLink?.classList.add("has-auth-error");
+    } else {
+      supabaseClient.auth.onAuthStateChange((_event, session) => {
+        window.setTimeout(() => {
+          updateAuthSession(session);
+        }, 0);
+      });
+      supabaseClient.auth.getSession().then(({ data, error }) => {
+        if (error) throw error;
+        return updateAuthSession(data.session);
+      }).catch((error) => {
+        const message = error instanceof Error ? error.message : String(error);
+        setAuthStatus(`Could not check Supabase session: ${message}`, true);
+      });
     }
   }
 
@@ -531,6 +679,9 @@ function startVocabularyPage() {
       if (unknownFilter?.checked && entry.known) {
         return false;
       }
+      if (savedFilter?.checked && !entry.saved) {
+        return false;
+      }
       if (selectedLevels.size && ![...selectedLevels].some((selectedLevel) =>
         entry.levels.some((level) =>
           selectedLevel === "7-9" ? level >= 7 && level <= 9 : level === Number(selectedLevel)
@@ -674,10 +825,29 @@ function startVocabularyPage() {
       entryActions.className = "entry-actions";
       entryActions.append(level);
       if (page === "hsk") {
-        const knownLabel = document.createElement("span");
-        knownLabel.className = `known-entry${entry.known ? " is-known" : " is-unknown"}`;
-        knownLabel.textContent = entry.known ? "Known" : "Unknown";
-        entryActions.append(knownLabel);
+        const knownToggle = document.createElement("button");
+        knownToggle.className = `known-entry flag-toggle${entry.known ? " is-known" : " is-unknown"}`;
+        knownToggle.type = "button";
+        knownToggle.textContent = entry.known ? "Known" : "Unknown";
+        knownToggle.setAttribute("aria-pressed", String(entry.known));
+        knownToggle.setAttribute("aria-label", `Mark ${entry.word} ${entry.known ? "unknown" : "known"}`);
+        knownToggle.disabled = !remoteFlagsReady;
+        knownToggle.addEventListener("click", () => {
+          updateHskFlag(entry, "known", document.body.dataset.supabaseKnownColumn, knownToggle);
+        });
+        entryActions.append(knownToggle);
+
+        const savedToggle = document.createElement("button");
+        savedToggle.className = `saved-entry flag-toggle${entry.saved ? " is-saved" : ""}`;
+        savedToggle.type = "button";
+        savedToggle.textContent = entry.saved ? "Saved" : "Save";
+        savedToggle.setAttribute("aria-pressed", String(entry.saved));
+        savedToggle.setAttribute("aria-label", `${entry.saved ? "Unsave" : "Save"} ${entry.word}`);
+        savedToggle.disabled = !remoteFlagsReady;
+        savedToggle.addEventListener("click", () => {
+          updateHskFlag(entry, "saved", document.body.dataset.supabaseSavedColumn, savedToggle);
+        });
+        entryActions.append(savedToggle);
       }
 
       const individualCopyButton = document.createElement("button");
@@ -836,6 +1006,9 @@ function startVocabularyPage() {
   if (unknownFilter) {
     unknownFilter.addEventListener("change", resetAndRender);
   }
+  if (savedFilter) {
+    savedFilter.addEventListener("change", resetAndRender);
+  }
   if (levelFilter) {
     levelFilter.addEventListener("click", (event) => {
       const button = event.target.closest("button[data-level]");
@@ -873,38 +1046,41 @@ function startVocabularyPage() {
       document.body.classList.toggle("only-pinyin", onlyPinyinToggle.checked);
     });
   }
-  fetch(source)
-    .then((response) => {
+  async function loadVocabulary() {
+    try {
+      const response = await fetch(source);
       if (!response.ok) {
-        throw new Error(`Could not load ${source} (${response.status}).`);
+        throw new Error(`Could not load ${source} (HTTP ${response.status}).`);
       }
-      return response.json();
-    })
-    .then((data) => {
+      const data = await response.json();
       if (!Array.isArray(data)) {
         throw new Error(`Expected ${source} to contain a JSON array.`);
       }
-      const knownState = page === "hsk" ? readKnownState(storageKey) : {};
-      entries = data.map((record) => normalizeRecord(record, page, knownState));
+      entries = data.map((record) => normalizeRecord(record, page, {}));
       renderBoyaWeekFilters();
       if (page === "hsk") {
         hskWordTrie = buildHskWordTrie();
         if (musicRequested) loadCedict();
         else musicStatus.textContent = "进入音乐页面后加载词典释义…";
         renderHskProgress();
+        await updateAuthSession(activeSession);
+      } else {
+        render();
       }
       status.classList.remove("error");
-      render();
-    })
-    .catch((error) => {
-      status.textContent = `Unable to load vocabulary: ${error.message}`;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      status.textContent = `Unable to load vocabulary: ${message}`;
       status.classList.add("error");
       if (page === "hsk") {
-        musicStatus.textContent = `无法加载 HSK 词表：${error.message}`;
+        musicStatus.textContent = `无法加载 HSK 词表：${message}`;
         window.history.replaceState(null, "", "#list");
         setHskView("list");
       }
-    });
+    }
+  }
+
+  loadVocabulary();
 }
 
 startVocabularyPage();

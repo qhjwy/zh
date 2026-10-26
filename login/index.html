@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en" class="dictionary-document">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sign in · 中文词典</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22central%22 text-anchor=%22middle%22 font-family=%22system-ui,sans-serif%22 font-weight=%22bold%22 font-size=%2260%22 fill=%22%23d35400%22>zh</text></svg>">
+  <link rel="stylesheet" href="../css/style.css?v=32">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+  <script src="../js/login.js?v=1" defer></script>
+</head>
+<body class="dictionary-page about-page login-page" data-supabase-url="https://ipavwfvtxrqipmedsbjf.supabase.co"
+      data-supabase-key="sb_publishable_d0CsN33Th0l4qs0_hWa5bA__YggSPaz">
+  <header class="dict-header">
+    <h1 class="dict-title"><span class="title-main">Account</span></h1>
+  </header>
+
+  <main class="login-content">
+    <p><a id="login-back-link" href="../hsk/">Back to HSK</a></p>
+    <form id="login-form" class="login-form">
+      <label>Email
+        <input id="login-email" name="email" type="email" autocomplete="username" required>
+      </label>
+      <label>Password
+        <input id="login-password" name="password" type="password" autocomplete="current-password" required>
+      </label>
+      <button id="login-submit" type="submit">Sign in</button>
+    </form>
+    <section id="signed-in-panel" class="signed-in-panel" hidden>
+      <p>Signed in as <strong id="signed-in-email"></strong>.</p>
+      <div class="login-actions">
+        <button id="continue-button" type="button">Continue</button>
+        <button id="logout-button" type="button">Sign out</button>
+      </div>
+    </section>
+    <p id="login-status" class="login-status" role="status" aria-live="polite">Checking account…</p>
+  </main>
+</body>
+</html>
