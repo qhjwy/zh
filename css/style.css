@@ -345,6 +345,133 @@ th:last-child {
   display: none;
 }
 
+.hsk-music-view[hidden] {
+  display: none;
+}
+
+.hsk-music-view h2 {
+  margin: 1rem 0 0.5rem;
+  font-size: 1.2rem;
+}
+
+.hsk-music-view > p,
+.music-status {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.music-input-label {
+  display: block;
+  margin: 1rem 0 0.4rem;
+  color: #344454;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.hsk-music-view textarea {
+  display: block;
+  width: 100%;
+  min-height: 10rem;
+  margin-bottom: 0.6rem;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid #b9c5d0;
+  border-radius: 7px;
+  background: #fff;
+  color: #1f2933;
+  font: inherit;
+  line-height: 1.5;
+  resize: vertical;
+}
+
+.music-status {
+  margin: 0.65rem 0;
+}
+
+.music-results {
+  margin-top: 1rem;
+  line-height: 1.8;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.music-unknown-word {
+  margin: 0;
+  padding: 0;
+  border-radius: 3px;
+  font: inherit;
+  vertical-align: baseline;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+  cursor: pointer;
+}
+
+.music-word-popover {
+  position: relative;
+  display: inline;
+}
+
+.music-definition-popover {
+  position: fixed;
+  z-index: 5;
+  max-width: min(22rem, calc(100vw - 2rem));
+  padding: 0.5rem 0.7rem;
+  border: 1px solid #e7ecf1;
+  border-radius: 6px;
+  background: #fff;
+  color: #344454;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  white-space: normal;
+  box-shadow: 0 4px 14px rgb(0 0 0 / 16%);
+}
+
+.music-unknown-word:not([class*="hsk"]) {
+  background: transparent;
+  color: #888;
+  text-decoration: underline dotted #999;
+  text-underline-offset: 0.15em;
+}
+
+.music-unknown-word:not([class*="hsk"]):hover,
+.music-unknown-word:not([class*="hsk"]):focus-visible {
+  color: #222;
+}
+
+.music-unknown-word.hsk1 {
+  background: color-mix(in srgb, var(--hsk1) 14%, white);
+  color: var(--hsk1);
+}
+
+.music-unknown-word.hsk2 {
+  background: color-mix(in srgb, var(--hsk2) 14%, white);
+  color: var(--hsk2);
+}
+
+.music-unknown-word.hsk3 {
+  background: color-mix(in srgb, var(--hsk3) 14%, white);
+  color: var(--hsk3);
+}
+
+.music-unknown-word.hsk4 {
+  background: color-mix(in srgb, var(--hsk4) 14%, white);
+  color: var(--hsk4);
+}
+
+.music-unknown-word.hsk5 {
+  background: color-mix(in srgb, var(--hsk5) 14%, white);
+  color: var(--hsk5);
+}
+
+.music-unknown-word.hsk6 {
+  background: color-mix(in srgb, var(--hsk6) 14%, white);
+  color: var(--hsk6);
+}
+
+.music-unknown-word.hsk7-9 {
+  background: color-mix(in srgb, var(--hsk7-9) 14%, white);
+  color: var(--hsk7-9);
+}
+
 .hsk-progress-table th,
 .hsk-progress-table td {
   padding: 0.45rem 0.5rem;

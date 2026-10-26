@@ -52,6 +52,7 @@ function normalizeRecord(record, page, knownState) {
   return {
     id,
     word,
+    variants: [...new Set([word, String(record.Original ?? "")].filter(Boolean))],
     pinyin,
     meaning,
     definitions,
@@ -72,6 +73,14 @@ function startVocabularyPage() {
   const hskFilters = document.querySelector(".hsk-filters");
   const progressView = document.querySelector("#hsk-progress-view");
   const progressRows = document.querySelector("#hsk-progress-rows");
+  const musicView = document.querySelector("#hsk-music-view");
+  const musicLink = document.querySelector('.hsk-view-nav a[href="#music"]');
+  const musicEditor = document.querySelector("#music-editor");
+  const musicText = document.querySelector("#music-text");
+  const musicAnalyze = document.querySelector("#music-analyze");
+  const musicRedo = document.querySelector("#music-redo");
+  const musicStatus = document.querySelector("#music-status");
+  const musicResults = document.querySelector("#music-results");
   const viewLinks = document.querySelectorAll(".hsk-view-nav a");
   const unknownFilter = document.querySelector("#unknown-filter");
   const pinyinToggle = document.querySelector("#pinyin-toggle");
@@ -104,6 +113,16 @@ function startVocabularyPage() {
   }
 
   let entries = [];
+  let hskWordTrie = null;
+  let cedictWordTrie = null;
+  let cedictLoadPromise = null;
+  let musicRequested = window.location.hash === "#music";
+  let activeMusicWord = null;
+  const musicDefinitionPopover = document.createElement("div");
+  musicDefinitionPopover.className = "music-definition-popover";
+  musicDefinitionPopover.setAttribute("role", "tooltip");
+  musicDefinitionPopover.hidden = true;
+  document.body.append(musicDefinitionPopover);
   const requestedPage = Number(new URLSearchParams(window.location.search).get("page"));
   let currentPage = Number.isSafeInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1;
   document.body.classList.toggle("hide-pinyin", !pinyinToggle.checked);
@@ -165,12 +184,14 @@ function startVocabularyPage() {
   });
 
   function setHskView(view) {
-    if (!listView || !progressView) return;
+    if (!listView || !progressView || !musicView) return;
     const showProgress = view === "progress";
-    listView.hidden = showProgress;
-    hskFilters.hidden = showProgress;
-    status.hidden = showProgress;
+    const showMusic = view === "music";
+    listView.hidden = showProgress || showMusic;
+    hskFilters.hidden = showProgress || showMusic;
+    status.hidden = showProgress || showMusic;
     progressView.hidden = !showProgress;
+    musicView.hidden = !showMusic;
     for (const link of viewLinks) {
       if (link.hash === `#${view}`) {
         link.setAttribute("aria-current", "page");
@@ -179,6 +200,234 @@ function startVocabularyPage() {
       }
     }
   }
+
+  function buildHskWordTrie() {
+    const root = { children: new Map(), entries: [] };
+    for (const entry of entries) {
+      for (const variant of entry.variants) {
+        const characters = [...variant];
+        if (!characters.some((character) => /\p{Script=Han}/u.test(character))) continue;
+        let node = root;
+        for (const character of characters) {
+          if (!node.children.has(character)) {
+            node.children.set(character, { children: new Map(), entries: [] });
+          }
+          node = node.children.get(character);
+        }
+        node.entries.push(entry);
+      }
+    }
+    return root;
+  }
+
+  function buildCedictWordTrie(records) {
+    const root = { children: new Map(), entries: [] };
+    for (const record of records) {
+      const definitions = String(record.Definitions ?? "")
+        .replace(/^\/|\/$/g, "")
+        .split("/")
+        .filter(Boolean);
+      if (!definitions.length) continue;
+
+      const entry = { definitions };
+      for (const variant of new Set([
+        String(record.Word ?? ""),
+        String(record.Traditional ?? "")
+      ])) {
+        const characters = [...variant];
+        if (!characters.some((character) => /\p{Script=Han}/u.test(character))) continue;
+        let node = root;
+        for (const character of characters) {
+          if (!node.children.has(character)) {
+            node.children.set(character, { children: new Map(), entries: [] });
+          }
+          node = node.children.get(character);
+        }
+        node.entries.push(entry);
+      }
+    }
+    return root;
+  }
+
+  function loadCedict() {
+    if (cedictWordTrie) return Promise.resolve();
+    if (cedictLoadPromise) return cedictLoadPromise;
+
+    musicAnalyze.disabled = true;
+    musicStatus.textContent = "正在加载词典释义…";
+    const source = document.body.dataset.cedictSource;
+    cedictLoadPromise = fetch(source)
+      .then((response) => {
+        if (!response.ok) throw new Error(`无法加载 CEDICT（${response.status}）。`);
+        return response.json();
+      })
+      .then((records) => {
+        if (!Array.isArray(records)) throw new Error("CEDICT 数据格式无效。");
+        cedictWordTrie = buildCedictWordTrie(records);
+        musicAnalyze.disabled = false;
+        musicStatus.textContent = "粘贴歌词或中文文本，然后点击“确定”识别词语。";
+      })
+      .catch((error) => {
+        cedictLoadPromise = null;
+        musicStatus.textContent = `无法加载词典释义：${error.message}`;
+      });
+    return cedictLoadPromise;
+  }
+
+  function showMusicDefinition(word, anchor) {
+    if (activeMusicWord) activeMusicWord.setAttribute("aria-expanded", "false");
+    if (activeMusicWord === anchor && !musicDefinitionPopover.hidden) {
+      musicDefinitionPopover.hidden = true;
+      activeMusicWord = null;
+      return;
+    }
+
+    activeMusicWord = anchor;
+    anchor.setAttribute("aria-expanded", "true");
+    musicDefinitionPopover.textContent = word.definitions.length
+      ? word.definitions.join("；")
+      : "暂无释义。";
+    musicDefinitionPopover.hidden = false;
+    const bounds = anchor.getBoundingClientRect();
+    const popoverBounds = musicDefinitionPopover.getBoundingClientRect();
+    const left = Math.min(
+      Math.max(popoverBounds.width / 2 + 8, bounds.left + bounds.width / 2),
+      window.innerWidth - popoverBounds.width / 2 - 8
+    );
+    musicDefinitionPopover.style.left = `${left}px`;
+    musicDefinitionPopover.style.top = `${Math.max(8, bounds.top - 8)}px`;
+    musicDefinitionPopover.style.transform = bounds.top - 8 >= popoverBounds.height
+      ? "translate(-50%, -100%)"
+      : "translate(-50%, 0)";
+  }
+
+  function analyzeMusicText(text) {
+    const characters = [...text];
+    const fragment = document.createDocumentFragment();
+    for (let index = 0; index < characters.length;) {
+      if (!/\p{Script=Han}/u.test(characters[index])) {
+        const start = index;
+        while (index < characters.length && !/\p{Script=Han}/u.test(characters[index])) {
+          index += 1;
+        }
+        fragment.append(document.createTextNode(characters.slice(start, index).join("")));
+        continue;
+      }
+
+      let hskNode = hskWordTrie;
+      let cedictNode = cedictWordTrie;
+      let hskEntries = null;
+      let hskEnd = index;
+      let cedictEntries = null;
+      let cedictEnd = index;
+      for (let cursor = index; cursor < characters.length; cursor += 1) {
+        hskNode = hskNode?.children.get(characters[cursor]) ?? null;
+        cedictNode = cedictNode?.children.get(characters[cursor]) ?? null;
+        if (!hskNode && !cedictNode) break;
+        if (hskNode?.entries.length) {
+          hskEntries = hskNode.entries;
+          hskEnd = cursor + 1;
+        }
+        if (cedictNode?.entries.length) {
+          cedictEntries = cedictNode.entries;
+          cedictEnd = cursor + 1;
+        }
+      }
+
+      const useHsk = hskEntries && hskEnd >= cedictEnd;
+      const matchEntries = useHsk ? hskEntries : cedictEntries;
+      const end = useHsk ? hskEnd : cedictEntries ? cedictEnd : index + 1;
+      const word = characters.slice(index, end).join("");
+      const unknownEntries = useHsk
+        ? matchEntries.filter((entry) => !entry.known && entry.levels.length > 0)
+        : [];
+      const definitions = useHsk
+        ? [...new Set(unknownEntries.flatMap((entry) => entry.definitions))]
+        : [...new Set((matchEntries ?? []).flatMap((entry) => entry.definitions))];
+      if (useHsk && !unknownEntries.length || !matchEntries) {
+        fragment.append(document.createTextNode(word));
+      } else {
+        const highlight = document.createElement("mark");
+        if (unknownEntries.length) {
+          const levels = unknownEntries.flatMap((entry) => entry.levels);
+          const level = levels.includes(7) || levels.includes(8) || levels.includes(9)
+            ? "7-9"
+            : Math.min(...levels);
+          highlight.className = `music-unknown-word hsk${level}`;
+        } else {
+          highlight.className = "music-unknown-word";
+        }
+        highlight.textContent = word;
+        highlight.setAttribute("aria-expanded", "false");
+        highlight.setAttribute("aria-label", `${word}：点击查看释义`);
+        highlight.setAttribute("role", "button");
+        highlight.tabIndex = 0;
+
+        function toggleDefinition() {
+          showMusicDefinition({ definitions }, highlight);
+        }
+        highlight.addEventListener("click", toggleDefinition);
+        highlight.addEventListener("keydown", (event) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            toggleDefinition();
+          }
+        });
+        fragment.append(highlight);
+      }
+      index = end;
+    }
+    return fragment;
+  }
+
+  if (musicAnalyze && musicText && musicResults && musicEditor && musicRedo) {
+    musicAnalyze.addEventListener("click", () => {
+      musicResults.replaceChildren(analyzeMusicText(musicText.value));
+      musicStatus.textContent = "";
+      musicEditor.hidden = true;
+      musicRedo.hidden = false;
+    });
+    musicRedo.addEventListener("click", () => {
+      musicEditor.hidden = false;
+      musicResults.replaceChildren();
+      musicRedo.hidden = true;
+      musicText.focus();
+    });
+  }
+  musicLink?.addEventListener("click", () => {
+    musicRequested = true;
+    if (entries.length && !cedictWordTrie) loadCedict();
+  });
+  document.addEventListener("click", (event) => {
+    if (
+      activeMusicWord
+      && event.target !== activeMusicWord
+      && !musicDefinitionPopover.contains(event.target)
+    ) {
+      activeMusicWord.setAttribute("aria-expanded", "false");
+      activeMusicWord = null;
+      musicDefinitionPopover.hidden = true;
+    }
+  });
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && activeMusicWord) {
+      activeMusicWord.setAttribute("aria-expanded", "false");
+      activeMusicWord = null;
+      musicDefinitionPopover.hidden = true;
+    }
+  });
+  window.addEventListener("scroll", () => {
+    if (!activeMusicWord) return;
+    activeMusicWord.setAttribute("aria-expanded", "false");
+    activeMusicWord = null;
+    musicDefinitionPopover.hidden = true;
+  }, true);
+  window.addEventListener("resize", () => {
+    if (!activeMusicWord) return;
+    activeMusicWord.setAttribute("aria-expanded", "false");
+    activeMusicWord = null;
+    musicDefinitionPopover.hidden = true;
+  });
 
   function renderHskProgress() {
     if (!progressRows) return;
@@ -551,9 +800,18 @@ function startVocabularyPage() {
       });
     }
     window.addEventListener("popstate", () => {
-      setHskView(window.location.hash === "#progress" ? "progress" : "list");
+      const view = ["#progress", "#music"].includes(window.location.hash)
+        ? window.location.hash.slice(1)
+        : "list";
+      setHskView(view);
+      musicRequested = view === "music";
+      if (musicRequested && entries.length && !cedictWordTrie) loadCedict();
     });
-    setHskView(window.location.hash === "#progress" ? "progress" : "list");
+    const view = ["#progress", "#music"].includes(window.location.hash)
+      ? window.location.hash.slice(1)
+      : "list";
+    setHskView(view);
+    musicRequested = view === "music";
   }
   window.addEventListener("popstate", () => {
     const pageFromUrl = Number(new URLSearchParams(window.location.search).get("page"));
@@ -615,6 +873,9 @@ function startVocabularyPage() {
       entries = data.map((record) => normalizeRecord(record, page, knownState));
       renderBoyaWeekFilters();
       if (page === "hsk") {
+        hskWordTrie = buildHskWordTrie();
+        if (musicRequested) loadCedict();
+        else musicStatus.textContent = "进入音乐页面后加载词典释义…";
         renderHskProgress();
       }
       status.classList.remove("error");
@@ -624,6 +885,7 @@ function startVocabularyPage() {
       status.textContent = `Unable to load vocabulary: ${error.message}`;
       status.classList.add("error");
       if (page === "hsk") {
+        musicStatus.textContent = `无法加载 HSK 词表：${error.message}`;
         window.history.replaceState(null, "", "#list");
         setHskView("list");
       }

@@ -5,12 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>HSK</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22central%22 text-anchor=%22middle%22 font-family=%22system-ui,sans-serif%22 font-weight=%22bold%22 font-size=%2260%22 fill=%22%23d35400%22>zh</text></svg>">
-  <link rel="stylesheet" href="../css/style.css?v=24">
+  <link rel="stylesheet" href="../css/style.css?v=28">
   <script src="../js/pinyin.js?v=1" defer></script>
-  <script src="../js/vocabulary-lists.js?v=20" defer></script>
+  <script src="../js/vocabulary-lists.js?v=24" defer></script>
 </head>
 <body class="dictionary-page vocabulary-list-page" data-page="hsk"
       data-source="../data/hsk.json?v=2"
+      data-cedict-source="../data/cedict.json?v=1"
       data-storage-key="zh-hsk-known">
   <div class="vocabulary-sticky">
     <header class="dict-header">
@@ -23,6 +24,7 @@
         <nav class="hsk-view-nav" aria-label="HSK views">
           <a href="#list" aria-current="page">[ <span class="nav-label">清单</span> ]</a>
           <a href="#progress">[ <span class="nav-label">进度</span> ]</a>
+          <a href="#music">[ <span class="nav-label">音乐</span> ]</a>
         </nav>
       </div>
     </header>
@@ -59,6 +61,18 @@
       </thead>
       <tbody id="hsk-progress-rows"></tbody>
     </table>
+  </section>
+  <section id="hsk-music-view" class="hsk-music-view" aria-label="歌词识词" hidden>
+    <h2>音乐</h2>
+    <p>粘贴歌词或中文文本，点击“确定”后，不认识的 HSK 词语会按级别标色。</p>
+    <div id="music-editor">
+      <label class="music-input-label" for="music-text">歌词或中文文本</label>
+      <textarea id="music-text" rows="8" placeholder="在此粘贴歌词或中文文本……"></textarea>
+      <button id="music-analyze" class="sentence-button" type="button" disabled>确定</button>
+    </div>
+    <button id="music-redo" class="sentence-button" type="button" hidden>重新输入</button>
+    <div id="music-status" class="music-status" role="status" aria-live="polite">正在加载 HSK 词表…</div>
+    <div id="music-results" class="music-results"></div>
   </section>
 </body>
 </html>
