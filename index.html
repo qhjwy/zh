@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>词典</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22central%22 text-anchor=%22middle%22 font-family=%22system-ui,sans-serif%22 font-weight=%22bold%22 font-size=%2260%22 fill=%22%23d35400%22>zh</text></svg>">
-  <link rel="stylesheet" href="css/style.css?v=6">
+  <link rel="stylesheet" href="css/style.css?v=7">
   <script src="js/pinyin.js?v=1" defer></script>
-  <script src="js/dictionary.js?v=7" defer></script>
+  <script src="js/dictionary.js?v=8" defer></script>
 </head>
 <body class="dictionary-page" data-worker-src="js/dictionary-worker.js?v=5">
   <header class="dict-header">
@@ -23,16 +23,17 @@
 
   <div class="search-tools">
     <details class="tag-filter">
-      <summary>Entry tags</summary>
-      <div id="tag-filter-options" class="tag-filter-options" role="group" aria-label="Show entries with CEDICT tags"></div>
+      <summary>词条标签</summary>
+      <div id="tag-filter-options" class="tag-filter-options" role="group" aria-label="显示带有 CEDICT 标签的词条"></div>
     </details>
   </div>
   <div class="search-wrapper">
     <button id="clear-btn" class="clear-btn" type="button" aria-label="Clear search">→</button>
+    <button id="paste-btn" class="clear-btn paste-btn" type="button" aria-label="Replace search with clipboard" title="Replace search with clipboard">↓</button>
     <input id="search" type="text" placeholder="在此输入……" autocomplete="off" autofocus>
   </div>
 
-  <div id="status">Loading dictionary…</div>
+  <div id="status">正在加载词典…</div>
   <div id="results"></div>
 
   <footer>
