@@ -229,7 +229,7 @@ function startVocabularyPage() {
         .filter(Boolean);
       if (!definitions.length) continue;
 
-      const entry = { definitions };
+      const entry = { pinyin: String(record.Pinyin ?? ""), definitions };
       for (const variant of new Set([
         String(record.Word ?? ""),
         String(record.Traditional ?? "")
@@ -284,9 +284,20 @@ function startVocabularyPage() {
 
     activeMusicWord = anchor;
     anchor.setAttribute("aria-expanded", "true");
-    musicDefinitionPopover.textContent = word.definitions.length
+    musicDefinitionPopover.replaceChildren();
+    if (word.pinyin.length) {
+      const pinyin = document.createElement("span");
+      pinyin.className = "pinyin";
+      pinyin.textContent = `[${word.pinyin.map((value) => (
+        window.convertPinyin(value.replace(/([1-5])(?=[a-züv:])/gi, "$1 "))
+      )).join(" / ")}]`;
+      musicDefinitionPopover.append(pinyin, " ");
+    }
+    const definitions = document.createElement("span");
+    definitions.textContent = word.definitions.length
       ? word.definitions.join("；")
       : "暂无释义。";
+    musicDefinitionPopover.append(definitions);
     musicDefinitionPopover.hidden = false;
     const bounds = anchor.getBoundingClientRect();
     const popoverBounds = musicDefinitionPopover.getBoundingClientRect();
@@ -338,12 +349,16 @@ function startVocabularyPage() {
       const matchEntries = useHsk ? hskEntries : cedictEntries;
       const end = useHsk ? hskEnd : cedictEntries ? cedictEnd : index + 1;
       const word = characters.slice(index, end).join("");
+      const matchingCedictEntries = cedictEnd === end ? cedictEntries : null;
       const unknownEntries = useHsk
         ? matchEntries.filter((entry) => !entry.known && entry.levels.length > 0)
         : [];
-      const definitions = useHsk
-        ? [...new Set(unknownEntries.flatMap((entry) => entry.definitions))]
-        : [...new Set((matchEntries ?? []).flatMap((entry) => entry.definitions))];
+      const hskDefinitions = [...new Set(unknownEntries.flatMap((entry) => entry.definitions))];
+      const definitions = useHsk && hskDefinitions.length
+        ? hskDefinitions
+        : [...new Set((matchingCedictEntries ?? matchEntries ?? []).flatMap((entry) => entry.definitions))];
+      const pinyinEntries = matchingCedictEntries ?? (useHsk ? unknownEntries : matchEntries ?? []);
+      const pinyin = [...new Set(pinyinEntries.map((entry) => entry.pinyin).filter(Boolean))];
       if (useHsk && !unknownEntries.length || !matchEntries) {
         fragment.append(document.createTextNode(word));
       } else {
@@ -364,7 +379,7 @@ function startVocabularyPage() {
         highlight.tabIndex = 0;
 
         function toggleDefinition() {
-          showMusicDefinition({ definitions }, highlight);
+          showMusicDefinition({ pinyin, definitions }, highlight);
         }
         highlight.addEventListener("click", toggleDefinition);
         highlight.addEventListener("keydown", (event) => {
