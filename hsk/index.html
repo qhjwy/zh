@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>HSK</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22central%22 text-anchor=%22middle%22 font-family=%22system-ui,sans-serif%22 font-weight=%22bold%22 font-size=%2260%22 fill=%22%23d35400%22>zh</text></svg>">
-  <link rel="stylesheet" href="../css/style.css?v=31">
+  <link rel="stylesheet" href="../css/style.css?v=34">
   <script src="../js/pinyin.js?v=1" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
-  <script src="../js/vocabulary-lists.js?v=28" defer></script>
+  <script src="../js/vocabulary-lists.js?v=31" defer></script>
 </head>
 <body class="dictionary-page vocabulary-list-page" data-page="hsk"
       data-source="../data/hsk.json?v=2"
@@ -33,12 +33,6 @@
           <a href="#music">[ <span class="nav-label">音乐</span> ]</a>
         </nav>
       </div>
-      <a id="hsk-account-link" class="account-link" href="../login/" aria-label="Account sign in" title="Account">
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <circle cx="12" cy="8" r="3.5"></circle>
-          <path d="M4.8 20c.7-3.5 3.4-5.3 7.2-5.3s6.5 1.8 7.2 5.3"></path>
-        </svg>
-      </a>
     </header>
     <section class="vocabulary-filters hsk-filters" aria-label="Vocabulary filters">
       <div class="level-filters" id="level-filter" role="group" aria-label="按 HSK 级别筛选">
@@ -67,6 +61,12 @@
     </section>
     <div id="status" class="list-status" role="status" aria-live="polite">Loading vocabulary…</div>
   </div>
+  <a id="hsk-account-link" class="account-link" href="../login/" aria-label="Account sign in" title="Account">
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="12" cy="8" r="3.5"></circle>
+      <path d="M4.8 20c.7-3.5 3.4-5.3 7.2-5.3s6.5 1.8 7.2 5.3"></path>
+    </svg>
+  </a>
   <main id="hsk-list-view">
     <div id="vocabulary-entries" aria-live="polite"></div>
   </main>

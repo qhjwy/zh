@@ -307,7 +307,7 @@ th:last-child {
 }
 
 .account-link {
-  position: fixed;
+  position: absolute;
   z-index: 10;
   top: 1rem;
   right: max(1rem, calc((100vw - 732px) / 2 + 1rem));
@@ -1051,8 +1051,7 @@ th:last-child {
   margin-left: 0;
 }
 
-.sentence-button,
-.sentence-copy {
+.sentence-button {
   min-height: 28px;
   padding: 0.25rem 0.55rem;
   border: 1px solid #ddd;
@@ -1063,12 +1062,7 @@ th:last-child {
   cursor: pointer;
 }
 
-.sentence-button {
-  white-space: nowrap;
-}
-
-.sentence-button:hover,
-.sentence-copy:hover {
+.sentence-button:hover {
   border-color: #d35400;
   color: #d35400;
 }
@@ -1083,32 +1077,33 @@ th:last-child {
   display: none;
 }
 
-.sentence-prompt {
-  width: 100%;
-  min-height: 4.5rem;
-  resize: vertical;
-  padding: 0.55rem;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  background: #fff;
-  color: #444;
-  font: 0.85rem/1.45 system-ui, -apple-system, sans-serif;
+.sentence-result {
+  color: #344454;
+  line-height: 1.6;
 }
 
-.sentence-actions {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.82rem;
+.sentence-result h4,
+.sentence-result p {
+  margin: 0;
 }
 
-.sentence-actions a {
-  color: #666;
+.sentence-result h4 {
+  color: #152536;
+  font-size: 1rem;
 }
 
-.sentence-status {
-  color: #666;
+.sentence-result p + p,
+.sentence-result h4 + p {
+  margin-top: 0.4rem;
+}
+
+.sentence-result .sentence-list-item {
+  padding-left: 0.4rem;
+}
+
+.sentence-result.is-error {
+  color: #a12622;
+  font-size: 0.85rem;
 }
 
 .selection-toolbar {

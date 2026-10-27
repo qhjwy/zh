@@ -52,6 +52,37 @@ function normalizeRecord(record, page, knownState, savedState = {}) {
   };
 }
 
+function renderSentenceMarkdown(text, container) {
+  container.replaceChildren();
+  for (const line of text.split(/\r?\n/)) {
+    if (!line.trim()) continue;
+    const heading = line.match(/^\s{0,3}#{1,6}\s+(.+?)\s*#*\s*$/);
+    const listItem = line.match(/^\s*(?:[-*+]|\d+[.)])\s+(.+)$/);
+    const content = heading?.[1] ?? listItem?.[1] ?? line;
+    const block = document.createElement(heading ? "h4" : "p");
+    if (listItem) {
+      block.className = "sentence-list-item";
+      const marker = document.createElement("span");
+      marker.setAttribute("aria-hidden", "true");
+      marker.textContent = line.match(/^\s*(?:[-*+]|\d+[.)])/)?.[0].trim() ?? "•";
+      block.append(marker, " ");
+    }
+
+    const boldParts = content.split(/(\*\*.+?\*\*|\*[^*]+?\*|__.+?__|_[^_]+?_)/g);
+    for (const part of boldParts) {
+      const boldMatch = part.match(/^(?:\*\*(.+)\*\*|\*(.+)\*|__(.+)__|_(.+)_)$/);
+      if (boldMatch) {
+        const bold = document.createElement("strong");
+        bold.textContent = boldMatch[1] ?? boldMatch[2] ?? boldMatch[3] ?? boldMatch[4];
+        block.append(bold);
+      } else {
+        block.append(document.createTextNode(part));
+      }
+    }
+    container.append(block);
+  }
+}
+
 function startVocabularyPage() {
   const page = document.body.dataset.page;
   const source = document.body.dataset.source;
@@ -79,7 +110,7 @@ function startVocabularyPage() {
   const chapterFilter = document.querySelector("#chapter-filter");
 
   const selectedIds = new Set();
-  const supabaseClient = page === "hsk" && window.supabase
+  const supabaseClient = (page === "hsk" || page === "boya") && window.supabase
     ? window.supabase.createClient(document.body.dataset.supabaseUrl, document.body.dataset.supabaseKey)
     : null;
   const selectionToolbar = document.createElement("div");
@@ -868,7 +899,7 @@ function startVocabularyPage() {
       sentenceButton.className = "sentence-button";
       sentenceButton.type = "button";
       sentenceButton.textContent = "例句";
-      sentenceButton.setAttribute("aria-label", `复制${entry.word}的AI提示`);
+      sentenceButton.setAttribute("aria-label", `为${entry.word}生成例句`);
       sentenceButton.setAttribute("aria-expanded", "false");
       entryActions.append(sentenceButton);
 
@@ -876,45 +907,40 @@ function startVocabularyPage() {
       sentenceHelper.className = "sentence-helper";
       sentenceHelper.hidden = true;
       const prompt = `「${entry.word}」中文解释：意思、3个例句+解释、常用吗、近义词或易混词。`;
-      const promptText = document.createElement("textarea");
-      promptText.className = "sentence-prompt";
-      promptText.value = prompt;
-      promptText.readOnly = true;
-      promptText.setAttribute("aria-label", `AI提示：${entry.word}`);
-      const sentenceActions = document.createElement("div");
-      sentenceActions.className = "sentence-actions";
-      const copyPromptButton = document.createElement("button");
-      copyPromptButton.className = "sentence-copy";
-      copyPromptButton.type = "button";
-      copyPromptButton.textContent = "再次复制提示";
-      const openAiLink = document.createElement("a");
-      openAiLink.href = "https://chat.deepseek.com/";
-      openAiLink.target = "_blank";
-      openAiLink.rel = "noopener noreferrer";
-      openAiLink.textContent = "打开 DeepSeek";
-      const promptStatus = document.createElement("span");
-      promptStatus.className = "sentence-status";
-      promptStatus.setAttribute("role", "status");
-      sentenceActions.append(copyPromptButton, openAiLink, promptStatus);
-      sentenceHelper.append(promptText, sentenceActions);
+      const sentenceResult = document.createElement("div");
+      sentenceResult.className = "sentence-result";
+      sentenceResult.setAttribute("role", "status");
+      sentenceResult.setAttribute("aria-live", "polite");
+      sentenceHelper.append(sentenceResult);
 
-      async function copyIndividualPrompt() {
-        const copied = await copyText(prompt);
-        promptStatus.textContent = copied
-          ? "提示已复制，可粘贴到 DeepSeek。"
-          : "复制失败，请选中上方提示并手动复制。";
-      }
-
-      sentenceButton.addEventListener("click", () => {
+      sentenceButton.addEventListener("click", async () => {
         const isOpen = sentenceHelper.hidden;
         sentenceHelper.hidden = !isOpen;
         sentenceButton.setAttribute("aria-expanded", String(isOpen));
-        if (isOpen) {
-          copyIndividualPrompt();
-          window.open(openAiLink.href, "_blank", "noopener,noreferrer");
+        if (!isOpen) return;
+        sentenceButton.disabled = true;
+        sentenceResult.classList.remove("is-error");
+        sentenceResult.textContent = "正在生成例句…";
+        try {
+          if (!supabaseClient) {
+            throw new Error("Supabase client is unavailable.");
+          }
+          const { data, error } = await supabaseClient.functions.invoke("generate-sentence", {
+            body: { prompt }
+          });
+          if (error) throw error;
+          if (typeof data?.sentence !== "string" || !data.sentence.trim()) {
+            throw new Error("The generate-sentence response did not contain a sentence.");
+          }
+          renderSentenceMarkdown(data.sentence, sentenceResult);
+        } catch (error) {
+          console.error("Could not generate sentence:", error);
+          sentenceResult.classList.add("is-error");
+          sentenceResult.textContent = "生成失败，请稍后重试。";
+        } finally {
+          sentenceButton.disabled = false;
         }
       });
-      copyPromptButton.addEventListener("click", copyIndividualPrompt);
 
       if (page === "hsk") {
         const detailButton = document.createElement("button");
