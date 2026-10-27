@@ -2,6 +2,7 @@
 
 let dictionary = [];
 let hskLevels = new Map();
+let hskIds = new Map();
 let hskRanks = new Map();
 let boyaRanks = new Map();
 let frequencyRanks = new Map();
@@ -170,6 +171,7 @@ function search(query, hiddenTags) {
       return {
         ...entry,
         hskLevels: levelsFor(entry),
+        hskIds: [...(hskIds.get(entryKey(entry.simplified, entry.pinyin)) ?? [])],
         frequencyProbability: frequencyRank === undefined
           ? null
           : estimateDailyProbability(frequencyRank)
@@ -209,6 +211,7 @@ async function loadDictionary() {
   }
 
   const hskMap = new Map();
+  const hskIdMap = new Map();
   const hskRankMap = new Map();
   for (const record of rawHsk) {
     const word = String(record.word ?? record.Word ?? "");
@@ -217,10 +220,15 @@ async function loadDictionary() {
     if (!key || !level) continue;
     if (!hskMap.has(key)) hskMap.set(key, new Set());
     hskMap.get(key).add(level);
+    if (record.ID !== undefined && record.ID !== null) {
+      if (!hskIdMap.has(key)) hskIdMap.set(key, new Set());
+      hskIdMap.get(key).add(String(record.ID));
+    }
     const rank = Number(level.match(/\d+/)?.[0] ?? Infinity);
     hskRankMap.set(key, Math.min(hskRankMap.get(key) ?? Infinity, rank));
   }
   hskLevels = hskMap;
+  hskIds = hskIdMap;
   hskRanks = hskRankMap;
 
   const boyaRankMap = new Map();

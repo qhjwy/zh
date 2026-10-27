@@ -311,18 +311,26 @@ th:last-child {
   z-index: 10;
   top: 1rem;
   right: max(1rem, calc((100vw - 732px) / 2 + 1rem));
-  display: grid;
-  width: 2.25rem;
+  display: inline-flex;
+  min-height: 2.25rem;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0 0.45rem;
   height: 2.25rem;
-  place-items: center;
   border: 1px solid transparent;
-  border-radius: 50%;
+  border-radius: 1.2rem;
   color: #858585;
   opacity: 0.75;
   text-decoration: none;
+  white-space: nowrap;
+}
+
+.account-link span {
+  font-size: 0.72rem;
 }
 
 .account-link svg {
+  flex: 0 0 auto;
   width: 1.3rem;
   height: 1.3rem;
   fill: none;
@@ -340,11 +348,34 @@ th:last-child {
 }
 
 .account-link.is-authenticated {
-  color: #858585;
+  color: #467446;
 }
 
 .account-link.has-auth-error {
-  color: #858585;
+  color: #a12622;
+}
+
+.hsk-load-progress {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin-top: 0.5rem;
+  color: #666;
+  font-size: 0.8rem;
+}
+
+.hsk-load-progress[hidden] {
+  display: none;
+}
+
+.hsk-load-progress progress {
+  width: 8rem;
+  height: 0.55rem;
+  accent-color: #467446;
+}
+
+.hsk-load-progress progress.is-error {
+  accent-color: #a12622;
 }
 
 .site-nav-stack .site-nav {

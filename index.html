@@ -5,11 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>词典</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22central%22 text-anchor=%22middle%22 font-family=%22system-ui,sans-serif%22 font-weight=%22bold%22 font-size=%2260%22 fill=%22%23d35400%22>zh</text></svg>">
-  <link rel="stylesheet" href="css/style.css?v=7">
+  <link rel="stylesheet" href="css/style.css?v=8">
   <script src="js/pinyin.js?v=1" defer></script>
-  <script src="js/dictionary.js?v=8" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+  <script src="js/dictionary.js?v=9" defer></script>
 </head>
-<body class="dictionary-page" data-worker-src="js/dictionary-worker.js?v=5">
+<body class="dictionary-page" data-worker-src="js/dictionary-worker.js?v=6"
+      data-supabase-url="https://ipavwfvtxrqipmedsbjf.supabase.co"
+      data-supabase-key="sb_publishable_d0CsN33Th0l4qs0_hWa5bA__YggSPaz"
+      data-supabase-table="HSK"
+      data-supabase-id-column="ID"
+      data-supabase-saved-column="Saved">
   <header class="dict-header">
     <h1 class="dict-title">
       <a class="title-main" href="index.html">词典</a><span class="title-sub"> · <span id="script-label">简体</span></span>
@@ -20,6 +26,13 @@
       <a href="boya/index.html">[ 博雅 ]</a>
     </nav>
   </header>
+  <a id="hsk-account-link" class="account-link" href="login/" aria-label="Account sign in" title="Account">
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="12" cy="8" r="3.5"></circle>
+      <path d="M4.8 20c.7-3.5 3.4-5.3 7.2-5.3s6.5 1.8 7.2 5.3"></path>
+    </svg>
+    <span id="account-connection">Connecting…</span>
+  </a>
 
   <div class="search-tools">
     <details class="tag-filter">

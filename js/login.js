@@ -44,9 +44,9 @@ function showSession(session) {
   signedInPanel.hidden = !isSignedIn;
   if (isSignedIn) {
     signedInEmail.textContent = session.user.email;
-    setStatus("Your account is ready.");
+    setStatus("Connected · your account is ready.");
   } else {
-    setStatus("Sign in to sync your HSK flags.");
+    setStatus("Connected · sign in to save and sync word status.");
   }
 }
 

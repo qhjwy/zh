@@ -83,12 +83,46 @@ function renderSentenceMarkdown(text, container) {
   }
 }
 
+async function fetchJsonWithProgress(source, onProgress) {
+  const response = await fetch(source);
+  if (!response.ok) {
+    throw new Error(`Could not load ${source} (HTTP ${response.status}).`);
+  }
+  if (!response.body) {
+    const data = await response.json();
+    onProgress(null);
+    return data;
+  }
+
+  const contentLength = Number(response.headers.get("content-length"));
+  const total = Number.isFinite(contentLength) && contentLength > 0 ? contentLength : null;
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let received = 0;
+  let text = "";
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    received += value.byteLength;
+    text += decoder.decode(value, { stream: true });
+    onProgress(total ? Math.min(99, Math.floor(received / total * 100)) : null);
+  }
+  text += decoder.decode();
+  onProgress(null);
+  return JSON.parse(text);
+}
+
 function startVocabularyPage() {
   const page = document.body.dataset.page;
   const source = document.body.dataset.source;
   const entriesElement = document.querySelector("#vocabulary-entries");
   const status = document.querySelector("#status");
   const accountLink = document.querySelector("#hsk-account-link");
+  const connectionStatus = document.querySelector("#account-connection");
+  const hskLoadProgress = document.querySelector("#hsk-load-progress");
+  const hskLoadProgressLabel = document.querySelector("#hsk-load-progress-label");
+  const hskLoadProgressBar = document.querySelector("#hsk-load-progress-bar");
   const listView = document.querySelector("#hsk-list-view");
   const hskFilters = document.querySelector(".hsk-filters");
   const progressView = document.querySelector("#hsk-progress-view");
@@ -138,6 +172,8 @@ function startVocabularyPage() {
 
   let entries = [];
   let activeSession = null;
+  let authSessionReady = false;
+  let hskReady = page !== "hsk";
   let remoteFlagsReady = false;
   let authGeneration = 0;
   let hskWordTrie = null;
@@ -242,6 +278,25 @@ function startVocabularyPage() {
     accountLink.classList.toggle("has-auth-error", isError);
   }
 
+  function setConnectionStatus(message, isError = false) {
+    if (connectionStatus) connectionStatus.textContent = message;
+    accountLink?.classList.toggle("has-auth-error", isError);
+  }
+
+  function setHskLoadProgress(percentage) {
+    if (!hskLoadProgress || !hskLoadProgressLabel || !hskLoadProgressBar) return;
+    hskLoadProgress.hidden = false;
+    if (percentage === null) {
+      hskLoadProgressBar.removeAttribute("value");
+      hskLoadProgressLabel.textContent = "Loading HSK…";
+      return;
+    }
+    hskLoadProgressBar.value = percentage;
+    hskLoadProgressLabel.textContent = percentage === 100
+      ? "HSK loaded · 100%"
+      : `Loading HSK… ${percentage}%`;
+  }
+
   async function loadHskFlags() {
     const table = document.body.dataset.supabaseTable;
     const idColumn = document.body.dataset.supabaseIdColumn;
@@ -271,6 +326,7 @@ function startVocabularyPage() {
 
   async function updateAuthSession(session) {
     activeSession = session;
+    authSessionReady = true;
     const generation = ++authGeneration;
     const isSignedIn = Boolean(session);
     if (accountLink) {
@@ -278,19 +334,27 @@ function startVocabularyPage() {
       accountLink.title = isSignedIn ? `Signed in as ${session.user.email}` : "Account sign in";
       accountLink.setAttribute("aria-label", isSignedIn ? `Account: ${session.user.email}` : "Account sign in");
     }
+    setConnectionStatus(navigator.onLine ? "Connected" : "Offline", !navigator.onLine);
     remoteFlagsReady = false;
 
-    if (page !== "hsk") return;
     if (!supabaseClient) {
+      setConnectionStatus("Connection unavailable", true);
       setAuthStatus("Supabase client failed to load. Reload the page and try again.", true);
+      if (page === "hsk" && entries.length) {
+        hskReady = true;
+        render();
+      }
       return;
     }
+    if (page !== "hsk") return;
+    if (!authSessionReady) return;
     if (!entries.length) return;
     if (!isSignedIn) {
       for (const entry of entries) {
         entry.known = false;
         entry.saved = false;
       }
+      hskReady = true;
       render();
       renderHskProgress();
       setAuthStatus("Sign in to load and sync Known and Saved flags.");
@@ -300,7 +364,9 @@ function startVocabularyPage() {
       entry.known = false;
       entry.saved = false;
     }
+    hskReady = false;
     render();
+    status.textContent = "Loading HSK account data…";
     setAuthStatus("Loading your HSK flags…");
     try {
       const { knownState, savedState } = await loadHskFlags();
@@ -310,14 +376,18 @@ function startVocabularyPage() {
         entry.saved = Boolean(savedState[entry.id]);
       }
       remoteFlagsReady = true;
+      hskReady = true;
       render();
       renderHskProgress();
       setAuthStatus(`Synced HSK flags for ${session.user.email}.`);
     } catch (error) {
       if (generation !== authGeneration) return;
       const message = error instanceof Error ? error.message : String(error);
-      setAuthStatus(`Could not load HSK flags: ${message}`, true);
+      hskReady = true;
       render();
+      status.textContent = `Could not load HSK flags: ${message}`;
+      status.classList.add("error");
+      setAuthStatus(`Could not load HSK flags: ${message}`, true);
     }
   }
 
@@ -361,24 +431,39 @@ function startVocabularyPage() {
     }
   }
 
-  if (page === "hsk") {
-    if (!supabaseClient) {
-      accountLink?.classList.add("has-auth-error");
-    } else {
-      supabaseClient.auth.onAuthStateChange((_event, session) => {
-        window.setTimeout(() => {
-          updateAuthSession(session);
-        }, 0);
-      });
-      supabaseClient.auth.getSession().then(({ data, error }) => {
-        if (error) throw error;
-        return updateAuthSession(data.session);
-      }).catch((error) => {
-        const message = error instanceof Error ? error.message : String(error);
-        setAuthStatus(`Could not check Supabase session: ${message}`, true);
-      });
+  if (!supabaseClient) {
+    setConnectionStatus("Connection unavailable", true);
+    if (page === "hsk") {
+      setAuthStatus("Supabase client failed to load. Reload the page and try again.", true);
     }
+  } else {
+    supabaseClient.auth.onAuthStateChange((_event, session) => {
+      window.setTimeout(() => {
+        updateAuthSession(session);
+      }, 0);
+    });
+    supabaseClient.auth.getSession().then(({ data, error }) => {
+      if (error) throw error;
+      return updateAuthSession(data.session);
+    }).catch((error) => {
+      const message = error instanceof Error ? error.message : String(error);
+      setConnectionStatus("Connection unavailable", true);
+      if (page === "hsk") setAuthStatus(`Could not check Supabase session: ${message}`, true);
+    });
   }
+  window.addEventListener("offline", () => setConnectionStatus("Offline", true));
+  window.addEventListener("online", () => {
+    setConnectionStatus("Reconnecting…");
+    if (!supabaseClient) return;
+    supabaseClient.auth.getSession().then(({ data, error }) => {
+      if (error) throw error;
+      return updateAuthSession(data.session);
+    }).catch((error) => {
+      const message = error instanceof Error ? error.message : String(error);
+      setConnectionStatus("Connection unavailable", true);
+      if (page === "hsk") setAuthStatus(`Could not check Supabase session: ${message}`, true);
+    });
+  });
 
   function buildHskWordTrie() {
     const root = { children: new Map(), entries: [] };
@@ -761,6 +846,11 @@ function startVocabularyPage() {
 
   function render() {
     status.classList.remove("error");
+    if (page === "hsk" && !hskReady) {
+      entriesElement.replaceChildren();
+      status.textContent = "Waiting for HSK data…";
+      return;
+    }
     const matches = filteredEntries();
     const pageCount = Math.max(1, Math.ceil(matches.length / PAGE_SIZE));
     currentPage = Math.min(currentPage, pageCount);
@@ -1074,11 +1164,17 @@ function startVocabularyPage() {
   }
   async function loadVocabulary() {
     try {
-      const response = await fetch(source);
-      if (!response.ok) {
-        throw new Error(`Could not load ${source} (HTTP ${response.status}).`);
+      if (page === "hsk") {
+        hskReady = false;
+        entriesElement.replaceChildren();
+        status.textContent = "Waiting for HSK data…";
       }
-      const data = await response.json();
+      const data = page === "hsk"
+        ? await fetchJsonWithProgress(source, setHskLoadProgress)
+        : await fetch(source).then((response) => {
+          if (!response.ok) throw new Error(`Could not load ${source} (HTTP ${response.status}).`);
+          return response.json();
+        });
       if (!Array.isArray(data)) {
         throw new Error(`Expected ${source} to contain a JSON array.`);
       }
@@ -1089,9 +1185,11 @@ function startVocabularyPage() {
         if (musicRequested) loadCedict();
         else musicStatus.textContent = "进入音乐页面后加载词典释义…";
         renderHskProgress();
-        await updateAuthSession(activeSession);
+        setHskLoadProgress(100);
+        if (authSessionReady) await updateAuthSession(activeSession);
       } else {
         render();
+        await updateAuthSession(activeSession);
       }
       status.classList.remove("error");
     } catch (error) {
@@ -1099,6 +1197,13 @@ function startVocabularyPage() {
       status.textContent = `Unable to load vocabulary: ${message}`;
       status.classList.add("error");
       if (page === "hsk") {
+        hskReady = true;
+        if (hskLoadProgress) hskLoadProgress.hidden = false;
+        if (hskLoadProgressLabel) hskLoadProgressLabel.textContent = "Unable to load HSK.";
+        if (hskLoadProgressBar) {
+          hskLoadProgressBar.removeAttribute("value");
+          hskLoadProgressBar.classList.add("is-error");
+        }
         musicStatus.textContent = `无法加载 HSK 词表：${message}`;
         window.history.replaceState(null, "", "#list");
         setHskView("list");
