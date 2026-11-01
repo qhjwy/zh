@@ -10,10 +10,12 @@ const passwordInput = document.querySelector("#login-password");
 const loginSubmit = document.querySelector("#login-submit");
 const signedInPanel = document.querySelector("#signed-in-panel");
 const signedInEmail = document.querySelector("#signed-in-email");
+const signedInAvatar = document.querySelector("#signed-in-avatar");
 const statusElement = document.querySelector("#login-status");
 const continueButton = document.querySelector("#continue-button");
 const logoutButton = document.querySelector("#logout-button");
 const returnTo = getReturnUrl();
+let activeSession = null;
 
 function getReturnUrl() {
   const requested = new URLSearchParams(window.location.search).get("return");
@@ -39,14 +41,31 @@ function setStatus(message, isError = false) {
 }
 
 function showSession(session) {
+  activeSession = session;
   const isSignedIn = Boolean(session);
   loginForm.hidden = isSignedIn;
   signedInPanel.hidden = !isSignedIn;
   if (isSignedIn) {
     signedInEmail.textContent = session.user.email;
-    setStatus("Connected · your account is ready.");
+    const imageUrl = document.body.dataset.profileImage;
+    signedInAvatar.hidden = true;
+    if (imageUrl) {
+      signedInAvatar.onload = () => {
+        if (!activeSession) return;
+        signedInAvatar.hidden = false;
+      };
+      signedInAvatar.onerror = () => {
+        signedInAvatar.hidden = true;
+      };
+      signedInAvatar.src = imageUrl;
+      if (signedInAvatar.complete && signedInAvatar.naturalWidth > 0) {
+        signedInAvatar.hidden = false;
+      }
+    }
+    setStatus("Your account is ready.");
   } else {
-    setStatus("Connected · sign in to save and sync word status.");
+    signedInAvatar.hidden = true;
+    setStatus("Sign in to save and sync word status.");
   }
 }
 

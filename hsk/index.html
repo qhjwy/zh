@@ -5,12 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>HSK</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22central%22 text-anchor=%22middle%22 font-family=%22system-ui,sans-serif%22 font-weight=%22bold%22 font-size=%2260%22 fill=%22%23d35400%22>zh</text></svg>">
-  <link rel="stylesheet" href="../css/style.css?v=35">
+  <link rel="stylesheet" href="../css/style.css?v=41">
   <script src="../js/pinyin.js?v=1" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
-  <script src="../js/vocabulary-lists.js?v=32" defer></script>
+  <script src="../js/vocabulary-lists.js?v=37" defer></script>
 </head>
 <body class="dictionary-page vocabulary-list-page" data-page="hsk"
+      data-profile-image="../images/profile.jpg"
       data-source="../data/hsk.json?v=2"
       data-cedict-source="../data/cedict.json?v=1"
       data-supabase-url="https://ipavwfvtxrqipmedsbjf.supabase.co"
@@ -24,6 +25,7 @@
       <h1 class="dict-title"><a class="title-main" href="../index.html">词典</a></h1>
       <div class="site-nav-stack">
         <nav class="site-nav" aria-label="Vocabulary lists">
+          <a href="../frequency/index.html">[ <span class="nav-label">词频</span> ]</a>
           <a href="index.html" aria-current="page">[ <span class="nav-label">HSK</span> ]</a>
           <a href="../boya/index.html">[ <span class="nav-label">博雅</span> ]</a>
         </nav>
@@ -59,18 +61,15 @@
         </label>
       </div>
     </section>
-    <div id="hsk-load-progress" class="hsk-load-progress" role="status" aria-live="polite">
-      <span id="hsk-load-progress-label">Loading HSK…</span>
-      <progress id="hsk-load-progress-bar" max="100" aria-label="Loading HSK vocabulary"></progress>
-    </div>
     <div id="status" class="list-status" role="status" aria-live="polite">Loading vocabulary…</div>
   </div>
-  <a id="hsk-account-link" class="account-link" href="../login/" aria-label="Account sign in" title="Account">
+  <a id="hsk-account-link" class="account-link" href="../login/" aria-label="登录" title="登录">
+    <span id="account-connection">登录</span>
+    <img id="account-avatar" class="account-avatar" alt="" hidden>
     <svg viewBox="0 0 24 24" aria-hidden="true">
       <circle cx="12" cy="8" r="3.5"></circle>
       <path d="M4.8 20c.7-3.5 3.4-5.3 7.2-5.3s6.5 1.8 7.2 5.3"></path>
     </svg>
-    <span id="account-connection">Connecting…</span>
   </a>
   <main id="hsk-list-view">
     <div id="vocabulary-entries" aria-live="polite"></div>

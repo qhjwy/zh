@@ -11,6 +11,8 @@ const toggleButton = document.querySelector("#script-toggle");
 const worker = new Worker(document.body.dataset.workerSrc || "worker.js");
 const accountLink = document.querySelector("#hsk-account-link");
 const connectionStatus = document.querySelector("#account-connection");
+const accountAvatar = document.querySelector("#account-avatar");
+const accountIcon = accountLink?.querySelector("svg");
 const supabaseClient = window.supabase?.createClient(
   document.body.dataset.supabaseUrl,
   document.body.dataset.supabaseKey
@@ -94,14 +96,21 @@ function render(entries) {
     if (entry.hskIds.length) {
       const saved = entry.hskIds.some((id) => savedFlags.get(id));
       const saveButton = document.createElement("button");
-      saveButton.className = `saved-entry flag-toggle${saved ? " is-saved" : ""}`;
+      saveButton.className = `dictionary-save-button flag-toggle${saved ? " is-saved" : ""}`;
       saveButton.type = "button";
-      saveButton.textContent = saved ? "Saved" : "Save";
       saveButton.setAttribute("aria-pressed", String(saved));
       saveButton.setAttribute("aria-label", `${saved ? "Unsave" : "Save"} ${displayWord}`);
       saveButton.disabled = !supabaseClient || !activeSession || !savedFlagsReady;
+      const icon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+      icon.setAttribute("class", "dictionary-save-icon");
+      icon.setAttribute("viewBox", "0 0 24 24");
+      icon.setAttribute("aria-hidden", "true");
+      const bookmark = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      bookmark.setAttribute("d", "M6 4.5a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1V21l-6-4-6 4V4.5Z");
+      icon.append(bookmark);
+      saveButton.append(icon);
       saveButton.addEventListener("click", () => toggleSaved(entry, saveButton));
-      heading.append(saveButton);
+      wrapper.append(saveButton);
     }
     wrapper.append(heading);
 
@@ -120,11 +129,12 @@ function render(entries) {
 
 function updateAccount(session, error = false) {
   activeSession = session;
+  updateAccountAvatar(Boolean(session));
   accountLink?.classList.toggle("is-authenticated", Boolean(session));
   accountLink?.classList.toggle("has-auth-error", error || !supabaseClient);
   accountLink?.setAttribute(
     "aria-label",
-    session ? `Account: ${session.user.email}` : "Account sign in"
+    session ? `Account: ${session.user.email}` : "登录"
   );
   accountLink?.setAttribute(
     "title",
@@ -132,12 +142,34 @@ function updateAccount(session, error = false) {
       ? "Connection unavailable"
       : session
         ? `Signed in as ${session.user.email}`
-        : "Account sign in"
+        : "登录"
   );
   if (connectionStatus) {
-    connectionStatus.textContent = error || !supabaseClient
-      ? "Unavailable"
-      : navigator.onLine ? "Connected" : "Offline";
+    connectionStatus.textContent = session ? "" : "登录";
+  }
+}
+
+function updateAccountAvatar(isSignedIn) {
+  if (!accountAvatar || !accountIcon) return;
+  accountAvatar.hidden = true;
+  accountIcon.hidden = isSignedIn;
+  if (!isSignedIn) return;
+
+  const imageUrl = document.body.dataset.profileImage;
+  if (!imageUrl) return;
+  accountAvatar.onload = () => {
+    if (!activeSession) return;
+    accountAvatar.hidden = false;
+    accountIcon.hidden = true;
+  };
+  accountAvatar.onerror = () => {
+    accountAvatar.hidden = true;
+    accountIcon.hidden = true;
+  };
+  accountAvatar.src = imageUrl;
+  if (accountAvatar.complete && accountAvatar.naturalWidth > 0) {
+    accountAvatar.hidden = false;
+    accountIcon.hidden = true;
   }
 }
 

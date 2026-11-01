@@ -327,16 +327,36 @@ th:last-child {
 
 .account-link span {
   font-size: 0.72rem;
+  order: 1;
 }
 
 .account-link svg {
   flex: 0 0 auto;
+  order: 2;
   width: 1.3rem;
   height: 1.3rem;
   fill: none;
   stroke: currentColor;
   stroke-linecap: round;
   stroke-width: 1.7;
+}
+
+.account-link .account-avatar {
+  flex: 0 0 auto;
+  order: 2;
+  width: 1.65rem;
+  height: 1.65rem;
+  border: 1px solid #dedede;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.account-link .account-avatar:not([hidden]) + svg {
+  display: none;
+}
+
+.account-link .account-avatar:not([hidden]) ~ span {
+  display: none;
 }
 
 .account-link:hover,
@@ -348,34 +368,27 @@ th:last-child {
 }
 
 .account-link.is-authenticated {
+  width: 1.65rem;
+  min-height: 1.65rem;
+  height: 1.65rem;
+  gap: 0;
+  padding: 0;
+  border-radius: 50%;
   color: #467446;
+  opacity: 1;
+}
+
+.account-link.is-authenticated span {
+  display: none;
+}
+
+.account-link.is-authenticated:hover {
+  border-color: transparent;
+  background: transparent;
 }
 
 .account-link.has-auth-error {
   color: #a12622;
-}
-
-.hsk-load-progress {
-  display: flex;
-  align-items: center;
-  gap: 0.65rem;
-  margin-top: 0.5rem;
-  color: #666;
-  font-size: 0.8rem;
-}
-
-.hsk-load-progress[hidden] {
-  display: none;
-}
-
-.hsk-load-progress progress {
-  width: 8rem;
-  height: 0.55rem;
-  accent-color: #467446;
-}
-
-.hsk-load-progress progress.is-error {
-  accent-color: #a12622;
 }
 
 .site-nav-stack .site-nav {
@@ -665,6 +678,7 @@ th:last-child {
 .hsk5 { background: color-mix(in srgb, var(--hsk5) 14%, white); color: var(--hsk5); }
 .hsk6 { background: color-mix(in srgb, var(--hsk6) 14%, white); color: var(--hsk6); }
 .hsk7-9 { background: color-mix(in srgb, var(--hsk7-9) 14%, white); color: var(--hsk7-9); }
+.frequency-rank { background: color-mix(in srgb, #808080 14%, white); color: #808080; }
 
 .vocabulary-list-page {
   --red: #d35400;
@@ -959,14 +973,56 @@ th:last-child {
   color: #555;
 }
 
+.dictionary-page:not(.vocabulary-list-page) .entry {
+  position: relative;
+  padding-right: 2.5rem;
+}
+
+.dictionary-save-button {
+  position: absolute;
+  top: 0.8rem;
+  right: 0;
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  min-height: 0;
+  padding: 0;
+  place-items: center;
+  background: transparent;
+  color: #555;
+}
+
+.dictionary-save-button:disabled {
+  cursor: default;
+  opacity: 1;
+}
+
+.dictionary-save-icon {
+  width: 1.4rem;
+  height: 1.4rem;
+  fill: none;
+  stroke: #555;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+}
+
+.dictionary-save-button.is-saved .dictionary-save-icon {
+  fill: #555;
+}
+
 .login-content {
   width: min(100%, 25rem);
 }
 
+.login-page .dict-header {
+  margin-bottom: 3rem;
+}
+
 .login-form {
   display: grid;
-  gap: 0.75rem;
-  margin: 1.5rem 0 0;
+  gap: 1.25rem;
+  margin: 2rem 0 0;
 }
 
 .login-form label {
@@ -974,14 +1030,61 @@ th:last-child {
   gap: 0.35rem;
 }
 
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 .login-form input {
   width: 100%;
+  border: 0;
+  background: #f0f0f0;
+}
+
+.login-form button,
+.signed-in-panel button {
+  width: 8rem;
+  height: 44px;
+  padding: 0.4rem 0.85rem;
+  cursor: pointer;
 }
 
 .login-form button {
   justify-self: start;
-  padding: 0.4rem 0.85rem;
-  cursor: pointer;
+  border: 0;
+  background: var(--red);
+  color: #fff;
+}
+
+.login-form button:hover:not(:disabled) {
+  background: #b94700;
+}
+
+#continue-button {
+  border: 0;
+  background: var(--red);
+  color: #fff;
+}
+
+#continue-button:hover:not(:disabled) {
+  background: #b94700;
+}
+
+#logout-button {
+  border: 0;
+  background: #f0f0f0;
+  color: var(--hsk1, #c75f5f);
+}
+
+#logout-button:hover:not(:disabled) {
+  background: #e3e3e3;
 }
 
 .login-form button:disabled,
@@ -999,15 +1102,32 @@ th:last-child {
   overflow-wrap: anywhere;
 }
 
+.signed-in-identity {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1.25rem;
+  margin: 0 0 2rem;
+}
+
+.signed-in-avatar {
+  flex: 0 0 auto;
+  width: 6rem;
+  height: 6rem;
+  border: 1px solid #dedede;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
 .login-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  gap: 0.75rem;
 }
 
 .login-status {
   min-height: 1.5rem;
-  margin: 0.75rem 0 0;
+  margin: 2rem 0 0;
   color: #596773;
 }
 

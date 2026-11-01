@@ -3,7 +3,7 @@
 const PAGE_SIZE = 60;
 
 function getLevelInfo(record, page) {
-  if (page === "dictionary") {
+  if (page === "dictionary" || page === "frequency") {
     return { levels: [], label: "" };
   }
 
@@ -33,7 +33,9 @@ function normalizeRecord(record, page, knownState, savedState = {}) {
   const id = String(record.ID ?? `${word}\u0000${pinyin}`);
   const known = page === "hsk"
     ? Boolean(knownState[id])
-    : Boolean(record.known ?? record["学会"] === "x");
+    : page === "frequency"
+      ? Boolean(knownState[id])
+      : Boolean(record.known ?? record["学会"] === "x");
   const saved = Boolean(savedState[id]);
   const levelInfo = getLevelInfo(record, page);
 
@@ -46,6 +48,7 @@ function normalizeRecord(record, page, knownState, savedState = {}) {
     definitions,
     levels: levelInfo.levels,
     levelLabel: levelInfo.label,
+    frequency: String(record.Frequency ?? record.frequency ?? ""),
     week: String(record["周"] ?? ""),
     known,
     saved
@@ -83,36 +86,6 @@ function renderSentenceMarkdown(text, container) {
   }
 }
 
-async function fetchJsonWithProgress(source, onProgress) {
-  const response = await fetch(source);
-  if (!response.ok) {
-    throw new Error(`Could not load ${source} (HTTP ${response.status}).`);
-  }
-  if (!response.body) {
-    const data = await response.json();
-    onProgress(null);
-    return data;
-  }
-
-  const contentLength = Number(response.headers.get("content-length"));
-  const total = Number.isFinite(contentLength) && contentLength > 0 ? contentLength : null;
-  const reader = response.body.getReader();
-  const decoder = new TextDecoder();
-  let received = 0;
-  let text = "";
-
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    received += value.byteLength;
-    text += decoder.decode(value, { stream: true });
-    onProgress(total ? Math.min(99, Math.floor(received / total * 100)) : null);
-  }
-  text += decoder.decode();
-  onProgress(null);
-  return JSON.parse(text);
-}
-
 function startVocabularyPage() {
   const page = document.body.dataset.page;
   const source = document.body.dataset.source;
@@ -120,9 +93,8 @@ function startVocabularyPage() {
   const status = document.querySelector("#status");
   const accountLink = document.querySelector("#hsk-account-link");
   const connectionStatus = document.querySelector("#account-connection");
-  const hskLoadProgress = document.querySelector("#hsk-load-progress");
-  const hskLoadProgressLabel = document.querySelector("#hsk-load-progress-label");
-  const hskLoadProgressBar = document.querySelector("#hsk-load-progress-bar");
+  const accountAvatar = document.querySelector("#account-avatar");
+  const accountIcon = accountLink?.querySelector("svg");
   const listView = document.querySelector("#hsk-list-view");
   const hskFilters = document.querySelector(".hsk-filters");
   const progressView = document.querySelector("#hsk-progress-view");
@@ -140,6 +112,7 @@ function startVocabularyPage() {
   const savedFilter = document.querySelector("#saved-filter");
   const pinyinToggle = document.querySelector("#pinyin-toggle");
   const onlyPinyinToggle = document.querySelector("#only-pinyin-toggle");
+  const knownFilter = document.querySelector("#known-filter");
   const levelFilter = document.querySelector("#level-filter");
   const chapterFilter = document.querySelector("#chapter-filter");
 
@@ -181,6 +154,7 @@ function startVocabularyPage() {
   let cedictLoadPromise = null;
   let musicRequested = window.location.hash === "#music";
   let activeMusicWord = null;
+  let frequencyStorageError = "";
   const musicDefinitionPopover = document.createElement("div");
   musicDefinitionPopover.className = "music-definition-popover";
   musicDefinitionPopover.setAttribute("role", "tooltip");
@@ -278,23 +252,33 @@ function startVocabularyPage() {
     accountLink.classList.toggle("has-auth-error", isError);
   }
 
-  function setConnectionStatus(message, isError = false) {
-    if (connectionStatus) connectionStatus.textContent = message;
+  function setConnectionStatus(_message, isError = false) {
+    if (connectionStatus) connectionStatus.textContent = activeSession ? "" : "登录";
     accountLink?.classList.toggle("has-auth-error", isError);
   }
 
-  function setHskLoadProgress(percentage) {
-    if (!hskLoadProgress || !hskLoadProgressLabel || !hskLoadProgressBar) return;
-    hskLoadProgress.hidden = false;
-    if (percentage === null) {
-      hskLoadProgressBar.removeAttribute("value");
-      hskLoadProgressLabel.textContent = "Loading HSK…";
-      return;
+  function updateAccountAvatar(isSignedIn) {
+    if (!accountAvatar || !accountIcon) return;
+    accountAvatar.hidden = true;
+    accountIcon.hidden = isSignedIn;
+    if (!isSignedIn) return;
+
+    const imageUrl = document.body.dataset.profileImage;
+    if (!imageUrl) return;
+    accountAvatar.onload = () => {
+      if (!activeSession) return;
+      accountAvatar.hidden = false;
+      accountIcon.hidden = true;
+    };
+    accountAvatar.onerror = () => {
+      accountAvatar.hidden = true;
+      accountIcon.hidden = true;
+    };
+    accountAvatar.src = imageUrl;
+    if (accountAvatar.complete && accountAvatar.naturalWidth > 0) {
+      accountAvatar.hidden = false;
+      accountIcon.hidden = true;
     }
-    hskLoadProgressBar.value = percentage;
-    hskLoadProgressLabel.textContent = percentage === 100
-      ? "HSK loaded · 100%"
-      : `Loading HSK… ${percentage}%`;
   }
 
   async function loadHskFlags() {
@@ -329,10 +313,11 @@ function startVocabularyPage() {
     authSessionReady = true;
     const generation = ++authGeneration;
     const isSignedIn = Boolean(session);
+    updateAccountAvatar(isSignedIn);
     if (accountLink) {
       accountLink.classList.toggle("is-authenticated", isSignedIn);
-      accountLink.title = isSignedIn ? `Signed in as ${session.user.email}` : "Account sign in";
-      accountLink.setAttribute("aria-label", isSignedIn ? `Account: ${session.user.email}` : "Account sign in");
+      accountLink.title = isSignedIn ? `Signed in as ${session.user.email}` : "登录";
+      accountLink.setAttribute("aria-label", isSignedIn ? `Account: ${session.user.email}` : "登录");
     }
     setConnectionStatus(navigator.onLine ? "Connected" : "Offline", !navigator.onLine);
     remoteFlagsReady = false;
@@ -790,9 +775,15 @@ function startVocabularyPage() {
       [...(chapterFilter?.querySelectorAll('button[data-week][aria-pressed="true"]') ?? [])]
         .map((button) => button.dataset.week)
     );
+    const showKnown = knownFilter?.checked ?? false;
+    const showUnknown = unknownFilter?.checked ?? false;
 
     const matches = entries.filter((entry) => {
-      if (unknownFilter?.checked && entry.known) {
+      if (page === "frequency" && (showKnown || showUnknown)
+        && !(entry.known ? showKnown : showUnknown)) {
+        return false;
+      }
+      if (page !== "frequency" && unknownFilter?.checked && entry.known) {
         return false;
       }
       if (savedFilter?.checked && !entry.saved) {
@@ -921,11 +912,13 @@ function startVocabularyPage() {
       }
 
       const level = document.createElement("span");
-      level.className = page === "hsk"
-        ? `hsk-level list-level ${entry.levelLabel.toLowerCase().replace(/[^a-z0-9-]/g, "")}`
+      level.className = page === "hsk" || page === "frequency"
+        ? `hsk-level list-level${page === "hsk" ? ` ${entry.levelLabel.toLowerCase().replace(/[^a-z0-9-]/g, "")}` : " frequency-rank"}`
         : "list-level boya-level";
       level.textContent = page === "hsk"
         ? entry.levelLabel ? `HSK${entry.levelLabel.replace(/^HSK/i, "")}` : "Unassigned"
+        : page === "frequency"
+          ? entry.frequency ? `#${entry.frequency}` : "Unranked"
         : entry.levelLabel
           ? `Boya ${entry.levelLabel.replace(/^Boya\s*/i, "")}${entry.chapter ? ` · ${entry.chapter}` : ""}`
           : "Unassigned";
@@ -945,30 +938,43 @@ function startVocabularyPage() {
       const entryActions = document.createElement("div");
       entryActions.className = "entry-actions";
       entryActions.append(level);
-      if (page === "hsk") {
+      if (page === "hsk" || page === "frequency") {
         const knownToggle = document.createElement("button");
         knownToggle.className = `known-entry flag-toggle${entry.known ? " is-known" : " is-unknown"}`;
         knownToggle.type = "button";
         knownToggle.textContent = entry.known ? "Known" : "Unknown";
         knownToggle.setAttribute("aria-pressed", String(entry.known));
         knownToggle.setAttribute("aria-label", `Mark ${entry.word} ${entry.known ? "unknown" : "known"}`);
-        knownToggle.disabled = !remoteFlagsReady;
+        knownToggle.disabled = page === "hsk" && !remoteFlagsReady;
         knownToggle.addEventListener("click", () => {
-          updateHskFlag(entry, "known", document.body.dataset.supabaseKnownColumn, knownToggle);
+          if (page === "hsk") {
+            updateHskFlag(entry, "known", document.body.dataset.supabaseKnownColumn, knownToggle);
+          } else {
+            entry.known = !entry.known;
+            knownToggle.textContent = entry.known ? "Known" : "Unknown";
+            knownToggle.classList.toggle("is-known", entry.known);
+            knownToggle.classList.toggle("is-unknown", !entry.known);
+            knownToggle.setAttribute("aria-pressed", String(entry.known));
+            knownToggle.setAttribute("aria-label", `Mark ${entry.word} ${entry.known ? "unknown" : "known"}`);
+            saveFrequencyKnownState();
+            resetAndRender();
+          }
         });
         entryActions.append(knownToggle);
 
-        const savedToggle = document.createElement("button");
-        savedToggle.className = `saved-entry flag-toggle${entry.saved ? " is-saved" : ""}`;
-        savedToggle.type = "button";
-        savedToggle.textContent = entry.saved ? "Saved" : "Save";
-        savedToggle.setAttribute("aria-pressed", String(entry.saved));
-        savedToggle.setAttribute("aria-label", `${entry.saved ? "Unsave" : "Save"} ${entry.word}`);
-        savedToggle.disabled = !remoteFlagsReady;
-        savedToggle.addEventListener("click", () => {
-          updateHskFlag(entry, "saved", document.body.dataset.supabaseSavedColumn, savedToggle);
-        });
-        entryActions.append(savedToggle);
+        if (page === "hsk") {
+          const savedToggle = document.createElement("button");
+          savedToggle.className = `saved-entry flag-toggle${entry.saved ? " is-saved" : ""}`;
+          savedToggle.type = "button";
+          savedToggle.textContent = entry.saved ? "Saved" : "Save";
+          savedToggle.setAttribute("aria-pressed", String(entry.saved));
+          savedToggle.setAttribute("aria-label", `${entry.saved ? "Unsave" : "Save"} ${entry.word}`);
+          savedToggle.disabled = !remoteFlagsReady;
+          savedToggle.addEventListener("click", () => {
+            updateHskFlag(entry, "saved", document.body.dataset.supabaseSavedColumn, savedToggle);
+          });
+          entryActions.append(savedToggle);
+        }
       }
 
       const individualCopyButton = document.createElement("button");
@@ -991,7 +997,9 @@ function startVocabularyPage() {
       sentenceButton.textContent = "例句";
       sentenceButton.setAttribute("aria-label", `为${entry.word}生成例句`);
       sentenceButton.setAttribute("aria-expanded", "false");
-      entryActions.append(sentenceButton);
+      if (page !== "frequency") {
+        entryActions.append(sentenceButton);
+      }
 
       const sentenceHelper = document.createElement("section");
       sentenceHelper.className = "sentence-helper";
@@ -1075,6 +1083,24 @@ function startVocabularyPage() {
       }
       status.append(pageLinks);
     }
+    if (frequencyStorageError) {
+      const error = document.createElement("span");
+      error.className = "error";
+      error.textContent = ` Known status could not be saved: ${frequencyStorageError}`;
+      status.append(error);
+    }
+  }
+
+  function saveFrequencyKnownState() {
+    try {
+      const knownState = Object.fromEntries(
+        entries.filter((entry) => entry.known).map((entry) => [entry.id, true])
+      );
+      window.localStorage.setItem(document.body.dataset.storageKey, JSON.stringify(knownState));
+      frequencyStorageError = "";
+    } catch (error) {
+      frequencyStorageError = error instanceof Error ? error.message : String(error);
+    }
   }
 
   function resetAndRender() {
@@ -1121,6 +1147,9 @@ function startVocabularyPage() {
   });
   if (unknownFilter) {
     unknownFilter.addEventListener("change", resetAndRender);
+  }
+  if (knownFilter) {
+    knownFilter.addEventListener("change", resetAndRender);
   }
   if (savedFilter) {
     savedFilter.addEventListener("change", resetAndRender);
@@ -1169,23 +1198,34 @@ function startVocabularyPage() {
         entriesElement.replaceChildren();
         status.textContent = "Waiting for HSK data…";
       }
-      const data = page === "hsk"
-        ? await fetchJsonWithProgress(source, setHskLoadProgress)
-        : await fetch(source).then((response) => {
-          if (!response.ok) throw new Error(`Could not load ${source} (HTTP ${response.status}).`);
-          return response.json();
-        });
+      const response = await fetch(source);
+      if (!response.ok) throw new Error(`Could not load ${source} (HTTP ${response.status}).`);
+      const data = await response.json();
       if (!Array.isArray(data)) {
         throw new Error(`Expected ${source} to contain a JSON array.`);
       }
-      entries = data.map((record) => normalizeRecord(record, page, {}));
+      let knownState = {};
+      if (page === "frequency") {
+        try {
+          const stored = window.localStorage.getItem(document.body.dataset.storageKey);
+          if (stored) {
+            const parsed = JSON.parse(stored);
+            if (parsed === null || typeof parsed !== "object" || Array.isArray(parsed)) {
+              throw new Error("Stored Frequency known state must be a JSON object.");
+            }
+            knownState = parsed;
+          }
+        } catch (error) {
+          frequencyStorageError = error instanceof Error ? error.message : String(error);
+        }
+      }
+      entries = data.map((record) => normalizeRecord(record, page, knownState));
       renderBoyaWeekFilters();
       if (page === "hsk") {
         hskWordTrie = buildHskWordTrie();
         if (musicRequested) loadCedict();
         else musicStatus.textContent = "进入音乐页面后加载词典释义…";
         renderHskProgress();
-        setHskLoadProgress(100);
         if (authSessionReady) await updateAuthSession(activeSession);
       } else {
         render();
@@ -1198,12 +1238,6 @@ function startVocabularyPage() {
       status.classList.add("error");
       if (page === "hsk") {
         hskReady = true;
-        if (hskLoadProgress) hskLoadProgress.hidden = false;
-        if (hskLoadProgressLabel) hskLoadProgressLabel.textContent = "Unable to load HSK.";
-        if (hskLoadProgressBar) {
-          hskLoadProgressBar.removeAttribute("value");
-          hskLoadProgressBar.classList.add("is-error");
-        }
         musicStatus.textContent = `无法加载 HSK 词表：${message}`;
         window.history.replaceState(null, "", "#list");
         setHskView("list");
