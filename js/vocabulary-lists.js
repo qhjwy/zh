@@ -1,9 +1,18 @@
 "use strict";
 
 const PAGE_SIZE = 60;
+const USER_STATE_PAGES = new Set(["hsk", "frequency", "zimu", "boya"]);
+const HIDDEN_CEDICT_TAGS = new Set([
+  "archaic",
+  "dated",
+  "latin_digit",
+  "proper_noun",
+  "regional",
+  "variant"
+]);
 
 function getLevelInfo(record, page) {
-  if (page === "dictionary" || page === "frequency") {
+  if (page === "dictionary" || page === "frequency" || page === "zimu") {
     return { levels: [], label: "" };
   }
 
@@ -23,7 +32,7 @@ function getLevelInfo(record, page) {
   return { levels: levels.slice(0, 1), label: source };
 }
 
-function normalizeRecord(record, page, knownState, savedState = {}) {
+function normalizeRecord(record, page, userWordState) {
   const word = String(record.word ?? record.Word ?? "");
   const pinyin = String(record.pinyin ?? record.Pinyin ?? "");
   const meaning = String(record.meaning ?? record.Meaning ?? record.Definitions ?? "");
@@ -31,16 +40,14 @@ function normalizeRecord(record, page, knownState, savedState = {}) {
     ? record["Dictionary definitions"].map(String).filter(Boolean)
     : meaning ? [meaning] : [];
   const id = String(record.ID ?? `${word}\u0000${pinyin}`);
-  const known = page === "hsk"
-    ? Boolean(knownState[id])
-    : page === "frequency"
-      ? Boolean(knownState[id])
-      : Boolean(record.known ?? record["学会"] === "x");
-  const saved = Boolean(savedState[id]);
+  const wId = String(record.w_id ?? "");
+  const hasUserState = USER_STATE_PAGES.has(page);
+  const initialKnown = Boolean(record.known ?? record["学会"] === "x");
   const levelInfo = getLevelInfo(record, page);
 
-  return {
+  const entry = {
     id,
+    wId,
     word,
     variants: [...new Set([word, String(record.Original ?? "")].filter(Boolean))],
     pinyin,
@@ -49,10 +56,21 @@ function normalizeRecord(record, page, knownState, savedState = {}) {
     levels: levelInfo.levels,
     levelLabel: levelInfo.label,
     frequency: String(record.Frequency ?? record.frequency ?? ""),
-    week: String(record["周"] ?? ""),
-    known,
-    saved
+    week: String(record["周"] ?? "")
   };
+  Object.defineProperties(entry, {
+    known: {
+      enumerable: true,
+      get: () => hasUserState
+        ? Boolean(wId && userWordState?.get(wId).known)
+        : initialKnown
+    },
+    saved: {
+      enumerable: true,
+      get: () => Boolean(hasUserState && wId && userWordState?.get(wId).saved)
+    }
+  });
+  return entry;
 }
 
 function renderSentenceMarkdown(text, container) {
@@ -91,35 +109,40 @@ function startVocabularyPage() {
   const source = document.body.dataset.source;
   const entriesElement = document.querySelector("#vocabulary-entries");
   const status = document.querySelector("#status");
+  const pagination = document.querySelector("#list-pagination") ?? status;
   const accountLink = document.querySelector("#hsk-account-link");
   const connectionStatus = document.querySelector("#account-connection");
   const accountAvatar = document.querySelector("#account-avatar");
   const accountIcon = accountLink?.querySelector("svg");
   const listView = document.querySelector("#hsk-list-view");
+  const frequencyListView = document.querySelector("#frequency-list-view");
   const hskFilters = document.querySelector(".hsk-filters");
   const progressView = document.querySelector("#hsk-progress-view");
   const progressRows = document.querySelector("#hsk-progress-rows");
+  const frequencyProgressView = document.querySelector("#frequency-progress-view");
+  const frequencyProgressRows = document.querySelector("#frequency-progress-rows");
   const musicView = document.querySelector("#hsk-music-view");
-  const musicLink = document.querySelector('.hsk-view-nav a[href="#music"]');
+  const musicLink = document.querySelector('.list-view-nav a[href="#music"]');
   const musicEditor = document.querySelector("#music-editor");
   const musicText = document.querySelector("#music-text");
   const musicAnalyze = document.querySelector("#music-analyze");
   const musicRedo = document.querySelector("#music-redo");
   const musicStatus = document.querySelector("#music-status");
   const musicResults = document.querySelector("#music-results");
-  const viewLinks = document.querySelectorAll(".hsk-view-nav a");
+  const viewLinks = document.querySelectorAll(".list-view-nav a");
   const unknownFilter = document.querySelector("#unknown-filter");
   const savedFilter = document.querySelector("#saved-filter");
   const pinyinToggle = document.querySelector("#pinyin-toggle");
   const onlyPinyinToggle = document.querySelector("#only-pinyin-toggle");
   const knownFilter = document.querySelector("#known-filter");
   const levelFilter = document.querySelector("#level-filter");
-  const chapterFilter = document.querySelector("#chapter-filter");
 
   const selectedIds = new Set();
-  const supabaseClient = (page === "hsk" || page === "boya") && window.supabase
+  const knownThisSession = new Set();
+  const supabaseClient = USER_STATE_PAGES.has(page) && window.supabase
     ? window.supabase.createClient(document.body.dataset.supabaseUrl, document.body.dataset.supabaseKey)
     : null;
+  const userWordState = window.createUserWordState?.(supabaseClient);
   const selectionToolbar = document.createElement("div");
   selectionToolbar.className = "selection-toolbar";
   selectionToolbar.setAttribute("role", "toolbar");
@@ -151,10 +174,10 @@ function startVocabularyPage() {
   let authGeneration = 0;
   let hskWordTrie = null;
   let cedictWordTrie = null;
+  let cedictDefinitionsById = null;
   let cedictLoadPromise = null;
   let musicRequested = window.location.hash === "#music";
   let activeMusicWord = null;
-  let frequencyStorageError = "";
   const musicDefinitionPopover = document.createElement("div");
   musicDefinitionPopover.className = "music-definition-popover";
   musicDefinitionPopover.setAttribute("role", "tooltip");
@@ -173,8 +196,6 @@ function startVocabularyPage() {
   });
 
   function updateSelectionToolbar() {
-    if (page === "boya") return;
-
     const selectedCount = selectedIds.size;
     selectionToolbar.hidden = selectedCount === 0;
     document.body.classList.toggle("has-selection", selectedCount > 0);
@@ -246,6 +267,23 @@ function startVocabularyPage() {
     }
   }
 
+  function setFrequencyView(view) {
+    if (!frequencyListView || !frequencyProgressView) return;
+    const showProgress = view === "progress";
+    frequencyListView.hidden = showProgress;
+    document.querySelector(".frequency-filters").hidden = showProgress;
+    status.hidden = showProgress;
+    pagination.hidden = showProgress;
+    frequencyProgressView.hidden = !showProgress;
+    for (const link of viewLinks) {
+      if (link.hash === `#${view}`) {
+        link.setAttribute("aria-current", "page");
+      } else {
+        link.removeAttribute("aria-current");
+      }
+    }
+  }
+
   function setAuthStatus(message, isError = false) {
     if (!accountLink) return;
     accountLink.title = message;
@@ -281,33 +319,6 @@ function startVocabularyPage() {
     }
   }
 
-  async function loadHskFlags() {
-    const table = document.body.dataset.supabaseTable;
-    const idColumn = document.body.dataset.supabaseIdColumn;
-    const knownColumn = document.body.dataset.supabaseKnownColumn;
-    const savedColumn = document.body.dataset.supabaseSavedColumn;
-    const knownState = {};
-    const savedState = {};
-    const pageSize = 1000;
-
-    for (let offset = 0; ; offset += pageSize) {
-      const { data, error } = await supabaseClient
-        .from(table)
-        .select(`${idColumn},${knownColumn},${savedColumn}`)
-        .order(idColumn, { ascending: true })
-        .range(offset, offset + pageSize - 1);
-      if (error) throw error;
-
-      for (const row of data) {
-        const id = String(row[idColumn]);
-        knownState[id] = row[knownColumn] === true;
-        savedState[id] = row[savedColumn] === true;
-      }
-      if (data.length < pageSize) break;
-    }
-    return { knownState, savedState };
-  }
-
   async function updateAuthSession(session) {
     activeSession = session;
     authSessionReady = true;
@@ -325,101 +336,108 @@ function startVocabularyPage() {
     if (!supabaseClient) {
       setConnectionStatus("Connection unavailable", true);
       setAuthStatus("Supabase client failed to load. Reload the page and try again.", true);
-      if (page === "hsk" && entries.length) {
+      if (page === "hsk") {
         hskReady = true;
         render();
       }
+      if (USER_STATE_PAGES.has(page)) {
+        status.textContent = "Supabase client failed to load. Reload the page and try again.";
+        status.classList.add("error");
+      }
       return;
     }
-    if (page !== "hsk") return;
+    if (!USER_STATE_PAGES.has(page)) return;
     if (!authSessionReady) return;
-    if (!entries.length) return;
-    if (!isSignedIn) {
-      for (const entry of entries) {
-        entry.known = false;
-        entry.saved = false;
-      }
+    if (!userWordState) {
       hskReady = true;
       render();
-      renderHskProgress();
-      setAuthStatus("Sign in to load and sync Known and Saved flags.");
+      status.textContent = "Word-state support failed to load. Reload the page and try again.";
+      status.classList.add("error");
+      setAuthStatus("Word-state support failed to load. Reload the page and try again.", true);
       return;
     }
-    for (const entry of entries) {
-      entry.known = false;
-      entry.saved = false;
-    }
-    hskReady = false;
+    if (page === "hsk") hskReady = false;
+    const loadingState = userWordState.load(session);
     render();
-    status.textContent = "Loading HSK account data…";
-    setAuthStatus("Loading your HSK flags…");
+    status.textContent = isSignedIn ? "Loading your word state…" : "Sign in to sync word status.";
+    setAuthStatus(isSignedIn ? "Loading your word state…" : "Sign in to sync Known and Saved flags.");
     try {
-      const { knownState, savedState } = await loadHskFlags();
+      await loadingState;
       if (generation !== authGeneration) return;
-      for (const entry of entries) {
-        entry.known = Boolean(knownState[entry.id]);
-        entry.saved = Boolean(savedState[entry.id]);
-      }
       remoteFlagsReady = true;
       hskReady = true;
       render();
-      renderHskProgress();
-      setAuthStatus(`Synced HSK flags for ${session.user.email}.`);
+      renderProgress();
+      status.classList.remove("error");
+      if (isSignedIn) {
+        status.textContent = "Your word state is synced.";
+        setAuthStatus(`Synced word state for ${session.user.email}.`);
+      } else {
+        status.textContent = "Sign in to sync word status.";
+        setAuthStatus("Sign in to sync Known and Saved flags.");
+      }
     } catch (error) {
       if (generation !== authGeneration) return;
       const message = error instanceof Error ? error.message : String(error);
       hskReady = true;
       render();
-      status.textContent = `Could not load HSK flags: ${message}`;
+      status.textContent = `Could not load your word state: ${message}`;
       status.classList.add("error");
-      setAuthStatus(`Could not load HSK flags: ${message}`, true);
+      setAuthStatus(`Could not load your word state: ${message}`, true);
     }
   }
 
-  async function updateHskFlag(entry, field, column, button) {
-    if (!supabaseClient || !activeSession || !remoteFlagsReady || button.disabled) return;
-    const idColumn = document.body.dataset.supabaseIdColumn;
-    const table = document.body.dataset.supabaseTable;
-    const nextValue = !entry[field];
+  async function updateWordFlag(entry, field, button) {
+    if (
+      !supabaseClient
+      || !activeSession
+      || !remoteFlagsReady
+      || !entry.wId
+      || button.disabled
+    ) return;
+    const nextValue = !userWordState.get(entry.wId)[field];
+    if ((page === "frequency" || page === "zimu") && field === "known") {
+      if (nextValue) {
+        knownThisSession.add(entry.id);
+      } else {
+        knownThisSession.delete(entry.id);
+      }
+    }
     button.disabled = true;
+    const write = userWordState.toggle(entry.wId, field);
+    render();
+    renderProgress();
     setAuthStatus(`Saving ${entry.word}…`);
     try {
-      const { data, error } = await supabaseClient
-        .from(table)
-        .update({ [column]: nextValue })
-        .eq(idColumn, Number(entry.id))
-        .select(idColumn)
-        .maybeSingle();
-      if (error) throw error;
-      if (!data) {
-        throw new Error(`No ${table} row was updated for ID ${entry.id}. Check the row and your Supabase update policy.`);
-      }
-      entry[field] = nextValue;
-      button.disabled = false;
-      button.setAttribute("aria-pressed", String(nextValue));
-      if (field === "known") {
-        button.textContent = nextValue ? "Known" : "Unknown";
-        button.classList.toggle("is-known", nextValue);
-        button.classList.toggle("is-unknown", !nextValue);
-        button.setAttribute("aria-label", `Mark ${entry.word} ${nextValue ? "unknown" : "known"}`);
-      } else {
-        button.textContent = nextValue ? "Saved" : "Save";
-        button.classList.toggle("is-saved", nextValue);
-        button.setAttribute("aria-label", `${nextValue ? "Unsave" : "Save"} ${entry.word}`);
-      }
-      renderHskProgress();
-      setAuthStatus(`Saved ${entry.word}.`);
+      await write;
+      render();
+      renderProgress();
+      status.classList.remove("error");
+      status.textContent = `${nextValue ? "Marked" : "Unmarked"} ${entry.word} ${field}.`;
+      setAuthStatus(`Saved ${entry.word} ${field} status.`);
     } catch (error) {
-      button.disabled = false;
+      if ((page === "frequency" || page === "zimu") && field === "known") {
+        knownThisSession.delete(entry.id);
+      }
+      render();
+      renderProgress();
       const message = error instanceof Error ? error.message : String(error);
-      setAuthStatus(`Could not save ${entry.word}: ${message}`, true);
+      status.textContent = `Could not save ${entry.word} status: ${message}`;
+      status.classList.add("error");
+      setAuthStatus(`Could not save ${entry.word} status: ${message}`, true);
     }
   }
 
   if (!supabaseClient) {
     setConnectionStatus("Connection unavailable", true);
-    if (page === "hsk") {
+    if (USER_STATE_PAGES.has(page)) {
       setAuthStatus("Supabase client failed to load. Reload the page and try again.", true);
+      status.textContent = "Supabase client failed to load. Reload the page and try again.";
+      status.classList.add("error");
+      if (page === "hsk") {
+        hskReady = true;
+        render();
+      }
     }
   } else {
     supabaseClient.auth.onAuthStateChange((_event, session) => {
@@ -433,7 +451,13 @@ function startVocabularyPage() {
     }).catch((error) => {
       const message = error instanceof Error ? error.message : String(error);
       setConnectionStatus("Connection unavailable", true);
-      if (page === "hsk") setAuthStatus(`Could not check Supabase session: ${message}`, true);
+      if (USER_STATE_PAGES.has(page)) {
+        hskReady = true;
+        render();
+        status.textContent = `Could not check Supabase session: ${message}`;
+        status.classList.add("error");
+        setAuthStatus(`Could not check Supabase session: ${message}`, true);
+      }
     });
   }
   window.addEventListener("offline", () => setConnectionStatus("Offline", true));
@@ -446,7 +470,13 @@ function startVocabularyPage() {
     }).catch((error) => {
       const message = error instanceof Error ? error.message : String(error);
       setConnectionStatus("Connection unavailable", true);
-      if (page === "hsk") setAuthStatus(`Could not check Supabase session: ${message}`, true);
+      if (USER_STATE_PAGES.has(page)) {
+        hskReady = true;
+        render();
+        status.textContent = `Could not check Supabase session: ${message}`;
+        status.classList.add("error");
+        setAuthStatus(`Could not check Supabase session: ${message}`, true);
+      }
     });
   });
 
@@ -498,12 +528,41 @@ function startVocabularyPage() {
     return root;
   }
 
+  function buildCedictDefinitionsById(records) {
+    const definitionsById = new Map();
+    for (const record of records) {
+      const wordId = String(record.w_id ?? "");
+      if (!wordId) continue;
+
+      const tags = JSON.parse(String(record.Tags ?? "[]"));
+      if (tags.some((tag) => HIDDEN_CEDICT_TAGS.has(tag))) continue;
+
+      const definitions = String(record.Definitions ?? "")
+        .replace(/^\/|\/$/g, "")
+        .split("/")
+        .map((definition) => definition.trim())
+        .filter((definition) => definition && !definition.startsWith("CL:"));
+      if (!definitions.length) continue;
+
+      const existing = definitionsById.get(wordId) ?? [];
+      for (const definition of definitions) {
+        if (!existing.includes(definition)) existing.push(definition);
+      }
+      definitionsById.set(wordId, existing);
+    }
+    return definitionsById;
+  }
+
   function loadCedict() {
-    if (cedictWordTrie) return Promise.resolve();
+    if (cedictDefinitionsById && (!musicRequested || cedictWordTrie)) {
+      return Promise.resolve();
+    }
     if (cedictLoadPromise) return cedictLoadPromise;
 
-    musicAnalyze.disabled = true;
-    musicStatus.textContent = "正在加载词典释义…";
+    if (musicRequested) {
+      musicAnalyze.disabled = true;
+      musicStatus.textContent = "正在加载词典释义…";
+    }
     const source = document.body.dataset.cedictSource;
     cedictLoadPromise = fetch(source)
       .then((response) => {
@@ -512,9 +571,12 @@ function startVocabularyPage() {
       })
       .then((records) => {
         if (!Array.isArray(records)) throw new Error("CEDICT 数据格式无效。");
-        cedictWordTrie = buildCedictWordTrie(records);
-        musicAnalyze.disabled = false;
-        musicStatus.textContent = "粘贴歌词或中文文本，然后点击“确定”识别词语。";
+        cedictDefinitionsById = buildCedictDefinitionsById(records);
+        if (musicRequested) {
+          cedictWordTrie = buildCedictWordTrie(records);
+          musicAnalyze.disabled = false;
+          musicStatus.textContent = "粘贴歌词或中文文本，然后点击“确定”识别词语。";
+        }
       })
       .catch((error) => {
         cedictLoadPromise = null;
@@ -743,6 +805,61 @@ function startVocabularyPage() {
     }
   }
 
+  function renderFrequencyProgress() {
+    if (!frequencyProgressRows) return;
+    const groups = [
+      { label: "一百", limit: 100 },
+      { label: "五百", limit: 500 },
+      { label: "一千", limit: 1_000 },
+      { label: "五千", limit: 5_000 },
+      { label: "一万 - fluency", limit: 10_000 },
+      { label: "五万 - ~all", limit: 50_000 }
+    ];
+
+    frequencyProgressRows.replaceChildren();
+    for (const group of groups) {
+      const groupEntries = entries.slice(0, group.limit);
+      const knownCount = groupEntries.filter((entry) => entry.known).length;
+      const percentage = groupEntries.length
+        ? Math.round((knownCount / groupEntries.length) * 100)
+        : 0;
+      const row = document.createElement("tr");
+      const levelCell = document.createElement("th");
+      levelCell.scope = "row";
+      levelCell.className = "frequency-progress-level";
+      levelCell.textContent = group.label;
+      row.append(levelCell);
+
+      const progressCell = document.createElement("td");
+      const progress = document.createElement("div");
+      progress.className = "hsk-progress-bar frequency-progress-bar";
+      progress.setAttribute("role", "progressbar");
+      progress.setAttribute("aria-label", `${group.label} 已认识词语`);
+      progress.setAttribute("aria-valuemin", "0");
+      progress.setAttribute("aria-valuemax", String(groupEntries.length));
+      progress.setAttribute("aria-valuenow", String(knownCount));
+      const fill = document.createElement("span");
+      fill.className = "hsk-progress-fill";
+      fill.style.width = `${percentage}%`;
+      const percentageLabel = document.createElement("span");
+      percentageLabel.className = "hsk-progress-percentage";
+      percentageLabel.textContent = `${percentage}%`;
+      progress.append(fill, percentageLabel);
+
+      const count = document.createElement("div");
+      count.className = "hsk-progress-count";
+      count.textContent = `已认识 ${knownCount} / ${groupEntries.length}`;
+      progressCell.append(progress, count);
+      row.append(progressCell);
+      frequencyProgressRows.append(row);
+    }
+  }
+
+  function renderProgress() {
+    if (page === "hsk") renderHskProgress();
+    if (page === "frequency" || page === "zimu") renderFrequencyProgress();
+  }
+
   function getPageUrl(pageNumber) {
     const url = new URL(window.location.href);
     if (pageNumber === 1) {
@@ -771,19 +888,18 @@ function startVocabularyPage() {
       [...(levelFilter?.querySelectorAll('button[data-level][aria-pressed="true"]') ?? [])]
         .map((button) => button.dataset.level)
     );
-    const selectedWeeks = new Set(
-      [...(chapterFilter?.querySelectorAll('button[data-week][aria-pressed="true"]') ?? [])]
-        .map((button) => button.dataset.week)
-    );
     const showKnown = knownFilter?.checked ?? false;
     const showUnknown = unknownFilter?.checked ?? false;
 
     const matches = entries.filter((entry) => {
-      if (page === "frequency" && (showKnown || showUnknown)
-        && !(entry.known ? showKnown : showUnknown)) {
-        return false;
-      }
-      if (page !== "frequency" && unknownFilter?.checked && entry.known) {
+      const keepKnownThisSession = (page === "frequency" || page === "zimu")
+        && showUnknown
+        && knownThisSession.has(entry.id);
+      if (
+        USER_STATE_PAGES.has(page)
+        && (showKnown || showUnknown)
+        && !(entry.known ? showKnown || keepKnownThisSession : showUnknown)
+      ) {
         return false;
       }
       if (savedFilter?.checked && !entry.saved) {
@@ -796,43 +912,9 @@ function startVocabularyPage() {
       )) {
         return false;
       }
-      if (selectedWeeks.size && !selectedWeeks.has(entry.week || "-")) {
-        return false;
-      }
       return true;
     });
-    if (page === "boya") {
-      const selectedRank = new Map(
-        [...selectedIds].map((id, index) => [id, index])
-      );
-      matches.sort((left, right) =>
-        (selectedRank.get(left.id) ?? Infinity) - (selectedRank.get(right.id) ?? Infinity)
-      );
-    }
     return matches;
-  }
-
-  function renderBoyaWeekFilters() {
-    if (page !== "boya" || !chapterFilter) return;
-
-    const weeks = new Set(entries.map((entry) => entry.week || "-"));
-    chapterFilter.replaceChildren();
-    const sortedWeeks = [...weeks].sort((left, right) =>
-      left === "-" ? 1 : right === "-" ? -1 : Number(left) - Number(right)
-    );
-    for (const week of sortedWeeks) {
-      const weekButton = document.createElement("button");
-      weekButton.className = "boya-level level-chip week-chip";
-      weekButton.type = "button";
-      weekButton.dataset.week = week;
-      weekButton.setAttribute("aria-pressed", "false");
-      weekButton.textContent = week === "-" ? "-" : `周${week}`;
-      weekButton.setAttribute(
-        "aria-label",
-        week === "-" ? "筛选无周" : `筛选第${week}周`
-      );
-      chapterFilter.append(weekButton);
-    }
   }
 
   function render() {
@@ -852,7 +934,7 @@ function startVocabularyPage() {
 
     for (const entry of visible) {
       const item = document.createElement("article");
-      item.className = `entry${selectedIds.has(entry.id) ? " is-selected" : ""}`;
+      item.className = `entry${page !== "boya" && selectedIds.has(entry.id) ? " is-selected" : ""}${page === "boya" && entry.saved ? " is-marked" : ""}`;
 
       const heading = document.createElement("div");
       heading.className = "vocabulary-entry-heading";
@@ -864,40 +946,47 @@ function startVocabularyPage() {
       word.className = "word word-select";
       word.textContent = entry.word;
       word.type = "button";
-      word.setAttribute("aria-pressed", String(selectedIds.has(entry.id)));
-      word.setAttribute("aria-label", `选择${entry.word}`);
+      const isBoya = page === "boya";
+      word.setAttribute("aria-pressed", String(isBoya ? entry.saved : selectedIds.has(entry.id)));
+      word.setAttribute("aria-label", isBoya
+        ? `${entry.saved ? "取消标记" : "标记"}${entry.word}`
+        : `选择${entry.word}`);
+      if (isBoya) {
+        word.disabled = !remoteFlagsReady || !activeSession || !entry.wId;
+      }
       word.addEventListener("click", () => {
+        if (isBoya) {
+          updateWordFlag(entry, "saved", word);
+          return;
+        }
         const selected = selectedIds.has(entry.id);
         if (selected) {
           selectedIds.delete(entry.id);
         } else {
           selectedIds.add(entry.id);
         }
-        if (page === "boya") {
-          resetAndRender();
-          return;
-        }
         item.classList.toggle("is-selected", !selected);
         selectionIndicator.textContent = selected ? "" : "✓";
         word.setAttribute("aria-pressed", String(!selected));
         updateSelectionToolbar();
       });
-      heading.addEventListener("click", (event) => {
-        if (
-          page === "boya"
-          || !selectedIds.has(entry.id)
-          || event.target === word
-          || event.clientX >= word.getBoundingClientRect().left
-        ) {
-          return;
-        }
+      if (!isBoya) {
+        heading.addEventListener("click", (event) => {
+          if (
+            !selectedIds.has(entry.id)
+            || event.target === word
+            || event.clientX >= word.getBoundingClientRect().left
+          ) {
+            return;
+          }
 
-        selectedIds.delete(entry.id);
-        item.classList.remove("is-selected");
-        selectionIndicator.textContent = "";
-        word.setAttribute("aria-pressed", "false");
-        updateSelectionToolbar();
-      });
+          selectedIds.delete(entry.id);
+          item.classList.remove("is-selected");
+          selectionIndicator.textContent = "";
+          word.setAttribute("aria-pressed", "false");
+          updateSelectionToolbar();
+        });
+      }
       if (page === "boya") {
         heading.append(word);
       } else {
@@ -911,13 +1000,14 @@ function startVocabularyPage() {
         heading.append(pinyin);
       }
 
+      const isRankedList = page === "frequency" || page === "zimu";
       const level = document.createElement("span");
-      level.className = page === "hsk" || page === "frequency"
+      level.className = page === "hsk" || isRankedList
         ? `hsk-level list-level${page === "hsk" ? ` ${entry.levelLabel.toLowerCase().replace(/[^a-z0-9-]/g, "")}` : " frequency-rank"}`
         : "list-level boya-level";
       level.textContent = page === "hsk"
         ? entry.levelLabel ? `HSK${entry.levelLabel.replace(/^HSK/i, "")}` : "Unassigned"
-        : page === "frequency"
+        : isRankedList
           ? entry.frequency ? `#${entry.frequency}` : "Unranked"
         : entry.levelLabel
           ? `Boya ${entry.levelLabel.replace(/^Boya\s*/i, "")}${entry.chapter ? ` · ${entry.chapter}` : ""}`
@@ -938,43 +1028,47 @@ function startVocabularyPage() {
       const entryActions = document.createElement("div");
       entryActions.className = "entry-actions";
       entryActions.append(level);
-      if (page === "hsk" || page === "frequency") {
-        const knownToggle = document.createElement("button");
-        knownToggle.className = `known-entry flag-toggle${entry.known ? " is-known" : " is-unknown"}`;
-        knownToggle.type = "button";
-        knownToggle.textContent = entry.known ? "Known" : "Unknown";
-        knownToggle.setAttribute("aria-pressed", String(entry.known));
-        knownToggle.setAttribute("aria-label", `Mark ${entry.word} ${entry.known ? "unknown" : "known"}`);
-        knownToggle.disabled = page === "hsk" && !remoteFlagsReady;
-        knownToggle.addEventListener("click", () => {
-          if (page === "hsk") {
-            updateHskFlag(entry, "known", document.body.dataset.supabaseKnownColumn, knownToggle);
-          } else {
-            entry.known = !entry.known;
-            knownToggle.textContent = entry.known ? "Known" : "Unknown";
-            knownToggle.classList.toggle("is-known", entry.known);
-            knownToggle.classList.toggle("is-unknown", !entry.known);
-            knownToggle.setAttribute("aria-pressed", String(entry.known));
-            knownToggle.setAttribute("aria-label", `Mark ${entry.word} ${entry.known ? "unknown" : "known"}`);
-            saveFrequencyKnownState();
-            resetAndRender();
-          }
-        });
-        entryActions.append(knownToggle);
-
-        if (page === "hsk") {
-          const savedToggle = document.createElement("button");
-          savedToggle.className = `saved-entry flag-toggle${entry.saved ? " is-saved" : ""}`;
-          savedToggle.type = "button";
-          savedToggle.textContent = entry.saved ? "Saved" : "Save";
-          savedToggle.setAttribute("aria-pressed", String(entry.saved));
-          savedToggle.setAttribute("aria-label", `${entry.saved ? "Unsave" : "Save"} ${entry.word}`);
-          savedToggle.disabled = !remoteFlagsReady;
-          savedToggle.addEventListener("click", () => {
-            updateHskFlag(entry, "saved", document.body.dataset.supabaseSavedColumn, savedToggle);
+      let frequencySavedToggle = null;
+      if (USER_STATE_PAGES.has(page)) {
+        if (!isBoya) {
+          const knownToggle = document.createElement("button");
+          knownToggle.className = `known-entry flag-toggle${entry.known ? " is-known" : " is-unknown"}`;
+          knownToggle.type = "button";
+          knownToggle.textContent = entry.known ? "Known" : "Unknown";
+          knownToggle.setAttribute("aria-pressed", String(entry.known));
+          knownToggle.setAttribute("aria-label", `Mark ${entry.word} ${entry.known ? "unknown" : "known"}`);
+          knownToggle.disabled = !remoteFlagsReady || !activeSession || !entry.wId;
+          knownToggle.addEventListener("click", () => {
+            updateWordFlag(entry, "known", knownToggle);
           });
+          entryActions.append(knownToggle);
+        }
+
+        const savedToggle = document.createElement("button");
+        savedToggle.className = isRankedList
+          ? `frequency-save-button flag-toggle${entry.saved ? " is-saved" : ""}`
+          : `saved-entry flag-toggle${entry.saved ? " is-saved" : ""}`;
+        savedToggle.type = "button";
+        savedToggle.setAttribute("aria-pressed", String(entry.saved));
+        savedToggle.setAttribute("aria-label", `${entry.saved ? "Unsave" : "Save"} ${entry.word}`);
+        savedToggle.disabled = !remoteFlagsReady || !activeSession || !entry.wId;
+        if (isRankedList) {
+          const icon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+          icon.setAttribute("class", "dictionary-save-icon");
+          icon.setAttribute("viewBox", "0 0 24 24");
+          icon.setAttribute("aria-hidden", "true");
+          const bookmark = document.createElementNS("http://www.w3.org/2000/svg", "path");
+          bookmark.setAttribute("d", "M6 4.5a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1V21l-6-4-6 4V4.5Z");
+          icon.append(bookmark);
+          savedToggle.append(icon);
+          frequencySavedToggle = savedToggle;
+        } else {
+          savedToggle.textContent = entry.saved ? "Saved" : "Save";
           entryActions.append(savedToggle);
         }
+        savedToggle.addEventListener("click", () => {
+          updateWordFlag(entry, "saved", savedToggle);
+        });
       }
 
       const individualCopyButton = document.createElement("button");
@@ -997,9 +1091,7 @@ function startVocabularyPage() {
       sentenceButton.textContent = "例句";
       sentenceButton.setAttribute("aria-label", `为${entry.word}生成例句`);
       sentenceButton.setAttribute("aria-expanded", "false");
-      if (page !== "frequency") {
-        entryActions.append(sentenceButton);
-      }
+      entryActions.append(sentenceButton);
 
       const sentenceHelper = document.createElement("section");
       sentenceHelper.className = "sentence-helper";
@@ -1058,6 +1150,9 @@ function startVocabularyPage() {
         });
         entryActions.append(detailButton);
       }
+      if (frequencySavedToggle) {
+        entryActions.append(frequencySavedToggle);
+      }
       item.insertBefore(entryActions, item.querySelector(".defs"));
       item.append(sentenceHelper);
 
@@ -1068,7 +1163,7 @@ function startVocabularyPage() {
     const last = Math.min(start + PAGE_SIZE, matches.length);
     const count = document.createElement("span");
     count.textContent = `${first}–${last} of ${matches.length} entries`;
-    status.replaceChildren(count);
+    pagination.replaceChildren(count);
     if (matches.length > PAGE_SIZE) {
       const pageLinks = document.createElement("span");
       pageLinks.className = "list-page-links";
@@ -1081,25 +1176,7 @@ function startVocabularyPage() {
         }
         pageLinks.append(createPageLink("→", currentPage + 1, "Next page"));
       }
-      status.append(pageLinks);
-    }
-    if (frequencyStorageError) {
-      const error = document.createElement("span");
-      error.className = "error";
-      error.textContent = ` Known status could not be saved: ${frequencyStorageError}`;
-      status.append(error);
-    }
-  }
-
-  function saveFrequencyKnownState() {
-    try {
-      const knownState = Object.fromEntries(
-        entries.filter((entry) => entry.known).map((entry) => [entry.id, true])
-      );
-      window.localStorage.setItem(document.body.dataset.storageKey, JSON.stringify(knownState));
-      frequencyStorageError = "";
-    } catch (error) {
-      frequencyStorageError = error instanceof Error ? error.message : String(error);
+      pagination.append(pageLinks);
     }
   }
 
@@ -1108,7 +1185,7 @@ function startVocabularyPage() {
     render();
   }
 
-  status.addEventListener("click", (event) => {
+  pagination.addEventListener("click", (event) => {
     const link = event.target.closest("a[data-page]");
     if (!link) return;
     event.preventDefault();
@@ -1123,22 +1200,35 @@ function startVocabularyPage() {
         if (window.location.hash !== link.hash) {
           window.history.pushState(null, "", link.hash);
         }
-        setHskView(link.hash.slice(1));
+        if (page === "hsk") {
+          setHskView(link.hash.slice(1));
+        } else {
+          setFrequencyView(link.hash.slice(1));
+        }
       });
     }
     window.addEventListener("popstate", () => {
+      if (page === "hsk") {
+        const view = ["#progress", "#music"].includes(window.location.hash)
+          ? window.location.hash.slice(1)
+          : "list";
+        setHskView(view);
+        musicRequested = view === "music";
+        if (musicRequested && entries.length && !cedictWordTrie) loadCedict();
+      } else {
+        const view = window.location.hash === "#progress" ? "progress" : "list";
+        setFrequencyView(view);
+      }
+    });
+    if (page === "hsk") {
       const view = ["#progress", "#music"].includes(window.location.hash)
         ? window.location.hash.slice(1)
         : "list";
       setHskView(view);
       musicRequested = view === "music";
-      if (musicRequested && entries.length && !cedictWordTrie) loadCedict();
-    });
-    const view = ["#progress", "#music"].includes(window.location.hash)
-      ? window.location.hash.slice(1)
-      : "list";
-    setHskView(view);
-    musicRequested = view === "music";
+    } else {
+      setFrequencyView(window.location.hash === "#progress" ? "progress" : "list");
+    }
   }
   window.addEventListener("popstate", () => {
     const pageFromUrl = Number(new URLSearchParams(window.location.search).get("page"));
@@ -1146,10 +1236,20 @@ function startVocabularyPage() {
     render();
   });
   if (unknownFilter) {
-    unknownFilter.addEventListener("change", resetAndRender);
+    unknownFilter.addEventListener("change", () => {
+      if (page === "hsk" && unknownFilter.checked && knownFilter) {
+        knownFilter.checked = false;
+      }
+      resetAndRender();
+    });
   }
   if (knownFilter) {
-    knownFilter.addEventListener("change", resetAndRender);
+    knownFilter.addEventListener("change", () => {
+      if (page === "hsk" && knownFilter.checked && unknownFilter) {
+        unknownFilter.checked = false;
+      }
+      resetAndRender();
+    });
   }
   if (savedFilter) {
     savedFilter.addEventListener("change", resetAndRender);
@@ -1166,15 +1266,6 @@ function startVocabularyPage() {
           filterButton.setAttribute("aria-pressed", String(filterButton === button && !wasSelected));
         }
       }
-      resetAndRender();
-    });
-  }
-  if (chapterFilter) {
-    chapterFilter.addEventListener("click", (event) => {
-      const button = event.target.closest("button[data-week]");
-      if (!button) return;
-      const wasSelected = button.getAttribute("aria-pressed") === "true";
-      button.setAttribute("aria-pressed", String(!wasSelected));
       resetAndRender();
     });
   }
@@ -1204,29 +1295,29 @@ function startVocabularyPage() {
       if (!Array.isArray(data)) {
         throw new Error(`Expected ${source} to contain a JSON array.`);
       }
-      let knownState = {};
-      if (page === "frequency") {
-        try {
-          const stored = window.localStorage.getItem(document.body.dataset.storageKey);
-          if (stored) {
-            const parsed = JSON.parse(stored);
-            if (parsed === null || typeof parsed !== "object" || Array.isArray(parsed)) {
-              throw new Error("Stored Frequency known state must be a JSON object.");
-            }
-            knownState = parsed;
-          }
-        } catch (error) {
-          frequencyStorageError = error instanceof Error ? error.message : String(error);
-        }
-      }
-      entries = data.map((record) => normalizeRecord(record, page, knownState));
-      renderBoyaWeekFilters();
+      entries = data.map((record) => normalizeRecord(record, page, userWordState));
+      renderProgress();
       if (page === "hsk") {
         hskWordTrie = buildHskWordTrie();
-        if (musicRequested) loadCedict();
-        else musicStatus.textContent = "进入音乐页面后加载词典释义…";
-        renderHskProgress();
+        if (musicRequested) {
+          loadCedict();
+        } else {
+          musicStatus.textContent = "进入音乐页面后加载词典释义…";
+        }
+        renderProgress();
         if (authSessionReady) await updateAuthSession(activeSession);
+        else render();
+        loadCedict().then(() => {
+          if (!cedictDefinitionsById) {
+            status.textContent = "Could not load CEDICT definitions for HSK words.";
+            status.classList.add("error");
+            return;
+          }
+          for (const entry of entries) {
+            entry.definitions = cedictDefinitionsById.get(entry.wId) ?? [];
+          }
+          render();
+        });
       } else {
         render();
         await updateAuthSession(activeSession);

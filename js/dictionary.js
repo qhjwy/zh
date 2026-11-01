@@ -17,6 +17,7 @@ const supabaseClient = window.supabase?.createClient(
   document.body.dataset.supabaseUrl,
   document.body.dataset.supabaseKey
 );
+const userWordState = window.createUserWordState?.(supabaseClient);
 
 let showTraditional = false;
 let lastQuery = "";
@@ -25,9 +26,6 @@ let ready = false;
 let readyStatus = "正在加载词典…";
 let activeSession = null;
 let currentEntries = [];
-let savedFlags = new Map();
-let savedFlagsReady = false;
-let savedFlagsGeneration = 0;
 const hiddenByDefaultTags = new Set([
   "archaic",
   "dated",
@@ -93,14 +91,14 @@ function render(entries) {
 
     appendHskBadges(heading, entry.hskLevels);
 
-    if (entry.hskIds.length) {
-      const saved = entry.hskIds.some((id) => savedFlags.get(id));
+    if (entry.w_id) {
+      const saved = userWordState?.get(entry.w_id).saved ?? false;
       const saveButton = document.createElement("button");
       saveButton.className = `dictionary-save-button flag-toggle${saved ? " is-saved" : ""}`;
       saveButton.type = "button";
       saveButton.setAttribute("aria-pressed", String(saved));
       saveButton.setAttribute("aria-label", `${saved ? "Unsave" : "Save"} ${displayWord}`);
-      saveButton.disabled = !supabaseClient || !activeSession || !savedFlagsReady;
+      saveButton.disabled = !supabaseClient || !activeSession || !userWordState?.ready;
       const icon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
       icon.setAttribute("class", "dictionary-save-icon");
       icon.setAttribute("viewBox", "0 0 24 24");
@@ -173,67 +171,43 @@ function updateAccountAvatar(isSignedIn) {
   }
 }
 
-async function loadSavedFlags(entries, generation) {
-  const ids = [...new Set(entries.flatMap((entry) => entry.hskIds))];
-  if (!supabaseClient || !activeSession || !ids.length) {
-    savedFlagsReady = true;
-    render(currentEntries);
-    return;
-  }
-
-  savedFlagsReady = false;
-  render(currentEntries);
-  const idColumn = document.body.dataset.supabaseIdColumn;
-  const savedColumn = document.body.dataset.supabaseSavedColumn;
-  const table = document.body.dataset.supabaseTable;
-  try {
-    const { data, error } = await supabaseClient
-      .from(table)
-      .select(`${idColumn},${savedColumn}`)
-      .in(idColumn, ids.map(Number));
-    if (error) throw error;
-    if (generation !== savedFlagsGeneration) return;
-    for (const id of ids) savedFlags.set(id, false);
-    for (const row of data) {
-      savedFlags.set(String(row[idColumn]), row[savedColumn] === true);
-    }
-    savedFlagsReady = true;
-    render(currentEntries);
-  } catch (error) {
-    if (generation !== savedFlagsGeneration) return;
-    savedFlagsReady = false;
-    const message = error instanceof Error ? error.message : String(error);
-    statusElement.textContent = `Could not load saved words: ${message}`;
-    statusElement.classList.add("error");
-  }
-}
-
 async function toggleSaved(entry, button) {
-  if (!supabaseClient || !activeSession || !savedFlagsReady || button.disabled) return;
-  const idColumn = document.body.dataset.supabaseIdColumn;
-  const savedColumn = document.body.dataset.supabaseSavedColumn;
-  const table = document.body.dataset.supabaseTable;
-  const ids = entry.hskIds.map(Number);
-  const nextValue = !entry.hskIds.some((id) => savedFlags.get(id));
+  if (!supabaseClient || !activeSession || !userWordState?.ready || button.disabled) return;
   button.disabled = true;
+  const nextValue = !userWordState.get(entry.w_id).saved;
+  const write = userWordState.toggle(entry.w_id, "saved");
+  render(currentEntries);
   try {
-    const { data, error } = await supabaseClient
-      .from(table)
-      .update({ [savedColumn]: nextValue })
-      .in(idColumn, ids)
-      .select(idColumn);
-    if (error) throw error;
-    if (data.length !== ids.length) {
-      throw new Error(`Only ${data.length} of ${ids.length} HSK rows were updated.`);
-    }
-    for (const id of entry.hskIds) savedFlags.set(id, nextValue);
+    await write;
     render(currentEntries);
     statusElement.classList.remove("error");
     statusElement.textContent = `${nextValue ? "Saved" : "Removed"} ${entry.simplified}.`;
   } catch (error) {
-    button.disabled = false;
+    render(currentEntries);
     const message = error instanceof Error ? error.message : String(error);
     statusElement.textContent = `Could not save ${entry.simplified}: ${message}`;
+    statusElement.classList.add("error");
+  }
+}
+
+async function loadUserState(session) {
+  updateAccount(session);
+  if (!userWordState) {
+    updateAccount(session, true);
+    return;
+  }
+  try {
+    const loadingState = userWordState.load(session);
+    render(currentEntries);
+    await loadingState;
+    render(currentEntries);
+    statusElement.classList.remove("error");
+    statusElement.textContent = readyStatus;
+  } catch (error) {
+    render(currentEntries);
+    const message = error instanceof Error ? error.message : String(error);
+    updateAccount(session, true);
+    statusElement.textContent = `Could not load your word state: ${message}`;
     statusElement.classList.add("error");
   }
 }
@@ -251,19 +225,12 @@ if (!supabaseClient) {
 } else {
   supabaseClient.auth.onAuthStateChange((_event, session) => {
     window.setTimeout(() => {
-      updateAccount(session);
-      savedFlags.clear();
-      savedFlagsReady = false;
-      const generation = ++savedFlagsGeneration;
-      render(currentEntries);
-      loadSavedFlags(currentEntries, generation);
+      loadUserState(session);
     }, 0);
   });
   supabaseClient.auth.getSession().then(({ data, error }) => {
     if (error) throw error;
-    updateAccount(data.session);
-    const generation = ++savedFlagsGeneration;
-    loadSavedFlags(currentEntries, generation);
+    return loadUserState(data.session);
   }).catch((error) => {
     const message = error instanceof Error ? error.message : String(error);
     updateAccount(null, true);
@@ -275,7 +242,7 @@ if (!supabaseClient) {
     updateAccount(activeSession);
     supabaseClient.auth.getSession().then(({ data, error }) => {
       if (error) throw error;
-      updateAccount(data.session);
+      return loadUserState(data.session);
     }).catch((error) => {
       const message = error instanceof Error ? error.message : String(error);
       updateAccount(null, true);
@@ -289,8 +256,6 @@ function runSearch(query) {
   if (!ready) return;
   if (!query.trim()) {
     currentEntries = [];
-    savedFlagsGeneration += 1;
-    savedFlagsReady = true;
     resultsElement.replaceChildren();
     statusElement.textContent = readyStatus;
     return;
@@ -347,8 +312,6 @@ clearButton.addEventListener("click", () => {
   searchInput.value = "";
   lastQuery = "";
   currentEntries = [];
-  savedFlagsGeneration += 1;
-  savedFlagsReady = true;
   resultsElement.replaceChildren();
   statusElement.textContent = readyStatus;
   clearButton.textContent = "→";
@@ -387,10 +350,7 @@ worker.addEventListener("message", (event) => {
     runSearch(lastQuery);
   } else if (message.type === "results") {
     currentEntries = message.entries;
-    savedFlagsReady = !activeSession || !supabaseClient;
     render(currentEntries);
-    const generation = ++savedFlagsGeneration;
-    loadSavedFlags(currentEntries, generation);
   } else if (message.type === "error") {
     ready = false;
     readyStatus = `无法加载词典：${message.message}`;

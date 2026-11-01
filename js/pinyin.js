@@ -11,10 +11,14 @@ window.convertPinyin = function convertPinyin(pinyin) {
   };
 
   return pinyin.split(" ").map((syllable) => {
-    const match = syllable.match(/([1-5])$/);
-    let word = syllable.replace(/u:/g, "ü").replace(/v/g, "ü");
-    if (!match || match[1] === "5") return word.replace(/[1-5]$/, "");
-    word = word.slice(0, -1);
+    const erhuaMatch = syllable.match(/([1-5])r$/i);
+    const match = syllable.match(/([1-5])$/) ?? erhuaMatch;
+    const suffix = erhuaMatch ? syllable.slice(-1) : "";
+    let word = erhuaMatch
+      ? syllable.replace(/([1-5])r$/i, "")
+      : match ? syllable.slice(0, -1) : syllable;
+    word = word.replace(/u:/g, "ü").replace(/v/g, "ü");
+    if (!match || match[1] === "5") return `${word}${suffix}`;
 
     const lower = word.toLowerCase();
     let vowel = "";
@@ -30,8 +34,9 @@ window.convertPinyin = function convertPinyin(pinyin) {
       }
     }
 
-    return vowel
+    const markedWord = vowel
       ? word.replace(new RegExp(vowel, "i"), toneMap[vowel][Number(match[1]) - 1])
       : word;
+    return `${markedWord}${suffix}`;
   }).join(" ");
 };

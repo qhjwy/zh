@@ -4,41 +4,36 @@ import os
 import re
 
 # --- Configuration ---
-ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+ROOT_DIR = os.path.dirname(
+    os.path.dirname(
+        os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    )
+)
 EXCEL_DIR = os.path.dirname(ROOT_DIR)
 OUTPUT_DIR = os.path.join(ROOT_DIR, 'data')
 
 EXCEL_FILES = {
-    'cedict': '1 cedict.xlsx',
-    'Frequency': '2 Frequency.xlsx',
-    'HSK': '3 HSK.xlsx',
-    'Boya': '4 Boya.xlsx',
+    'cedict': 'c cedict.xlsx',
+    'frequency': 'f Frequency.xlsx',
+    'hsk': 'h HSK.xlsx',
+    'boya': 'b Boya.xlsx',
+    'subtlex': 'z Subtlex.xlsx',
 }
 
 OUTPUT_FILES = {
     'cedict': 'cedict.json',
-    'Frequency': 'frequency.json',
-    'HSK': 'hsk.json',
-    'Boya': 'boya.json',
+    'frequency': 'frequency.json',
+    'hsk': 'hsk.json',
+    'boya': 'boya.json',
+    'subtlex': 'zimu.json',
 }
-
-HIDDEN_CEDICT_TAGS = {
-    'archaic',
-    'dated',
-    'latin_digit',
-    'proper_noun',
-    'regional',
-    'variant',
+SOURCE_ID_FIELDS = {
+    'cedict': 'c_id',
+    'frequency': 'f_id',
+    'hsk': 'h_id',
+    'boya': 'ID',
+    'subtlex': 'z_id',
 }
-
-
-def normalize_pinyin(value):
-    """Normalize numbered pinyin separators for matching spreadsheet records."""
-    return re.sub(
-        r"[\s'’‘·-]+",
-        "",
-        str(value).lower().replace('u:', 'v').replace('ü', 'v'),
-    )
 
 
 def read_excel(source_name, excel_path=None):
@@ -49,51 +44,41 @@ def read_excel(source_name, excel_path=None):
         excel_path = os.path.join(EXCEL_DIR, EXCEL_FILES[source_name])
     if not os.path.isfile(excel_path):
         raise FileNotFoundError(f"Excel workbook not found: {excel_path}")
-    return pd.read_excel(excel_path, dtype=str).fillna('')
+    df = pd.read_excel(excel_path, dtype=str).fillna('')
+    if source_name == 'frequency' and 'Pinyin' in df.columns:
+        df['Pinyin'] = df['Pinyin'].map(restore_frequency_excel_date)
+    return df
 
 
-def add_dictionary_definitions(df):
-    """Add visible CEDICT definitions to matching HSK entries."""
-    cedict = read_excel('cedict')
-    definitions_by_key = {}
-    for record in cedict.to_dict(orient='records'):
-        word = record.get('Word', '')
-        pinyin = normalize_pinyin(record.get('Pinyin', ''))
-        if not word or not pinyin:
-            continue
-
-        tags = json.loads(record.get('Tags') or '[]')
-        if HIDDEN_CEDICT_TAGS.intersection(tags):
-            continue
-
-        definition = str(record.get('Definitions', '')).strip('/')
-        if not definition:
-            continue
-
-        key = (word, pinyin)
-        definitions = definitions_by_key.setdefault(key, [])
-        for item in definition.split('/'):
-            item = item.strip()
-            if item and not item.startswith('CL:') and item not in definitions:
-                definitions.append(item)
-
-    df['Dictionary definitions'] = df.apply(
-        lambda record: definitions_by_key.get(
-            (str(record.get('Word', '')), normalize_pinyin(record.get('Pinyin', ''))),
-            [],
-        ),
-        axis=1,
+def restore_frequency_excel_date(value):
+    """Recover Pinyin cells Excel auto-converted from jun1-jun5 into dates."""
+    match = re.fullmatch(
+        r"\d{4}-06-0([1-5])(?: 00:00:00)?",
+        str(value).strip(),
     )
+    return f"jun{match.group(1)}" if match else value
+
+
+def order_record_fields(record, source_name):
+    """Put source ID, simplified word, and pinyin fields before other data."""
+    source_id = SOURCE_ID_FIELDS[source_name]
+    leading_fields = [source_id, 'Word', 'Pinyin']
+    return {
+        **{field: record[field] for field in leading_fields if field in record},
+        **{field: value for field, value in record.items() if field not in leading_fields},
+    }
 
 
 def convert_excel_to_json(source_name, output_filename, excel_path=None):
     """Read one source workbook and save it as a JSON file."""
     df = read_excel(source_name, excel_path)
-    if source_name == 'HSK':
+    if source_name == 'hsk':
         df = df.drop(columns=['Pinyin original'], errors='ignore')
-        add_dictionary_definitions(df)
 
-    data = df.to_dict(orient='records')
+    data = [
+        order_record_fields(record, source_name)
+        for record in df.to_dict(orient='records')
+    ]
     output_path = os.path.join(OUTPUT_DIR, output_filename)
     with open(output_path, 'w', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
@@ -131,8 +116,9 @@ def main():
         type=parse_excel_argument,
         metavar='SOURCE_OR_FILE',
         help=(
-            'convert only this source (cedict, frequency, hsk, boya, or a '
-            'configured workbook filename/path); default: convert all'
+            'convert only this source (cedict, frequency, hsk, boya, subtlex, or a '
+            'configured workbook filename/path); subtlex writes zimu.json; '
+            'default: convert all'
         ),
     )
     args = parser.parse_args()
@@ -149,9 +135,6 @@ def main():
             os.path.join(EXCEL_DIR, EXCEL_FILES[source_name])
             for source_name in sources_to_convert
         ]
-
-    if 'HSK' in sources_to_convert:
-        paths_to_check.append(os.path.join(EXCEL_DIR, EXCEL_FILES['cedict']))
 
     missing_files = [path for path in paths_to_check if not os.path.isfile(path)]
     if missing_files:

@@ -5,15 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>博雅</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22central%22 text-anchor=%22middle%22 font-family=%22system-ui,sans-serif%22 font-weight=%22bold%22 font-size=%2260%22 fill=%22%23d35400%22>zh</text></svg>">
-  <link rel="stylesheet" href="../css/style.css?v=41">
-  <script src="../js/pinyin.js?v=1" defer></script>
+  <link rel="stylesheet" href="../css/style.css?v=43">
+  <script src="../js/pinyin.js?v=2" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
-  <script src="../js/vocabulary-lists.js?v=37" defer></script>
+  <script src="../js/user-word-state.js?v=2" defer></script>
+  <script src="../js/vocabulary-lists.js?v=50" defer></script>
 </head>
 <body class="dictionary-page vocabulary-list-page" data-page="boya"
       data-profile-image="../images/profile.jpg"
-      data-source="../data/boya.json"
-      data-storage-key="zh-boya-known"
+      data-source="../data/boya.json?v=3"
       data-supabase-url="https://ipavwfvtxrqipmedsbjf.supabase.co"
       data-supabase-key="sb_publishable_d0CsN33Th0l4qs0_hWa5bA__YggSPaz">
   <div class="vocabulary-sticky">
@@ -22,24 +22,19 @@
       <nav class="site-nav" aria-label="Vocabulary lists">
         <a href="../frequency/index.html">[ <span class="nav-label">词频</span> ]</a>
         <a href="../hsk/index.html">[ <span class="nav-label">HSK</span> ]</a>
+        <a href="../subtlex/index.html">[ <span class="nav-label">字幕</span> ]</a>
         <a href="index.html" aria-current="page">[ <span class="nav-label">博雅</span> ]</a>
       </nav>
     </header>
     <section class="vocabulary-filters boya-filters" aria-label="Vocabulary filters">
-      <div class="level-filters" id="level-filter" role="group" aria-label="按博雅级别筛选">
-        <button class="boya-level level-chip" type="button" data-level="1" aria-pressed="false">Boya 1</button>
-        <button class="boya-level level-chip" type="button" data-level="2" aria-pressed="false">Boya 2</button>
-      </div>
-      <div class="level-filters" id="chapter-filter" role="group" aria-label="按周筛选">
-      </div>
       <div class="filter-options">
         <label class="check-control">
           <input id="pinyin-toggle" type="checkbox" checked>
           <span>显示拼音</span>
         </label>
         <label class="check-control">
-          <input id="only-pinyin-toggle" type="checkbox">
-          <span>仅显示拼音</span>
+          <input id="saved-filter" type="checkbox">
+          <span>只显示已收藏</span>
         </label>
       </div>
     </section>

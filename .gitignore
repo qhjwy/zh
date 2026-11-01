@@ -1,1 +1,7 @@
 .DS_Store
+/data/.mapping/01_normalize_sources/*.csv
+/data/.mapping/02_generate_mapping/*.csv
+/data/.mapping/02_generate_mapping/*.xlsx
+/data/.mapping/02_generate_mapping/~$*.xlsx
+/data/.mapping/01_normalize_sources/~$*.xlsx
+/data/.mapping/~$*.xlsx

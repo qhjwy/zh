@@ -395,7 +395,7 @@ th:last-child {
   margin-left: 0;
 }
 
-.hsk-view-nav {
+.list-view-nav {
   display: inline-flex;
   align-items: baseline;
   gap: 0.4rem;
@@ -410,19 +410,19 @@ th:last-child {
 }
 
 .site-nav a[aria-current="page"] .nav-label,
-.hsk-view-nav a[aria-current="page"] .nav-label {
+.list-view-nav a[aria-current="page"] .nav-label {
   color: var(--red);
 }
 
 .site-nav a:hover,
 .site-nav a:focus-visible,
-.hsk-view-nav a {
+.list-view-nav a {
   color: #666;
   text-decoration: none;
 }
 
-.hsk-view-nav a:hover,
-.hsk-view-nav a:focus-visible {
+.list-view-nav a:hover,
+.list-view-nav a:focus-visible {
   color: var(--red);
 }
 
@@ -589,6 +589,29 @@ th:last-child {
   font-size: 0.95rem;
 }
 
+.frequency-progress-table > thead th:first-child,
+.frequency-progress-table > tbody th {
+  width: 9rem;
+}
+
+.frequency-progress-table .frequency-progress-level {
+  background: none;
+  color: #666;
+  font-size: 0.95rem;
+  white-space: nowrap;
+}
+
+.source-citation {
+  margin: 0 0 1rem;
+  color: #777;
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+
+.source-citation a {
+  color: inherit;
+}
+
 .hsk-progress-level.hsk1 { color: var(--hsk1); }
 .hsk-progress-level.hsk2 { color: var(--hsk2); }
 .hsk-progress-level.hsk3 { color: var(--hsk3); }
@@ -603,6 +626,10 @@ th:last-child {
   overflow: hidden;
   border-radius: 0.25rem;
   background: #eee;
+}
+
+.frequency-progress-bar .hsk-progress-fill {
+  background: #777;
 }
 
 .hsk-progress-fill {
@@ -973,6 +1000,27 @@ th:last-child {
   color: #555;
 }
 
+.frequency-save-button {
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  min-height: 0;
+  flex: 0 0 auto;
+  padding: 0;
+  place-items: center;
+  background: transparent;
+  color: #555;
+}
+
+.frequency-save-button:disabled {
+  cursor: default;
+  opacity: 1;
+}
+
+.frequency-save-button.is-saved .dictionary-save-icon {
+  fill: #555;
+}
+
 .dictionary-page:not(.vocabulary-list-page) .entry {
   position: relative;
   padding-right: 2.5rem;
@@ -1172,21 +1220,9 @@ th:last-child {
   padding-right: 12rem;
 }
 
-.vocabulary-list-page[data-page="boya"] .entry.is-selected {
-  background: #fff0e6;
-}
-
 .vocabulary-list-page[data-page="boya"] .vocabulary-entry-heading {
   padding-left: 0;
   transition: none;
-}
-
-.vocabulary-list-page[data-page="boya"] .selection-indicator {
-  display: none;
-}
-
-.vocabulary-list-page[data-page="boya"] .entry.is-selected .word-select {
-  color: inherit;
 }
 
 .entry-actions {
