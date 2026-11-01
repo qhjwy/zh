@@ -837,6 +837,64 @@ th:last-child {
   outline-offset: 2px;
 }
 
+.hsk-membership-filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: #666;
+  font-size: 0.75rem;
+}
+
+.hsk-membership-filter select {
+  min-height: 25px;
+  padding: 0.1rem 0.4rem;
+  border: 0;
+  border-radius: 1rem;
+  background: #f0f0f0;
+  color: inherit;
+  font: inherit;
+}
+
+.hsk-membership-filter select:focus-visible {
+  outline: 2px solid #555;
+  outline-offset: 2px;
+}
+
+.ranked-list-search {
+  width: min(100%, 16rem);
+  margin-top: 0.35rem;
+}
+
+.ranked-list-search[hidden] {
+  display: none;
+}
+
+.ranked-list-search input {
+  width: 100%;
+  min-height: 30px;
+  padding: 0.2rem 0.45rem 0.2rem 1.9rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font: inherit;
+  font-size: 0.75rem;
+}
+
+.ranked-list-search .clear-btn {
+  width: 24px;
+  height: 24px;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.ranked-list-search .clear-btn::before {
+  width: 18px;
+  height: 18px;
+}
+
+.ranked-list-search .clear-btn.has-text {
+  font-size: 10px;
+}
+
 .list-status {
   display: flex;
   align-items: center;
@@ -875,6 +933,19 @@ th:last-child {
 
 .list-level {
   margin-left: 0.4rem;
+}
+
+.frequency-entry-tags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.3rem;
+  margin: 0.4rem 0 0.35rem;
+}
+
+.frequency-entry-tags .list-level,
+.frequency-entry-tags .hsk-level {
+  margin-left: 0;
 }
 
 .vocabulary-entry-heading {

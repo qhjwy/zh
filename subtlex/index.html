@@ -5,15 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>字幕</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22central%22 text-anchor=%22middle%22 font-family=%22system-ui,sans-serif%22 font-weight=%22bold%22 font-size=%2260%22 fill=%22%23d35400%22>zh</text></svg>">
-  <link rel="stylesheet" href="../css/style.css?v=45">
+  <link rel="stylesheet" href="../css/style.css?v=52">
   <script src="../js/pinyin.js?v=2" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
   <script src="../js/user-word-state.js?v=2" defer></script>
-  <script src="../js/vocabulary-lists.js?v=50" defer></script>
+  <script src="../js/vocabulary-lists.js?v=58" defer></script>
 </head>
 <body class="dictionary-page vocabulary-list-page" data-page="zimu"
       data-profile-image="../images/profile.jpg"
       data-source="../data/zimu.json?v=2"
+      data-hsk-source="../data/hsk.json?v=6"
       data-supabase-url="https://ipavwfvtxrqipmedsbjf.supabase.co"
       data-supabase-key="sb_publishable_d0CsN33Th0l4qs0_hWa5bA__YggSPaz">
   <div class="vocabulary-sticky">
@@ -50,9 +51,26 @@
           <input id="saved-filter" type="checkbox">
           <span>只显示已收藏</span>
         </label>
+        <label class="hsk-membership-filter">
+          <span>HSK</span>
+          <select id="hsk-membership-filter">
+            <option value="all">显示全部</option>
+            <option value="only">仅显示 HSK</option>
+            <option value="hide">隐藏 HSK</option>
+          </select>
+        </label>
       </div>
     </section>
     <div id="status" class="list-status" role="status" aria-live="polite">Loading vocabulary…</div>
+    <div id="ranked-list-search-container" class="ranked-list-search">
+      <label class="visually-hidden" for="ranked-list-search">Filter vocabulary list</label>
+      <div class="search-wrapper">
+        <button id="ranked-list-search-clear" class="clear-btn" type="button"
+                aria-label="Clear list filter">→</button>
+        <input id="ranked-list-search" type="text" autocomplete="off"
+               placeholder="在此输入……">
+      </div>
+    </div>
     <div id="list-pagination" class="list-status" aria-label="Pagination"></div>
   </div>
   <a id="hsk-account-link" class="account-link" href="../login/" aria-label="登录" title="登录">

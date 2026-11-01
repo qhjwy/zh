@@ -44,6 +44,14 @@ function normalizeRecord(record, page, userWordState) {
   const hasUserState = USER_STATE_PAGES.has(page);
   const initialKnown = Boolean(record.known ?? record["学会"] === "x");
   const levelInfo = getLevelInfo(record, page);
+  const rawProbability = String(record.Probability ?? record.probability ?? "");
+  const probability = page === "zimu" ? Number(rawProbability) : null;
+  if (
+    page === "zimu"
+    && (!rawProbability || !Number.isFinite(probability) || probability < 0 || probability > 1)
+  ) {
+    throw new Error(`Invalid SUBTLEX probability for ${word}: ${rawProbability}`);
+  }
 
   const entry = {
     id,
@@ -55,7 +63,9 @@ function normalizeRecord(record, page, userWordState) {
     definitions,
     levels: levelInfo.levels,
     levelLabel: levelInfo.label,
+    hskLevels: [],
     frequency: String(record.Frequency ?? record.frequency ?? ""),
+    probability,
     week: String(record["周"] ?? "")
   };
   Object.defineProperties(entry, {
@@ -121,6 +131,9 @@ function startVocabularyPage() {
   const progressRows = document.querySelector("#hsk-progress-rows");
   const frequencyProgressView = document.querySelector("#frequency-progress-view");
   const frequencyProgressRows = document.querySelector("#frequency-progress-rows");
+  const rankedListSearchContainer = document.querySelector("#ranked-list-search-container");
+  const rankedListSearch = document.querySelector("#ranked-list-search");
+  const rankedListSearchClear = document.querySelector("#ranked-list-search-clear");
   const musicView = document.querySelector("#hsk-music-view");
   const musicLink = document.querySelector('.list-view-nav a[href="#music"]');
   const musicEditor = document.querySelector("#music-editor");
@@ -136,6 +149,8 @@ function startVocabularyPage() {
   const onlyPinyinToggle = document.querySelector("#only-pinyin-toggle");
   const knownFilter = document.querySelector("#known-filter");
   const levelFilter = document.querySelector("#level-filter");
+  const chapterFilter = document.querySelector("#chapter-filter");
+  const hskMembershipFilter = document.querySelector("#hsk-membership-filter");
 
   const selectedIds = new Set();
   const knownThisSession = new Set();
@@ -274,6 +289,7 @@ function startVocabularyPage() {
     document.querySelector(".frequency-filters").hidden = showProgress;
     status.hidden = showProgress;
     pagination.hidden = showProgress;
+    if (rankedListSearchContainer) rankedListSearchContainer.hidden = showProgress;
     frequencyProgressView.hidden = !showProgress;
     for (const link of viewLinks) {
       if (link.hash === `#${view}`) {
@@ -855,6 +871,43 @@ function startVocabularyPage() {
     }
   }
 
+  async function loadHskLevels() {
+    const hskSource = document.body.dataset.hskSource;
+    if (!hskSource) {
+      throw new Error("The HSK data source is not configured for this frequency list.");
+    }
+
+    const response = await fetch(hskSource);
+    if (!response.ok) {
+      throw new Error(`Could not load ${hskSource} (HTTP ${response.status}).`);
+    }
+    const records = await response.json();
+    if (!Array.isArray(records)) {
+      throw new Error(`Expected ${hskSource} to contain a JSON array.`);
+    }
+
+    const levelsByWordId = new Map();
+    for (const record of records) {
+      const wId = String(record.w_id ?? "").trim();
+      const level = String(record.hsk_level ?? record["HSK几"] ?? "").trim();
+      if (!wId || !level) {
+        throw new Error(`An HSK record in ${hskSource} is missing w_id or level.`);
+      }
+      const levels = levelsByWordId.get(wId) ?? new Set();
+      levels.add(level);
+      levelsByWordId.set(wId, levels);
+    }
+
+    return new Map(
+      [...levelsByWordId].map(([wId, levels]) => [
+        wId,
+        [...levels].sort((first, second) =>
+          Number(first.match(/\d+/)?.[0] ?? 0) - Number(second.match(/\d+/)?.[0] ?? 0)
+        )
+      ])
+    );
+  }
+
   function renderProgress() {
     if (page === "hsk") renderHskProgress();
     if (page === "frequency" || page === "zimu") renderFrequencyProgress();
@@ -888,8 +941,18 @@ function startVocabularyPage() {
       [...(levelFilter?.querySelectorAll('button[data-level][aria-pressed="true"]') ?? [])]
         .map((button) => button.dataset.level)
     );
+    const selectedWeeks = new Set(
+      [...(chapterFilter?.querySelectorAll('button[data-week][aria-pressed="true"]') ?? [])]
+        .map((button) => button.dataset.week)
+    );
     const showKnown = knownFilter?.checked ?? false;
     const showUnknown = unknownFilter?.checked ?? false;
+    const hskMembership = page === "frequency" || page === "zimu"
+      ? hskMembershipFilter?.value ?? "all"
+      : "all";
+    const query = page === "frequency" || page === "zimu"
+      ? rankedListSearch?.value.trim().toLocaleLowerCase() ?? ""
+      : "";
 
     const matches = entries.filter((entry) => {
       const keepKnownThisSession = (page === "frequency" || page === "zimu")
@@ -905,6 +968,22 @@ function startVocabularyPage() {
       if (savedFilter?.checked && !entry.saved) {
         return false;
       }
+      if (hskMembership === "only" && !entry.hskLevels.length) {
+        return false;
+      }
+      if (hskMembership === "hide" && entry.hskLevels.length) {
+        return false;
+      }
+      if (query) {
+        const searchableText = [
+          entry.word,
+          entry.pinyin,
+          entry.frequency,
+          entry.probability === null ? "" : `${Math.round(entry.probability * 100)}%`,
+          ...entry.hskLevels
+        ].join(" ").toLocaleLowerCase();
+        if (!searchableText.includes(query)) return false;
+      }
       if (selectedLevels.size && ![...selectedLevels].some((selectedLevel) =>
         entry.levels.some((level) =>
           selectedLevel === "7-9" ? level >= 7 && level <= 9 : level === Number(selectedLevel)
@@ -912,9 +991,35 @@ function startVocabularyPage() {
       )) {
         return false;
       }
+      if (selectedWeeks.size && !selectedWeeks.has(entry.week || "-")) {
+        return false;
+      }
       return true;
     });
     return matches;
+  }
+
+  function renderBoyaWeekFilters() {
+    if (page !== "boya" || !chapterFilter) return;
+
+    const weeks = new Set(entries.map((entry) => entry.week || "-"));
+    chapterFilter.replaceChildren();
+    const sortedWeeks = [...weeks].sort((left, right) =>
+      left === "-" ? 1 : right === "-" ? -1 : Number(left) - Number(right)
+    );
+    for (const week of sortedWeeks) {
+      const weekButton = document.createElement("button");
+      weekButton.className = "boya-level level-chip week-chip";
+      weekButton.type = "button";
+      weekButton.dataset.week = week;
+      weekButton.setAttribute("aria-pressed", "false");
+      weekButton.textContent = week === "-" ? "-" : `周${week}`;
+      weekButton.setAttribute(
+        "aria-label",
+        week === "-" ? "筛选无周" : `筛选第${week}周`
+      );
+      chapterFilter.append(weekButton);
+    }
   }
 
   function render() {
@@ -1012,7 +1117,25 @@ function startVocabularyPage() {
         : entry.levelLabel
           ? `Boya ${entry.levelLabel.replace(/^Boya\s*/i, "")}${entry.chapter ? ` · ${entry.chapter}` : ""}`
           : "Unassigned";
+      const frequencyTags = isRankedList ? document.createElement("div") : null;
+      if (frequencyTags) {
+        frequencyTags.className = "frequency-entry-tags";
+        frequencyTags.append(level);
+        if (page === "zimu" && entry.probability !== null) {
+          const probabilityTag = document.createElement("span");
+          probabilityTag.className = "hsk-level frequency-rank";
+          probabilityTag.textContent = `${Math.round(entry.probability * 100)}%`;
+          frequencyTags.append(probabilityTag);
+        }
+        for (const hskLevel of entry.hskLevels) {
+          const hskTag = document.createElement("span");
+          hskTag.className = `hsk-level ${hskLevel.toLowerCase().replace(/[^a-z0-9-]/g, "")}`;
+          hskTag.textContent = hskLevel;
+          frequencyTags.append(hskTag);
+        }
+      }
       item.append(heading);
+      if (frequencyTags) item.append(frequencyTags);
 
       if (entry.definitions.length) {
         const meaning = document.createElement("div");
@@ -1027,7 +1150,7 @@ function startVocabularyPage() {
 
       const entryActions = document.createElement("div");
       entryActions.className = "entry-actions";
-      entryActions.append(level);
+      if (!frequencyTags) entryActions.append(level);
       let frequencySavedToggle = null;
       if (USER_STATE_PAGES.has(page)) {
         if (!isBoya) {
@@ -1254,6 +1377,21 @@ function startVocabularyPage() {
   if (savedFilter) {
     savedFilter.addEventListener("change", resetAndRender);
   }
+  hskMembershipFilter?.addEventListener("change", resetAndRender);
+  rankedListSearch?.addEventListener("input", () => {
+    const hasText = rankedListSearch.value.length > 0;
+    rankedListSearchClear.textContent = hasText ? "✕" : "→";
+    rankedListSearchClear.classList.toggle("has-text", hasText);
+    resetAndRender();
+  });
+  rankedListSearchClear?.addEventListener("click", () => {
+    if (!rankedListSearch) return;
+    rankedListSearch.value = "";
+    rankedListSearchClear.textContent = "→";
+    rankedListSearchClear.classList.remove("has-text");
+    resetAndRender();
+    rankedListSearch.focus();
+  });
   if (levelFilter) {
     levelFilter.addEventListener("click", (event) => {
       const button = event.target.closest("button[data-level]");
@@ -1266,6 +1404,17 @@ function startVocabularyPage() {
           filterButton.setAttribute("aria-pressed", String(filterButton === button && !wasSelected));
         }
       }
+      resetAndRender();
+    });
+  }
+  if (chapterFilter) {
+    chapterFilter.addEventListener("click", (event) => {
+      const button = event.target.closest("button[data-week]");
+      if (!button) return;
+      button.setAttribute(
+        "aria-pressed",
+        String(button.getAttribute("aria-pressed") !== "true")
+      );
       resetAndRender();
     });
   }
@@ -1296,6 +1445,13 @@ function startVocabularyPage() {
         throw new Error(`Expected ${source} to contain a JSON array.`);
       }
       entries = data.map((record) => normalizeRecord(record, page, userWordState));
+      if (page === "frequency" || page === "zimu") {
+        const hskLevelsByWordId = await loadHskLevels();
+        for (const entry of entries) {
+          entry.hskLevels = hskLevelsByWordId.get(entry.wId) ?? [];
+        }
+      }
+      renderBoyaWeekFilters();
       renderProgress();
       if (page === "hsk") {
         hskWordTrie = buildHskWordTrie();

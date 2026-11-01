@@ -9,7 +9,7 @@
   <script src="../js/pinyin.js?v=2" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
   <script src="../js/user-word-state.js?v=2" defer></script>
-  <script src="../js/vocabulary-lists.js?v=50" defer></script>
+  <script src="../js/vocabulary-lists.js?v=52" defer></script>
 </head>
 <body class="dictionary-page vocabulary-list-page" data-page="boya"
       data-profile-image="../images/profile.jpg"
@@ -27,6 +27,11 @@
       </nav>
     </header>
     <section class="vocabulary-filters boya-filters" aria-label="Vocabulary filters">
+      <div class="level-filters" id="level-filter" role="group" aria-label="按博雅级别筛选">
+        <button class="boya-level level-chip" type="button" data-level="1" aria-pressed="false">Boya 1</button>
+        <button class="boya-level level-chip" type="button" data-level="2" aria-pressed="false">Boya 2</button>
+      </div>
+      <div class="level-filters" id="chapter-filter" role="group" aria-label="按周筛选"></div>
       <div class="filter-options">
         <label class="check-control">
           <input id="pinyin-toggle" type="checkbox" checked>
