@@ -17,6 +17,28 @@ const logoutButton = document.querySelector("#logout-button");
 const returnTo = getReturnUrl();
 let activeSession = null;
 
+async function updateWordStateCount(session) {
+  const userId = session.user.id;
+  setStatus("Checking saved word records…");
+
+  try {
+    const { count, error } = await supabaseClient
+      .from("user_word_state")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", userId);
+    if (error) throw error;
+    if (activeSession?.user.id !== userId) return;
+    if (!Number.isInteger(count)) {
+      throw new Error("Supabase did not return an exact row count.");
+    }
+    setStatus(`Saved word records: ${count.toLocaleString()}`);
+  } catch (error) {
+    if (activeSession?.user.id !== userId) return;
+    const message = error instanceof Error ? error.message : String(error);
+    setStatus(`Could not load saved word record count: ${message}`, true);
+  }
+}
+
 function getReturnUrl() {
   const requested = new URLSearchParams(window.location.search).get("return");
   if (!requested) return new URL("../hsk/", window.location.href).href;
@@ -47,6 +69,7 @@ function showSession(session) {
   signedInPanel.hidden = !isSignedIn;
   if (isSignedIn) {
     signedInEmail.textContent = session.user.email;
+    updateWordStateCount(session);
     const imageUrl = document.body.dataset.profileImage;
     signedInAvatar.hidden = true;
     if (imageUrl) {
@@ -62,7 +85,6 @@ function showSession(session) {
         signedInAvatar.hidden = false;
       }
     }
-    setStatus("Your account is ready.");
   } else {
     signedInAvatar.hidden = true;
     setStatus("Sign in to save and sync word status.");

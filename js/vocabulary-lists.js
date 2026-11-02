@@ -50,7 +50,7 @@ function normalizeRecord(record, page, userWordState) {
     page === "zimu"
     && (!rawProbability || !Number.isFinite(probability) || probability < 0 || probability > 1)
   ) {
-    throw new Error(`Invalid SUBTLEX probability for ${word}: ${rawProbability}`);
+    throw new Error(`Invalid zimu probability for ${word}: ${rawProbability}`);
   }
 
   const entry = {
@@ -116,6 +116,7 @@ function renderSentenceMarkdown(text, container) {
 
 function startVocabularyPage() {
   const page = document.body.dataset.page;
+  const isRankedList = page === "frequency" || page === "zimu";
   const source = document.body.dataset.source;
   const entriesElement = document.querySelector("#vocabulary-entries");
   const status = document.querySelector("#status");
@@ -151,6 +152,7 @@ function startVocabularyPage() {
   const levelFilter = document.querySelector("#level-filter");
   const chapterFilter = document.querySelector("#chapter-filter");
   const hskMembershipFilter = document.querySelector("#hsk-membership-filter");
+  const knownStatusFilter = document.querySelector("#known-status-filter");
 
   const selectedIds = new Set();
   const knownThisSession = new Set();
@@ -191,6 +193,8 @@ function startVocabularyPage() {
   let cedictWordTrie = null;
   let cedictDefinitionsById = null;
   let cedictLoadPromise = null;
+  let cedictWordIds = null;
+  let cedictWordIdsLoadPromise = null;
   let musicRequested = window.location.hash === "#music";
   let activeMusicWord = null;
   const musicDefinitionPopover = document.createElement("div");
@@ -596,9 +600,46 @@ function startVocabularyPage() {
       })
       .catch((error) => {
         cedictLoadPromise = null;
-        musicStatus.textContent = `无法加载词典释义：${error.message}`;
+        if (musicStatus) {
+          musicStatus.textContent = `无法加载词典释义：${error.message}`;
+        }
       });
     return cedictLoadPromise;
+  }
+
+  function loadCedictWordIds() {
+    if (cedictWordIds) return Promise.resolve(cedictWordIds);
+    if (cedictWordIdsLoadPromise) return cedictWordIdsLoadPromise;
+
+    const source = document.body.dataset.cedictWordIdsSource;
+    if (!source) {
+      return Promise.reject(new Error("The CEDICT word ID source is not configured."));
+    }
+
+    cedictWordIdsLoadPromise = fetch(source)
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`Could not load CEDICT word IDs (HTTP ${response.status}).`);
+        }
+        return response.json();
+      })
+      .then((wordIds) => {
+        if (!Array.isArray(wordIds) || wordIds.some((wordId) =>
+          typeof wordId !== "string" || !wordId
+        )) {
+          throw new Error("The CEDICT word ID data is invalid.");
+        }
+        cedictWordIds = new Set(wordIds);
+        for (const button of entriesElement.querySelectorAll("button[data-cedict-word-id]")) {
+          button.disabled = !cedictWordIds.has(button.dataset.cedictWordId);
+        }
+        return cedictWordIds;
+      })
+      .catch((error) => {
+        cedictWordIdsLoadPromise = null;
+        throw error;
+      });
+    return cedictWordIdsLoadPromise;
   }
 
   function showMusicDefinition(word, anchor) {
@@ -843,6 +884,7 @@ function startVocabularyPage() {
       const levelCell = document.createElement("th");
       levelCell.scope = "row";
       levelCell.className = "frequency-progress-level";
+      if (percentage === 100) levelCell.classList.add("is-complete");
       levelCell.textContent = group.label;
       row.append(levelCell);
 
@@ -945,8 +987,13 @@ function startVocabularyPage() {
       [...(chapterFilter?.querySelectorAll('button[data-week][aria-pressed="true"]') ?? [])]
         .map((button) => button.dataset.week)
     );
-    const showKnown = knownFilter?.checked ?? false;
-    const showUnknown = unknownFilter?.checked ?? false;
+    const knownStatus = isRankedList ? knownStatusFilter?.value ?? "unknown" : null;
+    const showKnown = isRankedList
+      ? knownStatus === "known"
+      : knownFilter?.checked ?? false;
+    const showUnknown = isRankedList
+      ? knownStatus === "unknown"
+      : unknownFilter?.checked ?? false;
     const hskMembership = page === "frequency" || page === "zimu"
       ? hskMembershipFilter?.value ?? "all"
       : "all";
@@ -1105,7 +1152,6 @@ function startVocabularyPage() {
         heading.append(pinyin);
       }
 
-      const isRankedList = page === "frequency" || page === "zimu";
       const level = document.createElement("span");
       level.className = page === "hsk" || isRankedList
         ? `hsk-level list-level${page === "hsk" ? ` ${entry.levelLabel.toLowerCase().replace(/[^a-z0-9-]/g, "")}` : " frequency-rank"}`
@@ -1255,14 +1301,18 @@ function startVocabularyPage() {
         }
       });
 
-      if (page === "hsk") {
+      if (page === "hsk" || isRankedList) {
         const detailButton = document.createElement("button");
         detailButton.className = "sentence-button";
         detailButton.type = "button";
         detailButton.textContent = "详情";
+        if (isRankedList) {
+          detailButton.dataset.cedictWordId = entry.wId;
+          detailButton.disabled = !cedictWordIds?.has(entry.wId);
+        }
         detailButton.setAttribute("aria-expanded", "false");
         detailButton.setAttribute("aria-label", `显示${entry.word}的拼音和释义`);
-        detailButton.addEventListener("click", () => {
+        detailButton.addEventListener("click", async () => {
           const expanded = item.classList.toggle("is-expanded");
           detailButton.textContent = expanded ? "收起" : "详情";
           detailButton.setAttribute("aria-expanded", String(expanded));
@@ -1270,6 +1320,32 @@ function startVocabularyPage() {
             "aria-label",
             `${expanded ? "隐藏" : "显示"}${entry.word}的拼音和释义`
           );
+          if (!expanded || !isRankedList) return;
+
+          if (!cedictDefinitionsById) {
+            detailButton.disabled = true;
+            await loadCedict();
+            detailButton.disabled = false;
+          }
+
+          entry.definitions = cedictDefinitionsById?.get(entry.wId) ?? [];
+          const meaning = item.querySelector(".defs") ?? document.createElement("div");
+          meaning.className = "defs";
+          meaning.replaceChildren();
+          if (entry.definitions.length) {
+            for (const definition of entry.definitions) {
+              const chip = document.createElement("span");
+              chip.textContent = definition;
+              meaning.append(chip, " ");
+            }
+          } else {
+            const message = document.createElement("span");
+            message.textContent = cedictDefinitionsById
+              ? "暂无释义"
+              : "释义加载失败，请稍后重试。";
+            meaning.append(message);
+          }
+          if (!meaning.isConnected) item.insertBefore(meaning, entryActions);
         });
         entryActions.append(detailButton);
       }
@@ -1312,7 +1388,9 @@ function startVocabularyPage() {
     const link = event.target.closest("a[data-page]");
     if (!link) return;
     event.preventDefault();
-    currentPage = Number(link.dataset.page);
+    const nextPage = Number(link.dataset.page);
+    if (nextPage !== currentPage) knownThisSession.clear();
+    currentPage = nextPage;
     writePageUrl("pushState");
     render();
   });
@@ -1355,7 +1433,9 @@ function startVocabularyPage() {
   }
   window.addEventListener("popstate", () => {
     const pageFromUrl = Number(new URLSearchParams(window.location.search).get("page"));
-    currentPage = Number.isSafeInteger(pageFromUrl) && pageFromUrl > 0 ? pageFromUrl : 1;
+    const nextPage = Number.isSafeInteger(pageFromUrl) && pageFromUrl > 0 ? pageFromUrl : 1;
+    if (nextPage !== currentPage) knownThisSession.clear();
+    currentPage = nextPage;
     render();
   });
   if (unknownFilter) {
@@ -1377,6 +1457,7 @@ function startVocabularyPage() {
   if (savedFilter) {
     savedFilter.addEventListener("change", resetAndRender);
   }
+  knownStatusFilter?.addEventListener("change", resetAndRender);
   hskMembershipFilter?.addEventListener("change", resetAndRender);
   rankedListSearch?.addEventListener("input", () => {
     const hasText = rankedListSearch.value.length > 0;
@@ -1477,6 +1558,13 @@ function startVocabularyPage() {
       } else {
         render();
         await updateAuthSession(activeSession);
+        if (isRankedList) {
+          loadCedictWordIds().catch((error) => {
+            console.error("Could not load CEDICT word IDs:", error);
+            status.textContent = `Unable to check CEDICT mappings: ${error.message}`;
+            status.classList.add("error");
+          });
+        }
       }
       status.classList.remove("error");
     } catch (error) {

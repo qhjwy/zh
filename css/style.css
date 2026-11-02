@@ -601,6 +601,12 @@ th:last-child {
   white-space: nowrap;
 }
 
+.frequency-progress-table .frequency-progress-level.is-complete {
+  background: linear-gradient(90deg, #a86f00, #e0b83f 45%, #9a6500);
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
 .source-citation {
   margin: 0 0 1rem;
   color: #777;
@@ -629,7 +635,7 @@ th:last-child {
 }
 
 .frequency-progress-bar .hsk-progress-fill {
-  background: #777;
+  background: #aaa;
 }
 
 .hsk-progress-fill {
@@ -1323,6 +1329,11 @@ th:last-child {
 .sentence-button:hover {
   border-color: #d35400;
   color: #d35400;
+}
+
+.sentence-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
 }
 
 .sentence-helper {

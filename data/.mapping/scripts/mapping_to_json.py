@@ -113,9 +113,31 @@ def add_word_ids(source_filename, source_id_column, json_filename):
     )
 
 
+def write_cedict_word_ids():
+    """Write the CEDICT word IDs for checking definition availability."""
+    json_path = ROOT_DIR / "data" / "cedict.json"
+    with json_path.open(encoding="utf-8") as input_file:
+        records = json.load(input_file)
+    if not isinstance(records, list):
+        raise ValueError("cedict.json must contain a JSON array.")
+
+    word_ids = sorted({
+        str(record.get("w_id", "")).strip()
+        for record in records
+        if str(record.get("w_id", "")).strip()
+    })
+    output_path = ROOT_DIR / "data" / "cedict-word-ids.json"
+    with output_path.open("w", encoding="utf-8") as output_file:
+        json.dump(word_ids, output_file, ensure_ascii=False, indent=2)
+        output_file.write("\n")
+
+    print(f"Wrote {len(word_ids)} CEDICT word IDs to '{output_path}'.")
+
+
 def main():
     for source_filename, source_id_column, json_filename in SOURCE_FILES:
         add_word_ids(source_filename, source_id_column, json_filename)
+    write_cedict_word_ids()
 
 
 if __name__ == "__main__":

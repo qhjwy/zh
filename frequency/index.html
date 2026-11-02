@@ -5,16 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>词频</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22central%22 text-anchor=%22middle%22 font-family=%22system-ui,sans-serif%22 font-weight=%22bold%22 font-size=%2260%22 fill=%22%23d35400%22>zh</text></svg>">
-  <link rel="stylesheet" href="../css/style.css?v=53">
+  <link rel="stylesheet" href="../css/style.css?v=55">
   <script src="../js/pinyin.js?v=2" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
   <script src="../js/user-word-state.js?v=2" defer></script>
-  <script src="../js/vocabulary-lists.js?v=58" defer></script>
+  <script src="../js/vocabulary-lists.js?v=62" defer></script>
 </head>
 <body class="dictionary-page vocabulary-list-page" data-page="frequency"
       data-profile-image="../images/profile.jpg"
       data-source="../data/frequency.json?v=4"
       data-hsk-source="../data/hsk.json?v=6"
+      data-cedict-source="../data/cedict.json?v=4"
+      data-cedict-word-ids-source="../data/cedict-word-ids.json?v=1"
       data-supabase-url="https://ipavwfvtxrqipmedsbjf.supabase.co"
       data-supabase-key="sb_publishable_d0CsN33Th0l4qs0_hWa5bA__YggSPaz">
   <div class="vocabulary-sticky">
@@ -24,7 +26,7 @@
         <nav class="site-nav" aria-label="Vocabulary lists">
           <a href="index.html" aria-current="page">[ <span class="nav-label">词频</span> ]</a>
           <a href="../hsk/index.html">[ <span class="nav-label">HSK</span> ]</a>
-          <a href="../subtlex/index.html">[ <span class="nav-label">字幕</span> ]</a>
+          <a href="../zimu/index.html">[ <span class="nav-label">字幕</span> ]</a>
           <a href="../boya/index.html">[ <span class="nav-label">博雅</span> ]</a>
         </nav>
         <nav class="list-view-nav" aria-label="Frequency views">
@@ -36,20 +38,20 @@
     <section class="vocabulary-filters frequency-filters" aria-label="Vocabulary filters">
       <div class="filter-options">
         <label class="check-control">
-          <input id="pinyin-toggle" type="checkbox" checked>
+          <input id="pinyin-toggle" type="checkbox">
           <span>显示拼音</span>
         </label>
         <label class="check-control">
-          <input id="known-filter" type="checkbox">
-          <span>只显示认识</span>
-        </label>
-        <label class="check-control">
-          <input id="unknown-filter" type="checkbox" checked>
-          <span>只显示不认识</span>
-        </label>
-        <label class="check-control">
           <input id="saved-filter" type="checkbox">
-          <span>只显示已收藏</span>
+          <span>已收藏</span>
+        </label>
+        <label class="hsk-membership-filter">
+          <span>认识</span>
+          <select id="known-status-filter">
+            <option value="all">显示全部</option>
+            <option value="unknown" selected>只显示不认识</option>
+            <option value="known">只显示认识</option>
+          </select>
         </label>
         <label class="hsk-membership-filter">
           <span>HSK</span>
