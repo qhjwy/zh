@@ -306,11 +306,69 @@ th:last-child {
   margin-left: auto;
 }
 
-.account-link {
+.account-actions {
   position: absolute;
   z-index: 10;
   top: 1rem;
   right: max(1rem, calc((100vw - 732px) / 2 + 1rem));
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.known-words-export {
+  display: inline-flex;
+  min-height: 2.25rem;
+  align-items: center;
+  justify-content: center;
+  padding: 0 0.45rem;
+  border: 1px solid transparent;
+  border-radius: 1.2rem;
+  background: transparent;
+  color: #858585;
+  font: inherit;
+  font-size: 0.72rem;
+  opacity: 0.75;
+  white-space: nowrap;
+}
+
+.known-words-export:not(:disabled) {
+  cursor: pointer;
+}
+
+.known-words-export:disabled {
+  opacity: 0.65;
+}
+
+.known-words-export:not(:disabled):hover,
+.known-words-export:focus-visible {
+  color: #707070;
+  opacity: 1;
+}
+
+.known-words-export-status {
+  position: absolute;
+  top: calc(100% + 0.35rem);
+  right: 0;
+  max-width: min(24rem, calc(100vw - 2rem));
+  padding: 0.45rem 0.65rem;
+  border: 1px solid #dedede;
+  border-radius: 0.35rem;
+  background: #fff;
+  box-shadow: 0 2px 8px #00000014;
+  color: #555;
+  font-size: 0.75rem;
+}
+
+.known-words-export-status[hidden] {
+  display: none;
+}
+
+.known-words-export-status.error {
+  color: #a12622;
+}
+
+.account-link {
   display: inline-flex;
   min-height: 2.25rem;
   align-items: center;
@@ -1651,6 +1709,26 @@ th:last-child {
 
 .dictionary-page footer a {
   color: #999;
+}
+
+.saved-word-entry {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem 1rem;
+}
+
+.saved-word-entry .vocabulary-entry-heading {
+  flex: 1 1 auto;
+}
+
+.saved-word-entry .sentence-helper {
+  flex: 1 0 100%;
+}
+
+.saved-word-time {
+  color: #777;
+  font-size: 0.9rem;
 }
 
 @media (max-width: 680px) {

@@ -41,7 +41,7 @@ async function updateWordStateCount(session) {
 
 function getReturnUrl() {
   const requested = new URLSearchParams(window.location.search).get("return");
-  if (!requested) return new URL("../hsk/", window.location.href).href;
+  if (!requested) return new URL("../lists/hsk/", window.location.href).href;
 
   try {
     const target = new URL(requested, window.location.origin);
@@ -53,7 +53,7 @@ function getReturnUrl() {
     statusElement.textContent = error instanceof Error
       ? `Invalid return destination: ${error.message}`
       : "Invalid return destination.";
-    return new URL("../hsk/", window.location.href).href;
+    return new URL("../lists/hsk/", window.location.href).href;
   }
 }
 

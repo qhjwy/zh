@@ -110,7 +110,7 @@ window.createUserWordState = function createUserWordState(supabaseClient) {
           w_id: normalizedWId,
           saved: latestState.saved,
           known: latestState.known,
-          updated_at: new Date().toISOString()
+          ...(field === "saved" ? { updated_at: new Date().toISOString() } : {})
         }, { onConflict: "user_id,w_id" });
       if (error) throw describeError(error, "Saving user_word_state");
     }).catch((error) => {

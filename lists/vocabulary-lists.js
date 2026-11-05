@@ -83,39 +83,15 @@ function normalizeRecord(record, page, userWordState) {
   return entry;
 }
 
-function renderSentenceMarkdown(text, container) {
-  container.replaceChildren();
-  for (const line of text.split(/\r?\n/)) {
-    if (!line.trim()) continue;
-    const heading = line.match(/^\s{0,3}#{1,6}\s+(.+?)\s*#*\s*$/);
-    const listItem = line.match(/^\s*(?:[-*+]|\d+[.)])\s+(.+)$/);
-    const content = heading?.[1] ?? listItem?.[1] ?? line;
-    const block = document.createElement(heading ? "h4" : "p");
-    if (listItem) {
-      block.className = "sentence-list-item";
-      const marker = document.createElement("span");
-      marker.setAttribute("aria-hidden", "true");
-      marker.textContent = line.match(/^\s*(?:[-*+]|\d+[.)])/)?.[0].trim() ?? "•";
-      block.append(marker, " ");
-    }
-
-    const boldParts = content.split(/(\*\*.+?\*\*|\*[^*]+?\*|__.+?__|_[^_]+?_)/g);
-    for (const part of boldParts) {
-      const boldMatch = part.match(/^(?:\*\*(.+)\*\*|\*(.+)\*|__(.+)__|_(.+)_)$/);
-      if (boldMatch) {
-        const bold = document.createElement("strong");
-        bold.textContent = boldMatch[1] ?? boldMatch[2] ?? boldMatch[3] ?? boldMatch[4];
-        block.append(bold);
-      } else {
-        block.append(document.createTextNode(part));
-      }
-    }
-    container.append(block);
-  }
-}
-
 function startVocabularyPage() {
   const page = document.body.dataset.page;
+  const {
+    copyText,
+    createKnownToggle,
+    createSavedToggle,
+    createCopyButton,
+    createSentenceAction
+  } = window.vocabularyListUi;
   const isRankedList = page === "frequency" || page === "zimu";
   const source = document.body.dataset.source;
   const entriesElement = document.querySelector("#vocabulary-entries");
@@ -160,6 +136,7 @@ function startVocabularyPage() {
     ? window.supabase.createClient(document.body.dataset.supabaseUrl, document.body.dataset.supabaseKey)
     : null;
   const userWordState = window.createUserWordState?.(supabaseClient);
+  window.bindKnownWordsExport?.(supabaseClient);
   const selectionToolbar = document.createElement("div");
   selectionToolbar.className = "selection-toolbar";
   selectionToolbar.setAttribute("role", "toolbar");
@@ -220,28 +197,6 @@ function startVocabularyPage() {
     document.body.classList.toggle("has-selection", selectedCount > 0);
     selectionCount.textContent = `已选 ${selectedCount} 个`;
     selectionStatus.textContent = "";
-  }
-
-  async function copyText(text) {
-    try {
-      await navigator.clipboard.writeText(text);
-      return true;
-    } catch {
-      const copyField = document.createElement("textarea");
-      copyField.value = text;
-      copyField.setAttribute("readonly", "");
-      copyField.style.position = "fixed";
-      copyField.style.opacity = "0";
-      document.body.append(copyField);
-      copyField.select();
-      try {
-        return document.execCommand("copy");
-      } catch {
-        return false;
-      } finally {
-        copyField.remove();
-      }
-    }
   }
 
   async function copySelection(makeText, successMessage) {
@@ -1200,106 +1155,37 @@ function startVocabularyPage() {
       let frequencySavedToggle = null;
       if (USER_STATE_PAGES.has(page)) {
         if (!isBoya) {
-          const knownToggle = document.createElement("button");
-          knownToggle.className = `known-entry flag-toggle${entry.known ? " is-known" : " is-unknown"}`;
-          knownToggle.type = "button";
-          knownToggle.textContent = entry.known ? "Known" : "Unknown";
-          knownToggle.setAttribute("aria-pressed", String(entry.known));
-          knownToggle.setAttribute("aria-label", `Mark ${entry.word} ${entry.known ? "unknown" : "known"}`);
-          knownToggle.disabled = !remoteFlagsReady || !activeSession || !entry.wId;
-          knownToggle.addEventListener("click", () => {
+          const knownToggle = createKnownToggle({
+            word: entry.word,
+            known: entry.known,
+            disabled: !remoteFlagsReady || !activeSession || !entry.wId,
+            onToggle: () => {
             updateWordFlag(entry, "known", knownToggle);
+            }
           });
           entryActions.append(knownToggle);
         }
 
-        const savedToggle = document.createElement("button");
-        savedToggle.className = isRankedList
-          ? `frequency-save-button flag-toggle${entry.saved ? " is-saved" : ""}`
-          : `saved-entry flag-toggle${entry.saved ? " is-saved" : ""}`;
-        savedToggle.type = "button";
-        savedToggle.setAttribute("aria-pressed", String(entry.saved));
-        savedToggle.setAttribute("aria-label", `${entry.saved ? "Unsave" : "Save"} ${entry.word}`);
-        savedToggle.disabled = !remoteFlagsReady || !activeSession || !entry.wId;
+        const savedToggle = createSavedToggle({
+          word: entry.word,
+          saved: entry.saved,
+          disabled: !remoteFlagsReady || !activeSession || !entry.wId,
+          useIcon: isRankedList,
+          onToggle: () => updateWordFlag(entry, "saved", savedToggle)
+        });
         if (isRankedList) {
-          const icon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-          icon.setAttribute("class", "dictionary-save-icon");
-          icon.setAttribute("viewBox", "0 0 24 24");
-          icon.setAttribute("aria-hidden", "true");
-          const bookmark = document.createElementNS("http://www.w3.org/2000/svg", "path");
-          bookmark.setAttribute("d", "M6 4.5a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1V21l-6-4-6 4V4.5Z");
-          icon.append(bookmark);
-          savedToggle.append(icon);
           frequencySavedToggle = savedToggle;
         } else {
-          savedToggle.textContent = entry.saved ? "Saved" : "Save";
           entryActions.append(savedToggle);
         }
-        savedToggle.addEventListener("click", () => {
-          updateWordFlag(entry, "saved", savedToggle);
-        });
       }
 
-      const individualCopyButton = document.createElement("button");
-      individualCopyButton.className = "sentence-button";
-      individualCopyButton.type = "button";
-      individualCopyButton.textContent = "复制";
-      individualCopyButton.setAttribute("aria-label", `复制${entry.word}`);
-      individualCopyButton.addEventListener("click", async () => {
-        const copied = await copyText(entry.word);
-        individualCopyButton.textContent = copied ? "已复制" : "复制失败";
-        window.setTimeout(() => {
-          individualCopyButton.textContent = "复制";
-        }, 1500);
-      });
+      const individualCopyButton = createCopyButton(entry.word);
       entryActions.append(individualCopyButton);
 
-      const sentenceButton = document.createElement("button");
-      sentenceButton.className = "sentence-button";
-      sentenceButton.type = "button";
-      sentenceButton.textContent = "例句";
-      sentenceButton.setAttribute("aria-label", `为${entry.word}生成例句`);
-      sentenceButton.setAttribute("aria-expanded", "false");
+      const sentenceAction = createSentenceAction(entry.word, supabaseClient);
+      const { button: sentenceButton, helper: sentenceHelper } = sentenceAction;
       entryActions.append(sentenceButton);
-
-      const sentenceHelper = document.createElement("section");
-      sentenceHelper.className = "sentence-helper";
-      sentenceHelper.hidden = true;
-      const prompt = `「${entry.word}」中文解释：意思、3个例句+解释、常用吗、近义词或易混词。`;
-      const sentenceResult = document.createElement("div");
-      sentenceResult.className = "sentence-result";
-      sentenceResult.setAttribute("role", "status");
-      sentenceResult.setAttribute("aria-live", "polite");
-      sentenceHelper.append(sentenceResult);
-
-      sentenceButton.addEventListener("click", async () => {
-        const isOpen = sentenceHelper.hidden;
-        sentenceHelper.hidden = !isOpen;
-        sentenceButton.setAttribute("aria-expanded", String(isOpen));
-        if (!isOpen) return;
-        sentenceButton.disabled = true;
-        sentenceResult.classList.remove("is-error");
-        sentenceResult.textContent = "正在生成例句…";
-        try {
-          if (!supabaseClient) {
-            throw new Error("Supabase client is unavailable.");
-          }
-          const { data, error } = await supabaseClient.functions.invoke("generate-sentence", {
-            body: { prompt }
-          });
-          if (error) throw error;
-          if (typeof data?.sentence !== "string" || !data.sentence.trim()) {
-            throw new Error("The generate-sentence response did not contain a sentence.");
-          }
-          renderSentenceMarkdown(data.sentence, sentenceResult);
-        } catch (error) {
-          console.error("Could not generate sentence:", error);
-          sentenceResult.classList.add("is-error");
-          sentenceResult.textContent = "生成失败，请稍后重试。";
-        } finally {
-          sentenceButton.disabled = false;
-        }
-      });
 
       if (page === "hsk" || isRankedList) {
         const detailButton = document.createElement("button");

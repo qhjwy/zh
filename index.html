@@ -5,14 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>词典</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22central%22 text-anchor=%22middle%22 font-family=%22system-ui,sans-serif%22 font-weight=%22bold%22 font-size=%2260%22 fill=%22%23d35400%22>zh</text></svg>">
-  <link rel="stylesheet" href="css/style.css?v=14">
+  <link rel="stylesheet" href="css/style.css?v=15">
   <script src="js/pinyin.js?v=2" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
-  <script src="js/user-word-state.js?v=2" defer></script>
-  <script src="js/dictionary.js?v=15" defer></script>
+  <script src="js/user-word-state.js?v=3" defer></script>
+  <script src="lists/known-words-export.js?v=1" defer></script>
+  <script src="js/dictionary.js?v=16" defer></script>
 </head>
 <body class="dictionary-page" data-worker-src="js/dictionary-worker.js?v=8"
       data-profile-image="images/profile.jpg"
+      data-word-mapping-source="data/word_mapping.csv?v=1"
       data-supabase-url="https://ipavwfvtxrqipmedsbjf.supabase.co"
       data-supabase-key="sb_publishable_d0CsN33Th0l4qs0_hWa5bA__YggSPaz">
   <header class="dict-header">
@@ -21,20 +23,26 @@
     </h1>
     <button id="script-toggle" class="toggle-icon" type="button" aria-label="Toggle script" title="Switch to Traditional">⇆</button>
     <nav class="site-nav" aria-label="Vocabulary lists">
-      <a href="frequency/index.html">[ 词频 ]</a>
-      <a href="hsk/index.html">[ HSK ]</a>
-      <a href="zimu/index.html">[ 字幕 ]</a>
-      <a href="boya/index.html">[ 博雅 ]</a>
+      <a href="lists/frequency/">[ 词频 ]</a>
+      <a href="lists/hsk/">[ HSK ]</a>
+      <a href="lists/zimu/">[ 字幕 ]</a>
+      <a href="lists/boya/">[ 博雅 ]</a>
+      <a href="lists/saved/">[ 收藏 ]</a>
     </nav>
   </header>
-  <a id="hsk-account-link" class="account-link" href="login/" aria-label="登录" title="登录">
-    <span id="account-connection">登录</span>
-    <img id="account-avatar" class="account-avatar" alt="" hidden>
-    <svg viewBox="0 0 24 24" aria-hidden="true">
-      <circle cx="12" cy="8" r="3.5"></circle>
-      <path d="M4.8 20c.7-3.5 3.4-5.3 7.2-5.3s6.5 1.8 7.2 5.3"></path>
-    </svg>
-  </a>
+  <div class="account-actions">
+    <button id="download-known-words" class="known-words-export" type="button"
+            aria-label="Download all known words as a CSV" title="Sign in to export known words" disabled>认识词CSV</button>
+    <a id="hsk-account-link" class="account-link" href="login/" aria-label="登录" title="登录">
+      <span id="account-connection">登录</span>
+      <img id="account-avatar" class="account-avatar" alt="" hidden>
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <circle cx="12" cy="8" r="3.5"></circle>
+        <path d="M4.8 20c.7-3.5 3.4-5.3 7.2-5.3s6.5 1.8 7.2 5.3"></path>
+      </svg>
+    </a>
+    <span id="known-words-export-status" class="known-words-export-status" role="status" aria-live="polite" hidden></span>
+  </div>
 
   <div class="search-tools">
     <details class="tag-filter">

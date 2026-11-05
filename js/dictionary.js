@@ -18,6 +18,7 @@ const supabaseClient = window.supabase?.createClient(
   document.body.dataset.supabaseKey
 );
 const userWordState = window.createUserWordState?.(supabaseClient);
+window.bindKnownWordsExport?.(supabaseClient);
 
 let showTraditional = false;
 let lastQuery = "";

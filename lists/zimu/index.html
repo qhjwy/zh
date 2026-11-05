@@ -3,38 +3,29 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>词频</title>
+  <title>字幕</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22central%22 text-anchor=%22middle%22 font-family=%22system-ui,sans-serif%22 font-weight=%22bold%22 font-size=%2260%22 fill=%22%23d35400%22>zh</text></svg>">
-  <link rel="stylesheet" href="../css/style.css?v=55">
-  <script src="../js/pinyin.js?v=2" defer></script>
+  <link rel="stylesheet" href="../../css/style.css?v=59">
+  <script src="../../js/pinyin.js?v=2" defer></script>
+  <script src="../vocabulary-page-shell.js?v=4" defer></script>
+  <script src="../vocabulary-list-ui.js?v=2" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
-  <script src="../js/user-word-state.js?v=2" defer></script>
-  <script src="../js/vocabulary-lists.js?v=62" defer></script>
+  <script src="../../js/user-word-state.js?v=3" defer></script>
+  <script src="../known-words-export.js?v=1" defer></script>
+  <script src="../vocabulary-lists.js?v=65" defer></script>
 </head>
-<body class="dictionary-page vocabulary-list-page" data-page="frequency"
-      data-profile-image="../images/profile.jpg"
-      data-source="../data/frequency.json?v=4"
-      data-hsk-source="../data/hsk.json?v=6"
-      data-cedict-source="../data/cedict.json?v=4"
-      data-cedict-word-ids-source="../data/cedict-word-ids.json?v=1"
+<body class="dictionary-page vocabulary-list-page" data-page="zimu"
+      data-root-href="../../"
+      data-profile-image="../../images/profile.jpg"
+      data-source="../../data/zimu.json?v=2"
+      data-hsk-source="../../data/hsk.json?v=6"
+      data-cedict-source="../../data/cedict.json?v=4"
+      data-cedict-word-ids-source="../../data/cedict-word-ids.json?v=1"
+      data-word-mapping-source="../../data/word_mapping.csv?v=1"
       data-supabase-url="https://ipavwfvtxrqipmedsbjf.supabase.co"
       data-supabase-key="sb_publishable_d0CsN33Th0l4qs0_hWa5bA__YggSPaz">
   <div class="vocabulary-sticky">
-    <header class="dict-header">
-      <h1 class="dict-title"><a class="title-main" href="../index.html">词典</a></h1>
-      <div class="site-nav-stack">
-        <nav class="site-nav" aria-label="Vocabulary lists">
-          <a href="index.html" aria-current="page">[ <span class="nav-label">词频</span> ]</a>
-          <a href="../hsk/index.html">[ <span class="nav-label">HSK</span> ]</a>
-          <a href="../zimu/index.html">[ <span class="nav-label">字幕</span> ]</a>
-          <a href="../boya/index.html">[ <span class="nav-label">博雅</span> ]</a>
-        </nav>
-        <nav class="list-view-nav" aria-label="Frequency views">
-          <a href="#list" aria-current="page">[ <span class="nav-label">清单</span> ]</a>
-          <a href="#progress">[ <span class="nav-label">进度</span> ]</a>
-        </nav>
-      </div>
-    </header>
+    <div id="vocabulary-page-header"></div>
     <section class="vocabulary-filters frequency-filters" aria-label="Vocabulary filters">
       <div class="filter-options">
         <label class="check-control">
@@ -75,18 +66,11 @@
     </div>
     <div id="list-pagination" class="list-status" aria-label="Pagination"></div>
   </div>
-  <a id="hsk-account-link" class="account-link" href="../login/" aria-label="登录" title="登录">
-    <span id="account-connection">登录</span>
-    <img id="account-avatar" class="account-avatar" alt="" hidden>
-    <svg viewBox="0 0 24 24" aria-hidden="true">
-      <circle cx="12" cy="8" r="3.5"></circle>
-      <path d="M4.8 20c.7-3.5 3.4-5.3 7.2-5.3s6.5 1.8 7.2 5.3"></path>
-    </svg>
-  </a>
+  <div id="vocabulary-page-account"></div>
   <main id="frequency-list-view">
     <div id="vocabulary-entries" aria-live="polite"></div>
   </main>
-  <section id="frequency-progress-view" class="hsk-progress-view" aria-label="词频学习进度" hidden>
+  <section id="frequency-progress-view" class="hsk-progress-view" aria-label="字幕学习进度" hidden>
     <table class="hsk-progress-table frequency-progress-table">
       <thead>
         <tr><th scope="col">范围</th><th scope="col">进度</th></tr>

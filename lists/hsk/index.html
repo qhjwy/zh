@@ -5,35 +5,25 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>HSK</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22central%22 text-anchor=%22middle%22 font-family=%22system-ui,sans-serif%22 font-weight=%22bold%22 font-size=%2260%22 fill=%22%23d35400%22>zh</text></svg>">
-  <link rel="stylesheet" href="../css/style.css?v=41">
-  <script src="../js/pinyin.js?v=2" defer></script>
+  <link rel="stylesheet" href="../../css/style.css?v=59">
+  <script src="../../js/pinyin.js?v=2" defer></script>
+  <script src="../vocabulary-page-shell.js?v=4" defer></script>
+  <script src="../vocabulary-list-ui.js?v=2" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
-  <script src="../js/user-word-state.js?v=2" defer></script>
-  <script src="../js/vocabulary-lists.js?v=52" defer></script>
+  <script src="../../js/user-word-state.js?v=3" defer></script>
+  <script src="../known-words-export.js?v=1" defer></script>
+  <script src="../vocabulary-lists.js?v=55" defer></script>
 </head>
 <body class="dictionary-page vocabulary-list-page" data-page="hsk"
-      data-profile-image="../images/profile.jpg"
-      data-source="../data/hsk.json?v=6"
-      data-cedict-source="../data/cedict.json?v=4"
+      data-root-href="../../"
+      data-profile-image="../../images/profile.jpg"
+      data-source="../../data/hsk.json?v=6"
+      data-word-mapping-source="../../data/word_mapping.csv?v=1"
+      data-cedict-source="../../data/cedict.json?v=4"
       data-supabase-url="https://ipavwfvtxrqipmedsbjf.supabase.co"
       data-supabase-key="sb_publishable_d0CsN33Th0l4qs0_hWa5bA__YggSPaz">
   <div class="vocabulary-sticky">
-    <header class="dict-header">
-      <h1 class="dict-title"><a class="title-main" href="../index.html">词典</a></h1>
-      <div class="site-nav-stack">
-        <nav class="site-nav" aria-label="Vocabulary lists">
-          <a href="../frequency/index.html">[ <span class="nav-label">词频</span> ]</a>
-          <a href="index.html" aria-current="page">[ <span class="nav-label">HSK</span> ]</a>
-          <a href="../zimu/index.html">[ <span class="nav-label">字幕</span> ]</a>
-          <a href="../boya/index.html">[ <span class="nav-label">博雅</span> ]</a>
-        </nav>
-        <nav class="list-view-nav" aria-label="HSK views">
-          <a href="#list" aria-current="page">[ <span class="nav-label">清单</span> ]</a>
-          <a href="#progress">[ <span class="nav-label">进度</span> ]</a>
-          <a href="#music">[ <span class="nav-label">音乐</span> ]</a>
-        </nav>
-      </div>
-    </header>
+    <div id="vocabulary-page-header"></div>
     <section class="vocabulary-filters hsk-filters" aria-label="Vocabulary filters">
       <div class="level-filters" id="level-filter" role="group" aria-label="按 HSK 级别筛选">
         <button class="hsk-level hsk1" type="button" data-level="1" aria-pressed="false">HSK1</button>
@@ -65,14 +55,7 @@
     </section>
     <div id="status" class="list-status" role="status" aria-live="polite">Loading vocabulary…</div>
   </div>
-  <a id="hsk-account-link" class="account-link" href="../login/" aria-label="登录" title="登录">
-    <span id="account-connection">登录</span>
-    <img id="account-avatar" class="account-avatar" alt="" hidden>
-    <svg viewBox="0 0 24 24" aria-hidden="true">
-      <circle cx="12" cy="8" r="3.5"></circle>
-      <path d="M4.8 20c.7-3.5 3.4-5.3 7.2-5.3s6.5 1.8 7.2 5.3"></path>
-    </svg>
-  </a>
+  <div id="vocabulary-page-account"></div>
   <main id="hsk-list-view">
     <div id="vocabulary-entries" aria-live="polite"></div>
   </main>
