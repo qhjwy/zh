@@ -107,6 +107,48 @@ function renderSentenceMarkdown(text, container) {
   }
 }
 
+function renderListPagination(container, {
+  currentPage,
+  pageSize,
+  total,
+  getPageUrl,
+  onPageChange
+}) {
+  container.replaceChildren();
+  if (!total) return;
+
+  const first = (currentPage - 1) * pageSize + 1;
+  const last = Math.min(currentPage * pageSize, total);
+  const summary = document.createElement("span");
+  summary.textContent = `${first}–${last} of ${total} entries`;
+  container.append(summary);
+
+  const pageCount = Math.ceil(total / pageSize);
+  if (pageCount <= 1) return;
+
+  const pageLinks = document.createElement("span");
+  pageLinks.className = "list-page-links";
+  const addPageLink = (label, targetPage, accessibleLabel) => {
+    const link = document.createElement("a");
+    link.href = getPageUrl(targetPage);
+    link.dataset.page = String(targetPage);
+    link.textContent = label;
+    link.setAttribute("aria-label", accessibleLabel);
+    link.addEventListener("click", (event) => {
+      event.preventDefault();
+      onPageChange(targetPage);
+    });
+    pageLinks.append(link);
+  };
+
+  if (currentPage > 1) addPageLink("←", currentPage - 1, "Previous page");
+  if (currentPage < pageCount) {
+    if (currentPage > 1) pageLinks.append(document.createTextNode("·"));
+    addPageLink("→", currentPage + 1, "Next page");
+  }
+  container.append(pageLinks);
+}
+
 function createSentenceAction(word, supabaseClient) {
   const button = document.createElement("button");
   button.className = "sentence-button";
@@ -159,5 +201,6 @@ window.vocabularyListUi = {
   createSavedToggle,
   createCopyButton,
   createSentenceAction,
-  renderSentenceMarkdown
+  renderSentenceMarkdown,
+  renderListPagination
 };

@@ -1722,6 +1722,10 @@ th:last-child {
   flex: 1 1 auto;
 }
 
+.saved-word-entry .frequency-entry-tags {
+  flex: 1 0 100%;
+}
+
 .saved-word-entry .sentence-helper {
   flex: 1 0 100%;
 }

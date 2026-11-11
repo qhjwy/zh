@@ -1,6 +1,9 @@
 "use strict";
 
 const PAGE_SIZE = 60;
+const DAILY_TOKEN_COUNT = 17000;
+const FREQUENCY_VOCABULARY_SIZE = 50000;
+const EULER_MASCHERONI = 0.5772156649015329;
 const supabaseClient = window.supabase?.createClient(
   document.body.dataset.supabaseUrl,
   document.body.dataset.supabaseKey
@@ -11,7 +14,8 @@ const {
   createKnownToggle: makeKnownToggle,
   createSavedToggle: makeSavedToggle,
   createCopyButton: makeCopyButton,
-  createSentenceAction: makeSentenceAction
+  createSentenceAction: makeSentenceAction,
+  renderListPagination: renderSharedListPagination
 } = window.vocabularyListUi;
 const accountLink = document.querySelector("#hsk-account-link");
 const accountConnection = document.querySelector("#account-connection");
@@ -31,7 +35,9 @@ let savedRows = [];
 let wordsById = new Map();
 let pinyinById = new Map();
 let hskWordIds = new Set();
-let currentPage = 1;
+let listMetricsById = new Map();
+const initialPage = Number(new URLSearchParams(window.location.search).get("page"));
+let currentPage = Number.isSafeInteger(initialPage) && initialPage > 0 ? initialPage : 1;
 
 function setStatus(message, isError = false) {
   statusElement.textContent = message;
@@ -167,37 +173,87 @@ async function loadHskWordIds() {
   return new Set(records.map((record) => String(record.w_id ?? "")).filter(Boolean));
 }
 
+async function loadListMetrics() {
+  const frequencySource = document.body.dataset.frequencySource;
+  const zimuSource = document.body.dataset.zimuSource;
+  if (!frequencySource || !zimuSource) {
+    throw new Error("The frequency and 字幕 sources are not configured.");
+  }
+
+  const [frequencyResponse, zimuResponse] = await Promise.all([
+    fetch(frequencySource),
+    fetch(zimuSource)
+  ]);
+  if (!frequencyResponse.ok) {
+    throw new Error(`Could not load the frequency list (HTTP ${frequencyResponse.status}).`);
+  }
+  if (!zimuResponse.ok) {
+    throw new Error(`Could not load the 字幕 list (HTTP ${zimuResponse.status}).`);
+  }
+
+  const [frequencyRecords, zimuRecords] = await Promise.all([
+    frequencyResponse.json(),
+    zimuResponse.json()
+  ]);
+  if (!Array.isArray(frequencyRecords) || !Array.isArray(zimuRecords)) {
+    throw new Error("The frequency or 字幕 data format is invalid.");
+  }
+
+  const metrics = new Map();
+  for (const record of frequencyRecords) {
+    const wordId = String(record.w_id ?? "");
+    const rank = Number(record.Frequency ?? record.frequency);
+    if (!wordId || !Number.isFinite(rank) || rank < 1) continue;
+    const lambda = DAILY_TOKEN_COUNT
+      / (rank * (Math.log(FREQUENCY_VOCABULARY_SIZE) + EULER_MASCHERONI));
+    const dailyProbability = -Math.expm1(-lambda);
+    const current = metrics.get(wordId) ?? {};
+    if (
+      current.frequencyProbability === undefined
+      || dailyProbability > current.frequencyProbability
+    ) {
+      current.frequencyProbability = dailyProbability;
+    }
+    metrics.set(wordId, current);
+  }
+
+  for (const record of zimuRecords) {
+    const wordId = String(record.w_id ?? "");
+    const probability = Number(record.Probability ?? record.probability);
+    if (!wordId || !Number.isFinite(probability) || probability < 0 || probability > 1) continue;
+    const current = metrics.get(wordId) ?? {};
+    current.zimuProbability = probability;
+    metrics.set(wordId, current);
+  }
+  return metrics;
+}
+
 function getDisplayPinyin(wordId) {
   const normalized = pinyinById.get(wordId) ?? "";
   const syllables = normalized.match(/\d+[a-züv]+[1-5]?|[a-züv]+[1-5]?/gi);
   return syllables?.length ? window.convertPinyin(syllables.join(" ")) : normalized;
 }
 
-function updatePagination(pageCount, matchCount) {
-  pagination.replaceChildren();
-  if (!matchCount) return;
-  const controls = document.createElement("div");
-  controls.className = "list-page-links";
-  const summary = document.createElement("span");
-  summary.textContent = `Page ${currentPage} of ${pageCount}`;
-  controls.append(summary);
-
-  for (const [label, targetPage] of [
-    ["Previous", currentPage - 1],
-    ["Next", currentPage + 1]
-  ]) {
-    const button = document.createElement("button");
-    button.className = "sentence-button";
-    button.type = "button";
-    button.textContent = label;
-    button.disabled = targetPage < 1 || targetPage > pageCount;
-    button.addEventListener("click", () => {
-      currentPage = targetPage;
-      renderSavedRows();
-    });
-    controls.append(button);
+function getPageUrl(pageNumber) {
+  const url = new URL(window.location.href);
+  if (pageNumber === 1) {
+    url.searchParams.delete("page");
+  } else {
+    url.searchParams.set("page", String(pageNumber));
   }
-  pagination.append(controls);
+  return `${url.pathname}${url.search}${url.hash}`;
+}
+
+function writePageUrl(method = "replaceState") {
+  window.history[method](null, "", getPageUrl(currentPage));
+}
+
+function getDaysSinceSaved(timestamp, now = new Date()) {
+  const savedDate = new Date(timestamp);
+  if (!Number.isFinite(savedDate.getTime())) return null;
+  const savedDay = Date.UTC(savedDate.getFullYear(), savedDate.getMonth(), savedDate.getDate());
+  const today = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
+  return Math.max(0, Math.floor((today - savedDay) / 86400000));
 }
 
 function renderSavedRows() {
@@ -219,6 +275,7 @@ function renderSavedRows() {
   });
   const pageCount = Math.max(1, Math.ceil(matches.length / PAGE_SIZE));
   currentPage = Math.min(currentPage, pageCount);
+  writePageUrl();
   const start = (currentPage - 1) * PAGE_SIZE;
   const visibleRows = matches.slice(start, start + PAGE_SIZE);
   const fragment = document.createDocumentFragment();
@@ -244,6 +301,27 @@ function renderSavedRows() {
     }
     entry.append(heading);
 
+    const metrics = listMetricsById.get(wordId);
+    if (metrics) {
+      const metricTags = document.createElement("div");
+      metricTags.className = "frequency-entry-tags";
+      if (metrics.frequencyProbability !== undefined) {
+        const frequencyTag = document.createElement("span");
+        frequencyTag.className = "hsk-level frequency-rank";
+        frequencyTag.title = "Estimated chance of use at least once in a day based on the frequency-list rank.";
+        frequencyTag.textContent = `词频 ${Math.round(metrics.frequencyProbability * 100)}%`;
+        metricTags.append(frequencyTag);
+      }
+      if (metrics.zimuProbability !== undefined) {
+        const zimuTag = document.createElement("span");
+        zimuTag.className = "hsk-level frequency-rank";
+        zimuTag.title = "Probability listed in the 字幕 list.";
+        zimuTag.textContent = `字幕 ${Math.round(metrics.zimuProbability * 100)}%`;
+        metricTags.append(zimuTag);
+      }
+      if (metricTags.childElementCount) entry.append(metricTags);
+    }
+
     const savedTime = document.createElement("time");
     savedTime.className = "saved-word-time";
     const timestamp = new Date(row.updated_at);
@@ -251,10 +329,9 @@ function renderSavedRows() {
       throw new Error(`Saved word ${wordId} has an invalid timestamp.`);
     }
     savedTime.dateTime = row.updated_at;
-    savedTime.textContent = new Intl.DateTimeFormat(undefined, {
-      dateStyle: "medium",
-      timeStyle: "short"
-    }).format(timestamp);
+    const daysSinceSaved = getDaysSinceSaved(row.updated_at);
+    savedTime.textContent = `${daysSinceSaved} day${daysSinceSaved === 1 ? "" : "s"}`;
+    savedTime.setAttribute("aria-label", `Saved ${daysSinceSaved} day${daysSinceSaved === 1 ? "" : "s"} ago`);
     entry.append(savedTime);
 
     const actions = document.createElement("div");
@@ -292,7 +369,17 @@ function renderSavedRows() {
   } else {
     setStatus(`${matches.length.toLocaleString()} saved word${matches.length === 1 ? "" : "s"}.`);
   }
-  updatePagination(pageCount, matches.length);
+  renderSharedListPagination(pagination, {
+    currentPage,
+    pageSize: PAGE_SIZE,
+    total: matches.length,
+    getPageUrl,
+    onPageChange: (nextPage) => {
+      currentPage = nextPage;
+      writePageUrl("pushState");
+      renderSavedRows();
+    }
+  });
 }
 
 async function updateWordFlag(row, field) {
@@ -316,9 +403,9 @@ async function updateSession(session) {
   const generation = ++authGeneration;
   updateAccount(session);
   savedRows = [];
+  listMetricsById = new Map();
   savedWordsElement.replaceChildren();
   pagination.replaceChildren();
-  currentPage = 1;
   if (!session) {
     setStatus("Sign in to see your saved words.");
     return;
@@ -340,10 +427,15 @@ async function updateSession(session) {
       throw new Error("A saved-word row is missing a word ID or timestamp.");
     }
     if (savedRows.length) {
-      const [mapping, hskIds] = await Promise.all([loadWordMapping(), loadHskWordIds()]);
+      const [mapping, hskIds, listMetrics] = await Promise.all([
+        loadWordMapping(),
+        loadHskWordIds(),
+        loadListMetrics()
+      ]);
       wordsById = mapping.words;
       pinyinById = mapping.pinyin;
       hskWordIds = hskIds;
+      listMetricsById = listMetrics;
     }
     if (generation !== authGeneration) return;
     renderSavedRows();
@@ -379,6 +471,11 @@ knownStatusFilter.addEventListener("change", () => {
 });
 hskMembershipFilter.addEventListener("change", () => {
   currentPage = 1;
+  renderSavedRows();
+});
+window.addEventListener("popstate", () => {
+  const pageFromUrl = Number(new URLSearchParams(window.location.search).get("page"));
+  currentPage = Number.isSafeInteger(pageFromUrl) && pageFromUrl > 0 ? pageFromUrl : 1;
   renderSavedRows();
 });
 pinyinToggle.addEventListener("change", () => {

@@ -41,7 +41,22 @@ async function updateWordStateCount(session) {
 
 function getReturnUrl() {
   const requested = new URLSearchParams(window.location.search).get("return");
-  if (!requested) return new URL("../lists/hsk/", window.location.href).href;
+  if (!requested) {
+    if (document.referrer) {
+      try {
+        const referrer = new URL(document.referrer);
+        if (
+          referrer.origin === window.location.origin
+          && referrer.pathname !== window.location.pathname
+        ) {
+          return referrer.href;
+        }
+      } catch {
+        // Fall back to the default list when the referrer is not a valid URL.
+      }
+    }
+    return new URL("../lists/hsk/", window.location.href).href;
+  }
 
   try {
     const target = new URL(requested, window.location.origin);

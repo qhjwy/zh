@@ -90,7 +90,8 @@ function startVocabularyPage() {
     createKnownToggle,
     createSavedToggle,
     createCopyButton,
-    createSentenceAction
+    createSentenceAction,
+    renderListPagination
   } = window.vocabularyListUi;
   const isRankedList = page === "frequency" || page === "zimu";
   const source = document.body.dataset.source;
@@ -924,15 +925,6 @@ function startVocabularyPage() {
     window.history[method](null, "", getPageUrl(currentPage));
   }
 
-  function createPageLink(label, pageNumber, accessibleLabel) {
-    const link = document.createElement("a");
-    link.href = getPageUrl(pageNumber);
-    link.dataset.page = String(pageNumber);
-    link.textContent = label;
-    link.setAttribute("aria-label", accessibleLabel);
-    return link;
-  }
-
   function filteredEntries() {
     const selectedLevels = new Set(
       [...(levelFilter?.querySelectorAll('button[data-level][aria-pressed="true"]') ?? [])]
@@ -1244,25 +1236,18 @@ function startVocabularyPage() {
       entriesElement.append(item);
     }
 
-    const first = matches.length ? start + 1 : 0;
-    const last = Math.min(start + PAGE_SIZE, matches.length);
-    const count = document.createElement("span");
-    count.textContent = `${first}–${last} of ${matches.length} entries`;
-    pagination.replaceChildren(count);
-    if (matches.length > PAGE_SIZE) {
-      const pageLinks = document.createElement("span");
-      pageLinks.className = "list-page-links";
-      if (currentPage > 1) {
-        pageLinks.append(createPageLink("←", currentPage - 1, "Previous page"));
+    renderListPagination(pagination, {
+      currentPage,
+      pageSize: PAGE_SIZE,
+      total: matches.length,
+      getPageUrl,
+      onPageChange: (nextPage) => {
+        if (nextPage !== currentPage) knownThisSession.clear();
+        currentPage = nextPage;
+        writePageUrl("pushState");
+        render();
       }
-      if (currentPage < pageCount) {
-        if (currentPage > 1) {
-          pageLinks.append(document.createTextNode("·"));
-        }
-        pageLinks.append(createPageLink("→", currentPage + 1, "Next page"));
-      }
-      pagination.append(pageLinks);
-    }
+    });
   }
 
   function resetAndRender() {
@@ -1270,16 +1255,6 @@ function startVocabularyPage() {
     render();
   }
 
-  pagination.addEventListener("click", (event) => {
-    const link = event.target.closest("a[data-page]");
-    if (!link) return;
-    event.preventDefault();
-    const nextPage = Number(link.dataset.page);
-    if (nextPage !== currentPage) knownThisSession.clear();
-    currentPage = nextPage;
-    writePageUrl("pushState");
-    render();
-  });
   if (viewLinks.length) {
     for (const link of viewLinks) {
       link.addEventListener("click", (event) => {
